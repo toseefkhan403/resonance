@@ -1,0 +1,111 @@
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:graphify/src/controller/implements/mobile.dart';
+import 'package:graphify/src/controller/js_methods.dart';
+import 'package:graphify/src/resources/dependencies.js.dart';
+import 'package:graphify/src/resources/index.html.dart';
+import 'package:graphify/src/view/_interface.dart' as g_view;
+import 'package:webview_flutter/webview_flutter.dart';
+
+class GraphifyView extends g_view.GraphifyView {
+  const GraphifyView({
+    super.key,
+    super.controller,
+    super.initialOptions,
+    super.onConsoleMessage,
+    super.onCreated,
+    super.onChartClick,
+    super.onChartHover,
+    super.onChartHoverOut,
+  });
+
+  @override
+  State<StatefulWidget> createState() => _GraphifyViewState();
+}
+
+class _GraphifyViewState extends g_view.GraphifyViewState<GraphifyView> {
+  late final webViewController = WebViewController();
+  late final controller =
+      (widget.controller ?? GraphifyController()) as GraphifyController;
+
+  @override
+  void initView() {
+    controller.connector = webViewController
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(const Color(0x00000000))
+      ..setOnConsoleMessage(widget.onConsoleMessage ?? (_) {})
+      ..addJavaScriptChannel(
+        JsMethods.onChartClick,
+        onMessageReceived: (JavaScriptMessage message) {
+          if (widget.onChartClick != null) {
+            final parts = message.message.split('|');
+            if (parts.length >= 2) {
+              final chartId = parts[0];
+              final eventData = jsonDecode(parts.sublist(1).join('|'))
+                  as Map<String, dynamic>;
+              widget.onChartClick!(chartId, eventData);
+            }
+          }
+        },
+      )
+      ..addJavaScriptChannel(
+        JsMethods.onChartHover,
+        onMessageReceived: (JavaScriptMessage message) {
+          if (widget.onChartHover != null) {
+            final parts = message.message.split('|');
+            if (parts.length >= 2) {
+              final chartId = parts[0];
+              final eventData = jsonDecode(parts.sublist(1).join('|'))
+                  as Map<String, dynamic>;
+              widget.onChartHover!(chartId, eventData);
+            }
+          }
+        },
+      )
+      ..addJavaScriptChannel(
+        JsMethods.onChartHoverOut,
+        onMessageReceived: (JavaScriptMessage message) {
+          if (widget.onChartHoverOut != null) {
+            final parts = message.message.split('|');
+            if (parts.length >= 2) {
+              final chartId = parts[0];
+              final eventData = jsonDecode(parts.sublist(1).join('|'))
+                  as Map<String, dynamic>;
+              widget.onChartHoverOut!(chartId, eventData);
+            }
+          }
+        },
+      )
+      ..loadHtmlString(
+        indexHtml(
+          id: controller.uid,
+          dependencies: "<script>$dependencies</script>",
+        ),
+      )
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageFinished: (_) {
+            widget.onCreated?.call();
+            controller.update(widget.initialOptions);
+          },
+        ),
+      );
+  }
+
+  @override
+  Widget buildView() {
+    return view = WebViewWidget(controller: webViewController);
+  }
+
+  @override
+  void dispose() {
+    if (widget.controller == null) {
+      controller.dispose();
+    }
+    webViewController
+      ..clearLocalStorage()
+      ..clearCache();
+    super.dispose();
+  }
+}

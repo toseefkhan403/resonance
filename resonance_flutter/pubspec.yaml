@@ -29,9 +29,10 @@ dependencies:
     sdk: flutter
   resonance_client:
     path: ../resonance_client
+  graphify: 
+    path: ./packages/graphify
   serverpod_auth_idp_flutter: 3.2.0
   serverpod_flutter: 3.2.0
-  graphify: ^1.2.1
 
 dev_dependencies:
   flutter_lints: '>=3.0.0 <7.0.0'
