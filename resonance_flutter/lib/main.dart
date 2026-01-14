@@ -1,6 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:resonance_client/resonance_client.dart';
+
+import 'package:resonance_flutter/configure_nonweb.dart'
+    if (dart.library.html) 'configure_web.dart';
 import 'package:resonance_flutter/routing/go_router.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
@@ -15,27 +20,36 @@ import 'package:serverpod_flutter/serverpod_flutter.dart';
 late final Client client;
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  await runZonedGuarded(
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
 
-  // When you are running the app on a physical device, you need to set the
-  // server URL to the IP address of your computer. You can find the IP
-  // address by running `ipconfig` on Windows or `ifconfig` on Mac/Linux.
-  //
-  // You can set the variable when running or building your app like this:
-  // E.g. `flutter run --dart-define=SERVER_URL=https://api.example.com/`.
-  //
-  // Otherwise, the server URL is fetched from the assets/config.json file or
-  // defaults to http://$localhost:8080/ if not found.
-  final serverUrl = await getServerUrl();
+      final serverUrl = await getServerUrl();
 
-  client = Client(serverUrl)
-    ..connectivityMonitor = FlutterConnectivityMonitor()
-    ..authSessionManager = FlutterAuthSessionManager();
+      client = Client(serverUrl)
+        ..connectivityMonitor = FlutterConnectivityMonitor()
+        ..authSessionManager = FlutterAuthSessionManager();
+      configureApp();
 
-  client.auth.initialize();
-  client.auth.initializeGoogleSignIn();
+      unawaited(client.auth.initialize());
+      unawaited(client.auth.initializeGoogleSignIn());
 
-  runApp(const ProviderScope(child: MainApp()));
+      runApp(const ProviderScope(child: MainApp()));
+
+       FlutterError.onError = (FlutterErrorDetails details) {
+        FlutterError.presentError(details);
+      };
+      ErrorWidget.builder = (FlutterErrorDetails details) {
+        return Scaffold(
+          body: Center(child: Text(details.exceptionAsString())),
+        );
+      };
+    },
+    (Object error, StackTrace stack) {
+      // * Log any errors to console
+      debugPrint(error.toString());
+    },
+  );
 }
 
 class MainApp extends ConsumerWidget {
@@ -49,6 +63,7 @@ class MainApp extends ConsumerWidget {
       routerConfig: goRouter,
       title: 'Resonance',
       theme: ThemeData(primarySwatch: Colors.deepPurple),
+      debugShowCheckedModeBanner: false,
     );
   }
 }

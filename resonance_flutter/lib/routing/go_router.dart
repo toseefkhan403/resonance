@@ -22,13 +22,12 @@ GoRouter goRouter(Ref ref) {
 
         debugPrint('isLoggedIn: $isLoggedIn');
         final isRoot = state.matchedLocation == '/';
+        final isHome = state.matchedLocation == '/home';
 
         if (isRoot) {
-          if (isLoggedIn) {
-            return '/home';
-          } else {
-            return null;
-          }
+          if (isLoggedIn) return '/home';
+        } else if (isHome) {
+          if (!isLoggedIn) return '/';
         }
       } catch (e) {
         debugPrint('Error in redirect: $e');
@@ -60,7 +59,6 @@ GoRouter goRouter(Ref ref) {
     onException: (context, state, error) {
       debugPrint('Error in router: $error');
     },
-    // errorBuilder: (context, state) => UnknownPage(error: state.error?.message),\
     debugLogDiagnostics: true,
   );
 }

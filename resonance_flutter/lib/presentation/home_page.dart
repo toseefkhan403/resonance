@@ -5,6 +5,6 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder(child: Text('Home'));
+    return const Scaffold(body: Placeholder(child: Text('Home')));
   }
 }
