@@ -1,0 +1,8 @@
+# GraphData contains the complete graph structure for visualization
+# This is a serializable model (not persisted)
+class: GraphData
+fields:
+  ### All nodes in the graph
+  nodes: List<GraphNode>
+  ### All links in the graph
+  links: List<GraphLink>

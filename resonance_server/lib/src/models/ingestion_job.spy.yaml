@@ -1,0 +1,23 @@
+# IngestionJob tracks the background processing of a podcast
+class: IngestionJob
+table: ingestion_job
+
+fields:
+  ### The podcast being processed
+  podcast: Podcast?, relation
+  ### The user who owns this job
+  userId: String
+  ### Current processing stage
+  stage: String, default="pending"
+  ### Processing status: pending, processing, completed, failed
+  status: String, default="pending"
+  ### Error message if failed
+  errorMessage: String?
+  ### Progress percentage (0-100)
+  progress: int, default=0
+  ### When the job was created
+  createdAt: DateTime, default=now
+  ### When the job was last updated
+  updatedAt: DateTime, default=now
+  ### When the job completed
+  completedAt: DateTime?

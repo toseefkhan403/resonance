@@ -1,0 +1,23 @@
+# Subtopic represents a specific idea/concept extracted from chunks
+class: Subtopic
+table: subtopic
+
+fields:
+  ### The user who owns this subtopic
+  userId: String
+  ### The canonical name (short noun phrase)
+  name: String
+  ### The category this subtopic belongs to
+  category: Category?, relation
+  ### Secondary concepts (stored as JSON list)
+  secondaryConcepts: List<String>
+  ### A concise human-readable summary
+  summary: String
+  ### The embedding vector for this subtopic (for similarity matching, 768 dimensions)
+  embedding: Vector(768)
+  ### Importance score (0.0 to 1.0)
+  importanceScore: double, default=0.5
+  ### When the subtopic was created
+  createdAt: DateTime, default=now
+  ### When the subtopic was last updated
+  updatedAt: DateTime, default=now

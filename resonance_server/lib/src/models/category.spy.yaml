@@ -1,0 +1,13 @@
+# Category represents a high-level domain/topic area
+class: Category
+table: category
+
+fields:
+  ### The user who owns this category
+  userId: String
+  ### The canonical name of the category
+  name: String
+  ### A description of what this category represents
+  description: String?
+  ### When the category was created
+  createdAt: DateTime, default=now

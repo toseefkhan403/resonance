@@ -1,0 +1,13 @@
+# PodcastSubtopicEvidence links subtopics to podcasts with provenance
+class: PodcastSubtopicEvidence
+table: podcast_subtopic_evidence
+
+fields:
+  ### The podcast
+  podcast: Podcast?, relation(onDelete=cascade)
+  ### The subtopic
+  subtopic: Subtopic?, relation(onDelete=cascade)
+  ### Frequency count (how many times this subtopic appears in the podcast)
+  frequency: int, default=1
+  ### When this evidence was created
+  createdAt: DateTime, default=now

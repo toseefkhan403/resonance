@@ -16,8 +16,9 @@ import 'package:serverpod_client/serverpod_client.dart' as _i2;
 import 'dart:async' as _i3;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i4;
-import 'package:resonance_client/src/protocol/greetings/greeting.dart' as _i5;
-import 'protocol.dart' as _i6;
+import 'package:resonance_client/src/protocol/ingestion_job.dart' as _i5;
+import 'package:resonance_client/src/protocol/podcast.dart' as _i6;
+import 'protocol.dart' as _i7;
 
 /// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
 /// are made available on the server and enable the corresponding sign-in widget
@@ -258,21 +259,43 @@ class EndpointJwtRefresh extends _i4.EndpointRefreshJwtTokens {
   );
 }
 
-/// This is an example endpoint that returns a greeting message through
-/// its [hello] method.
+/// Endpoint for podcast ingestion and management
 /// {@category Endpoint}
-class EndpointGreeting extends _i2.EndpointRef {
-  EndpointGreeting(_i2.EndpointCaller caller) : super(caller);
+class EndpointPodcast extends _i2.EndpointRef {
+  EndpointPodcast(_i2.EndpointCaller caller) : super(caller);
 
   @override
-  String get name => 'greeting';
+  String get name => 'podcast';
 
-  /// Returns a personalized greeting message: "Hello {name}".
-  _i3.Future<_i5.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i5.Greeting>(
-        'greeting',
-        'hello',
-        {'name': name},
+  /// Step 1: Ingestion orchestration
+  /// Accepts a YouTube URL from an authenticated user
+  /// Creates a background ingestion job and returns immediately
+  _i3.Future<_i5.IngestionJob> ingestPodcast(String youtubeUrl) =>
+      caller.callServerEndpoint<_i5.IngestionJob>(
+        'podcast',
+        'ingestPodcast',
+        {'youtubeUrl': youtubeUrl},
+      );
+
+  /// Gets the status of an ingestion job
+  /// Gets the status of an ingestion job as a stream
+  _i3.Stream<_i5.IngestionJob> getJobStatus(int jobId) =>
+      caller.callStreamingServerEndpoint<
+        _i3.Stream<_i5.IngestionJob>,
+        _i5.IngestionJob
+      >(
+        'podcast',
+        'getJobStatus',
+        {'jobId': jobId},
+        {},
+      );
+
+  /// Lists all podcasts for the authenticated user
+  _i3.Future<List<_i6.Podcast>> listPodcasts() =>
+      caller.callServerEndpoint<List<_i6.Podcast>>(
+        'podcast',
+        'listPodcasts',
+        {},
       );
 }
 
@@ -307,7 +330,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i6.Protocol(),
+         _i7.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,
@@ -319,7 +342,7 @@ class Client extends _i2.ServerpodClientShared {
     emailIdp = EndpointEmailIdp(this);
     googleIdp = EndpointGoogleIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
-    greeting = EndpointGreeting(this);
+    podcast = EndpointPodcast(this);
     modules = Modules(this);
   }
 
@@ -329,7 +352,7 @@ class Client extends _i2.ServerpodClientShared {
 
   late final EndpointJwtRefresh jwtRefresh;
 
-  late final EndpointGreeting greeting;
+  late final EndpointPodcast podcast;
 
   late final Modules modules;
 
@@ -338,7 +361,7 @@ class Client extends _i2.ServerpodClientShared {
     'emailIdp': emailIdp,
     'googleIdp': googleIdp,
     'jwtRefresh': jwtRefresh,
-    'greeting': greeting,
+    'podcast': podcast,
   };
 
   @override

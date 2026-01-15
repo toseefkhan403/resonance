@@ -1,0 +1,19 @@
+# SemanticChunk represents a coherent idea extracted from the transcript
+class: SemanticChunk
+table: semantic_chunk
+
+fields:
+  ### The transcript this chunk came from
+  transcript: Transcript?, relation(onDelete=cascade)
+  ### The podcast this chunk belongs to
+  podcast: Podcast?, relation(onDelete=cascade)
+  ### Start timestamp in seconds
+  startTime: double
+  ### End timestamp in seconds
+  endTime: double
+  ### The text content of this chunk
+  text: String
+  ### The embedding vector (768 dimensions)
+  embedding: Vector(768)
+  ### When this chunk was created
+  createdAt: DateTime, default=now

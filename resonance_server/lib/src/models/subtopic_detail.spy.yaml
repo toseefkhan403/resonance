@@ -1,0 +1,16 @@
+# SubtopicDetail contains detailed information about a subtopic when clicked
+# This is a serializable model (not persisted)
+class: SubtopicDetail
+fields:
+  ### The subtopic ID
+  subtopicId: int
+  ### The subtopic name
+  name: String
+  ### The category
+  category: String?
+  ### The summary
+  summary: String
+  ### List of referenced podcasts with URLs
+  podcasts: List<PodcastReference>
+  ### List of exact timestamps that reference this subtopic
+  timestamps: List<TimestampReference>

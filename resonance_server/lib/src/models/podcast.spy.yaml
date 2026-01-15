@@ -1,0 +1,21 @@
+# Podcast represents a YouTube podcast that has been ingested
+class: Podcast
+table: podcast
+
+fields:
+  ### The YouTube URL of the podcast
+  youtubeUrl: String
+  ### The unique YouTube Video ID
+  videoId: String
+  ### The title of the podcast (extracted from YouTube)
+  title: String?
+  ### The channel name
+  channelName: String?
+  ### The thumbnail URL
+  thumbnailUrl: String?
+  ### The user who owns this podcast
+  userId: String
+  ### When the podcast was first ingested
+  createdAt: DateTime, default=now
+  ### When the podcast was last updated
+  updatedAt: DateTime, default=now

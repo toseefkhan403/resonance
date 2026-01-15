@@ -1,0 +1,12 @@
+# ConversationResponse contains the AI-generated answer with speaker perspective
+# This is a serializable model (not persisted)
+class: ConversationResponse
+fields:
+  ### The answer text
+  answer: String
+  ### The speaker(s) whose perspective this answer reflects
+  speakers: List<String>
+  ### Source subtopics used to generate this answer
+  sourceSubtopics: List<String>
+  ### Citations to specific podcast timestamps
+  citations: List<TimestampReference>

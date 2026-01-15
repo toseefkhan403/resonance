@@ -10,5 +10,7 @@ googleIdp:
   - login:
 jwtRefresh:
   - refreshAccessToken:
-greeting:
-  - hello:
+podcast:
+  - ingestPodcast:
+  - getJobStatus:
+  - listPodcasts:

@@ -16,7 +16,8 @@ import 'package:serverpod/serverpod.dart' as _i2;
 import 'dart:async' as _i3;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _i4;
-import 'package:resonance_server/src/generated/greetings/greeting.dart' as _i5;
+import 'package:resonance_server/src/generated/ingestion_job.dart' as _i5;
+import 'package:resonance_server/src/generated/podcast.dart' as _i6;
 import 'package:resonance_server/src/generated/protocol.dart';
 import 'package:resonance_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -130,7 +131,7 @@ class TestEndpoints {
 
   late final _JwtRefreshEndpoint jwtRefresh;
 
-  late final _GreetingEndpoint greeting;
+  late final _PodcastEndpoint podcast;
 }
 
 class _InternalTestEndpoints extends TestEndpoints
@@ -152,7 +153,7 @@ class _InternalTestEndpoints extends TestEndpoints
       endpoints,
       serializationManager,
     );
-    greeting = _GreetingEndpoint(
+    podcast = _PodcastEndpoint(
       endpoints,
       serializationManager,
     );
@@ -495,8 +496,8 @@ class _JwtRefreshEndpoint {
   }
 }
 
-class _GreetingEndpoint {
-  _GreetingEndpoint(
+class _PodcastEndpoint {
+  _PodcastEndpoint(
     this._endpointDispatch,
     this._serializationManager,
   );
@@ -505,22 +506,22 @@ class _GreetingEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i5.Greeting> hello(
+  _i3.Future<_i5.IngestionJob> ingestPodcast(
     _i1.TestSessionBuilder sessionBuilder,
-    String name,
+    String youtubeUrl,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
           (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
-            endpoint: 'greeting',
-            method: 'hello',
+            endpoint: 'podcast',
+            method: 'ingestPodcast',
           );
       try {
         var _localCallContext = await _endpointDispatch.getMethodCallContext(
           createSessionCallback: (_) => _localUniqueSession,
-          endpointPath: 'greeting',
-          methodName: 'hello',
-          parameters: _i1.testObjectToJson({'name': name}),
+          endpointPath: 'podcast',
+          methodName: 'ingestPodcast',
+          parameters: _i1.testObjectToJson({'youtubeUrl': youtubeUrl}),
           serializationManager: _serializationManager,
         );
         var _localReturnValue =
@@ -528,7 +529,69 @@ class _GreetingEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i5.Greeting>);
+                as _i3.Future<_i5.IngestionJob>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Stream<_i5.IngestionJob> getJobStatus(
+    _i1.TestSessionBuilder sessionBuilder,
+    int jobId,
+  ) {
+    var _localTestStreamManager = _i1.TestStreamManager<_i5.IngestionJob>();
+    _i1.callStreamFunctionAndHandleExceptions(
+      () async {
+        var _localUniqueSession =
+            (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+              endpoint: 'podcast',
+              method: 'getJobStatus',
+            );
+        var _localCallContext = await _endpointDispatch
+            .getMethodStreamCallContext(
+              createSessionCallback: (_) => _localUniqueSession,
+              endpointPath: 'podcast',
+              methodName: 'getJobStatus',
+              arguments: {'jobId': jobId},
+              requestedInputStreams: [],
+              serializationManager: _serializationManager,
+            );
+        await _localTestStreamManager.callStreamMethod(
+          _localCallContext,
+          _localUniqueSession,
+          {},
+        );
+      },
+      _localTestStreamManager.outputStreamController,
+    );
+    return _localTestStreamManager.outputStreamController.stream;
+  }
+
+  _i3.Future<List<_i6.Podcast>> listPodcasts(
+    _i1.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'podcast',
+            method: 'listPodcasts',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'podcast',
+          methodName: 'listPodcasts',
+          parameters: _i1.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i6.Podcast>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

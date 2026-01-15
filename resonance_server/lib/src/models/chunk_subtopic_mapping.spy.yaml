@@ -1,0 +1,13 @@
+# ChunkSubtopicMapping links semantic chunks to subtopics
+class: ChunkSubtopicMapping
+table: chunk_subtopic_mapping
+
+fields:
+  ### The semantic chunk
+  chunk: SemanticChunk?, relation(onDelete=cascade)
+  ### The subtopic
+  subtopic: Subtopic?, relation(onDelete=cascade)
+  ### Confidence score (0.0 to 1.0) for this mapping
+  confidence: double, default=0.5
+  ### When this mapping was created
+  createdAt: DateTime, default=now
