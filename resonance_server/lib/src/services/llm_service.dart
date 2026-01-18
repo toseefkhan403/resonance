@@ -1,202 +1,114 @@
+import 'package:resonance_server/src/generated/protocol.dart';
+import 'package:resonance_server/src/services/youtube_service.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:dartantic_ai/dartantic_ai.dart';
-import 'dart:convert';
+
+import 'package:dartantic_interface/dartantic_interface.dart';
+import 'package:resonance_server/src/services/llm_prompts.dart';
 
 /// Service for LLM-based topic extraction and summarization using Gemini
 class LLMService {
-  /// Extracts topics from a semantic chunk
-  /// Returns a structured response with primary subtopic, secondary concepts, and summary
-  static Future<TopicExtractionResult> extractTopics(
+  final String _geminiAPIKey;
+
+  LLMService()
+    : _geminiAPIKey = Serverpod.instance.getPassword('geminiAPIKey')!;
+
+  LLMService.withAPIKey(String geminiAPIKey) : _geminiAPIKey = geminiAPIKey;
+
+  /// Returns Agentic segmented transcript with speaker info and timestamps
+  Future<SegmentedTranscript> getSegmentedTranscript(
     Session session,
-    String chunkText,
+    Podcast podcast,
   ) async {
     try {
-      final apiKey = session.serverpod.getPassword('gemini_api_key');
-      if (apiKey == null || apiKey.isEmpty) {
-        throw Exception('Gemini API key not configured');
-      }
+      final ytService = YouTubeService();
 
-      final agent = Agent('google:gemini-1.5-flash', apiKey: apiKey);
-      
-      final prompt = '''
-Analyze the following text segment from a podcast and extract:
-1. A primary subtopic as a short noun phrase (2-5 words)
-2. Secondary concepts as a comma-separated list of short phrases
-3. A concise, human-readable summary (2-3 sentences)
+      final audioFile = await ytService.downloadYouTubeAudio(
+        podcast.youtubeUrl,
+      );
+      final audioBytes = await audioFile.readAsBytes();
+      final agent = _createAgent();
 
-Text: "$chunkText"
-
-Respond in JSON format:
-{
-  "primarySubtopic": "short noun phrase",
-  "secondaryConcepts": ["concept1", "concept2", ...],
-  "summary": "concise summary text"
-}
-''';
-
-      final history = [
-        const ChatMessage.system(
-          'You are a knowledge extraction system. Always respond with valid JSON only, no additional text.',
+      final result = await agent.sendFor<SegmentedTranscript>(
+        LLMPrompts.segmentedTranscriptPrompt(
+          podcast.title,
+          podcast.channelName,
         ),
-      ];
-
-      final result = await agent.send(
-        prompt,
-        history: history,
+        attachments: [
+          DataPart(audioBytes, mimeType: 'audio/mp3'),
+        ],
+        outputSchema: LLMPrompts.segmentedTranscriptSchema,
+        outputFromJson: SegmentedTranscript.fromJson,
       );
 
-      if (result.output != null && result.output!.isNotEmpty) {
-        final jsonData = json.decode(result.output!) as Map<String, dynamic>;
-        
-        return TopicExtractionResult(
-          primarySubtopic: jsonData['primarySubtopic'] as String,
-          secondaryConcepts: (jsonData['secondaryConcepts'] as List)
-              .map((e) => e.toString())
-              .toList(),
-          summary: jsonData['summary'] as String,
-        );
-      } else {
-        throw Exception('Failed to extract topics: empty response');
-      }
+      return result.output;
     } catch (e) {
-      session.log('Error extracting topics: $e', level: LogLevel.error);
+      session.log(
+        'Error fetching segmented transcript: $e',
+        level: LogLevel.error,
+      );
       rethrow;
     }
   }
 
-  /// Categorizes a subtopic into a higher-level category
-  static Future<String> categorizeSubtopic(
-    Session session,
-    String subtopicName,
-    List<String> existingCategories,
-  ) async {
+  Future<Vector> generateEmbedding(String text) async {
+    final agent = _createAgent();
     try {
-      final apiKey = session.serverpod.getPassword('gemini_api_key');
-      if (apiKey == null || apiKey.isEmpty) {
-        throw Exception('Gemini API key not configured');
-      }
-
-      final agent = Agent('google:gemini-1.5-flash', apiKey: apiKey);
-      
-      final categoriesList = existingCategories.isEmpty
-          ? 'No existing categories'
-          : existingCategories.join(', ');
-      
-      final prompt = '''
-Given the subtopic "$subtopicName" and existing categories: $categoriesList
-
-Determine the most appropriate category for this subtopic. If an existing category fits well, use it. Otherwise, suggest a new broad domain category name (1-2 words).
-
-Respond with ONLY the category name, nothing else.
-''';
-
-      final history = [
-        const ChatMessage.system(
-          'You are a categorization system. Respond with only the category name.',
-        ),
-      ];
-
-      final result = await agent.send(
-        prompt,
-        history: history,
-      );
-
-      if (result.output != null && result.output!.isNotEmpty) {
-        final category = result.output!.trim();
-        return category.isNotEmpty ? category : 'General';
-      } else {
-        return 'General';
-      }
+      final embedding = await agent.embedQuery(text);
+      return Vector(embedding.embeddings);
     } catch (e) {
-      session.log('Error categorizing subtopic: $e', level: LogLevel.error);
-      return 'General';
+      throw Exception(e.toString());
     }
   }
 
   /// Generates a conversational answer with speaker perspective
-  static Future<String> generateConversationalAnswer(
-    Session session,
+  Stream<String> generateConversationalAnswer(
     String question,
-    List<ContextChunk> contextChunks,
-    List<String> speakers,
-  ) async {
+    String speakerName,
+    List<GraphNode> nodes,
+  ) async* {
     try {
-      final apiKey = session.serverpod.getPassword('gemini_api_key');
-      if (apiKey == null || apiKey.isEmpty) {
-        throw Exception('Gemini API key not configured');
-      }
+      final agent = _createAgent();
 
-      final agent = Agent('google:gemini-1.5-flash', apiKey: apiKey);
-      
-      final contextText = contextChunks
-          .map((chunk) => '[${chunk.startTime}s-${chunk.endTime}s] ${chunk.text}')
-          .join('\n\n');
-      
-      final speakersList = speakers.isEmpty ? 'the speakers' : speakers.join(' and ');
-      
-      final prompt = '''
-You are answering a question as if you were $speakersList from a podcast.
-
-Question: "$question"
-
-Context from the podcast:
-$contextText
-
-Answer the question using ONLY the information provided in the context. 
-Maintain the tone and perspective of $speakersList.
-Do not make up information not present in the context.
-If the context doesn't contain enough information, say so clearly.
-
-Answer:
-''';
+      final prompt = LLMPrompts.conversationalAnswerPrompt(
+        question,
+        speakerName,
+        nodes
+            .map(
+              (e) => {
+                'label': e.label,
+                'summary': e.summary,
+                'references': e.references.map((r) => r.toString()).toList(),
+                'videoId': e.videoId,
+              },
+            )
+            .toString(),
+      );
 
       final history = [
-        const ChatMessage.system(
-          'You are a podcast speaker answering questions based on the provided context.',
-        ),
+        ChatMessage.system(LLMPrompts.conversationalAnswerSystemMessage),
       ];
 
-      final result = await agent.send(
+      final resultStream = agent.sendStream(
         prompt,
         history: history,
       );
 
-      if (result.output != null && result.output!.isNotEmpty) {
-        return result.output!;
-      } else {
-        throw Exception('Failed to generate answer: empty response');
+      await for (final chunk in resultStream) {
+        yield chunk.output;
       }
     } catch (e) {
-      session.log('Error generating answer: $e', level: LogLevel.error);
       rethrow;
     }
   }
-}
 
-/// Result of topic extraction
-class TopicExtractionResult {
-  final String primarySubtopic;
-  final List<String> secondaryConcepts;
-  final String summary;
-
-  TopicExtractionResult({
-    required this.primarySubtopic,
-    required this.secondaryConcepts,
-    required this.summary,
-  });
-}
-
-/// Context chunk for RAG
-class ContextChunk {
-  final String text;
-  final double startTime;
-  final double endTime;
-  final String? speaker;
-
-  ContextChunk({
-    required this.text,
-    required this.startTime,
-    required this.endTime,
-    this.speaker,
-  });
+  Agent _createAgent() {
+    Agent.environment['GEMINI_API_KEY'] = _geminiAPIKey;
+    return Agent(
+      'google?chat=gemini-2.5-flash&embeddings=text-embedding-004',
+      embeddingsModelOptions: const GoogleEmbeddingsModelOptions(
+        dimensions: 768,
+      ),
+    );
+  }
 }

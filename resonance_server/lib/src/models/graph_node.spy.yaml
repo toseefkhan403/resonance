@@ -1,16 +1,17 @@
-# GraphNode represents a node in the force-directed graph visualization
-# This is a serializable model (not persisted) that aggregates data for the UI
 class: GraphNode
+table: graph_node
 fields:
-  ### Node ID (category or subtopic ID)
-  id: int
-  ### Node type: category or subtopic
-  type: String
-  ### Display label
+  userId: String
+  videoId: String
   label: String
-  ### Category name (for subtopics)
-  category: String?
-  ### Importance score
-  importanceScore: double
-  ### Summary (for subtopics)
-  summary: String?
+  impactScore: double
+  summary: String
+  primarySpeakerId: int
+  references: List<QuoteReference>
+  embedding: Vector(768)
+  createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
+indexes:
+  graph_node_idx:
+    fields: userId, videoId, primarySpeakerId
+    unique: true

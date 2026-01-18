@@ -11,76 +11,119 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'quote_reference.dart' as _i2;
+import 'package:resonance_client/src/protocol/protocol.dart' as _i3;
 
 abstract class GraphNode implements _i1.SerializableModel {
   GraphNode._({
-    required this.id,
-    required this.type,
+    this.id,
+    required this.userId,
+    required this.videoId,
     required this.label,
-    this.category,
-    required this.importanceScore,
-    this.summary,
-  });
+    required this.impactScore,
+    required this.summary,
+    required this.primarySpeakerId,
+    required this.references,
+    required this.embedding,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) : createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
 
   factory GraphNode({
-    required int id,
-    required String type,
+    int? id,
+    required String userId,
+    required String videoId,
     required String label,
-    String? category,
-    required double importanceScore,
-    String? summary,
+    required double impactScore,
+    required String summary,
+    required int primarySpeakerId,
+    required List<_i2.QuoteReference> references,
+    required _i1.Vector embedding,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   }) = _GraphNodeImpl;
 
   factory GraphNode.fromJson(Map<String, dynamic> jsonSerialization) {
     return GraphNode(
-      id: jsonSerialization['id'] as int,
-      type: jsonSerialization['type'] as String,
+      id: jsonSerialization['id'] as int?,
+      userId: jsonSerialization['userId'] as String,
+      videoId: jsonSerialization['videoId'] as String,
       label: jsonSerialization['label'] as String,
-      category: jsonSerialization['category'] as String?,
-      importanceScore: (jsonSerialization['importanceScore'] as num).toDouble(),
-      summary: jsonSerialization['summary'] as String?,
+      impactScore: (jsonSerialization['impactScore'] as num).toDouble(),
+      summary: jsonSerialization['summary'] as String,
+      primarySpeakerId: jsonSerialization['primarySpeakerId'] as int,
+      references: _i3.Protocol().deserialize<List<_i2.QuoteReference>>(
+        jsonSerialization['references'],
+      ),
+      embedding: _i1.VectorJsonExtension.fromJson(
+        jsonSerialization['embedding'],
+      ),
+      createdAt: jsonSerialization['createdAt'] == null
+          ? null
+          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+      updatedAt: jsonSerialization['updatedAt'] == null
+          ? null
+          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
     );
   }
 
-  /// Node ID (category or subtopic ID)
-  int id;
+  /// The database id, set if the object has been inserted into the
+  /// database or if it has been fetched from the database. Otherwise,
+  /// the id will be null.
+  int? id;
 
-  /// Node type: category or subtopic
-  String type;
+  String userId;
 
-  /// Display label
+  String videoId;
+
   String label;
 
-  /// Category name (for subtopics)
-  String? category;
+  double impactScore;
 
-  /// Importance score
-  double importanceScore;
+  String summary;
 
-  /// Summary (for subtopics)
-  String? summary;
+  int primarySpeakerId;
+
+  List<_i2.QuoteReference> references;
+
+  _i1.Vector embedding;
+
+  DateTime createdAt;
+
+  DateTime updatedAt;
 
   /// Returns a shallow copy of this [GraphNode]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
   GraphNode copyWith({
     int? id,
-    String? type,
+    String? userId,
+    String? videoId,
     String? label,
-    String? category,
-    double? importanceScore,
+    double? impactScore,
     String? summary,
+    int? primarySpeakerId,
+    List<_i2.QuoteReference>? references,
+    _i1.Vector? embedding,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'GraphNode',
-      'id': id,
-      'type': type,
+      if (id != null) 'id': id,
+      'userId': userId,
+      'videoId': videoId,
       'label': label,
-      if (category != null) 'category': category,
-      'importanceScore': importanceScore,
-      if (summary != null) 'summary': summary,
+      'impactScore': impactScore,
+      'summary': summary,
+      'primarySpeakerId': primarySpeakerId,
+      'references': references.toJson(valueToJson: (v) => v.toJson()),
+      'embedding': embedding.toJson(),
+      'createdAt': createdAt.toJson(),
+      'updatedAt': updatedAt.toJson(),
     };
   }
 
@@ -94,19 +137,29 @@ class _Undefined {}
 
 class _GraphNodeImpl extends GraphNode {
   _GraphNodeImpl({
-    required int id,
-    required String type,
+    int? id,
+    required String userId,
+    required String videoId,
     required String label,
-    String? category,
-    required double importanceScore,
-    String? summary,
+    required double impactScore,
+    required String summary,
+    required int primarySpeakerId,
+    required List<_i2.QuoteReference> references,
+    required _i1.Vector embedding,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   }) : super._(
          id: id,
-         type: type,
+         userId: userId,
+         videoId: videoId,
          label: label,
-         category: category,
-         importanceScore: importanceScore,
+         impactScore: impactScore,
          summary: summary,
+         primarySpeakerId: primarySpeakerId,
+         references: references,
+         embedding: embedding,
+         createdAt: createdAt,
+         updatedAt: updatedAt,
        );
 
   /// Returns a shallow copy of this [GraphNode]
@@ -114,20 +167,31 @@ class _GraphNodeImpl extends GraphNode {
   @_i1.useResult
   @override
   GraphNode copyWith({
-    int? id,
-    String? type,
+    Object? id = _Undefined,
+    String? userId,
+    String? videoId,
     String? label,
-    Object? category = _Undefined,
-    double? importanceScore,
-    Object? summary = _Undefined,
+    double? impactScore,
+    String? summary,
+    int? primarySpeakerId,
+    List<_i2.QuoteReference>? references,
+    _i1.Vector? embedding,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return GraphNode(
-      id: id ?? this.id,
-      type: type ?? this.type,
+      id: id is int? ? id : this.id,
+      userId: userId ?? this.userId,
+      videoId: videoId ?? this.videoId,
       label: label ?? this.label,
-      category: category is String? ? category : this.category,
-      importanceScore: importanceScore ?? this.importanceScore,
-      summary: summary is String? ? summary : this.summary,
+      impactScore: impactScore ?? this.impactScore,
+      summary: summary ?? this.summary,
+      primarySpeakerId: primarySpeakerId ?? this.primarySpeakerId,
+      references:
+          references ?? this.references.map((e0) => e0.copyWith()).toList(),
+      embedding: embedding ?? this.embedding.clone(),
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

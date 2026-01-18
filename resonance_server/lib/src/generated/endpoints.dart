@@ -14,11 +14,14 @@ import 'package:serverpod/serverpod.dart' as _i1;
 import '../auth/email_idp_endpoint.dart' as _i2;
 import '../auth/google_idp_endpoint.dart' as _i3;
 import '../auth/jwt_refresh_endpoint.dart' as _i4;
-import '../endpoints/podcast_endpoint.dart' as _i5;
+import '../endpoints/conversation_endpoint.dart' as _i5;
+import '../endpoints/graph_endpoint.dart' as _i6;
+import '../endpoints/podcast_endpoint.dart' as _i7;
+import 'package:resonance_server/src/generated/speaker.dart' as _i8;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
-    as _i6;
+    as _i9;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
-    as _i7;
+    as _i10;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -42,7 +45,19 @@ class Endpoints extends _i1.EndpointDispatch {
           'jwtRefresh',
           null,
         ),
-      'podcast': _i5.PodcastEndpoint()
+      'conversation': _i5.ConversationEndpoint()
+        ..initialize(
+          server,
+          'conversation',
+          null,
+        ),
+      'graph': _i6.GraphEndpoint()
+        ..initialize(
+          server,
+          'graph',
+          null,
+        ),
+      'podcast': _i7.PodcastEndpoint()
         ..initialize(
           server,
           'podcast',
@@ -274,6 +289,57 @@ class Endpoints extends _i1.EndpointDispatch {
         ),
       },
     );
+    connectors['conversation'] = _i1.EndpointConnector(
+      name: 'conversation',
+      endpoint: endpoints['conversation']!,
+      methodConnectors: {
+        'askQuestion': _i1.MethodStreamConnector(
+          name: 'askQuestion',
+          params: {
+            'question': _i1.ParameterDescription(
+              name: 'question',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'speaker': _i1.ParameterDescription(
+              name: 'speaker',
+              type: _i1.getType<_i8.Speaker>(),
+              nullable: false,
+            ),
+          },
+          streamParams: {},
+          returnType: _i1.MethodStreamReturnType.streamType,
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+                Map<String, Stream> streamParams,
+              ) => (endpoints['conversation'] as _i5.ConversationEndpoint)
+                  .askQuestion(
+                    session,
+                    params['question'],
+                    params['speaker'],
+                  ),
+        ),
+      },
+    );
+    connectors['graph'] = _i1.EndpointConnector(
+      name: 'graph',
+      endpoint: endpoints['graph']!,
+      methodConnectors: {
+        'getGraphData': _i1.MethodConnector(
+          name: 'getGraphData',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['graph'] as _i6.GraphEndpoint).getGraphData(
+                session,
+              ),
+        ),
+      },
+    );
     connectors['podcast'] = _i1.EndpointConnector(
       name: 'podcast',
       endpoint: endpoints['podcast']!,
@@ -292,7 +358,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['podcast'] as _i5.PodcastEndpoint).ingestPodcast(
+                  (endpoints['podcast'] as _i7.PodcastEndpoint).ingestPodcast(
                     session,
                     params['youtubeUrl'],
                   ),
@@ -304,7 +370,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
-              ) async => (endpoints['podcast'] as _i5.PodcastEndpoint)
+              ) async => (endpoints['podcast'] as _i7.PodcastEndpoint)
                   .listPodcasts(session),
         ),
         'getJobStatus': _i1.MethodStreamConnector(
@@ -323,16 +389,16 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
                 Map<String, Stream> streamParams,
-              ) => (endpoints['podcast'] as _i5.PodcastEndpoint).getJobStatus(
+              ) => (endpoints['podcast'] as _i7.PodcastEndpoint).getJobStatus(
                 session,
                 params['jobId'],
               ),
         ),
       },
     );
-    modules['serverpod_auth_idp'] = _i6.Endpoints()
+    modules['serverpod_auth_idp'] = _i9.Endpoints()
       ..initializeEndpoints(server);
-    modules['serverpod_auth_core'] = _i7.Endpoints()
+    modules['serverpod_auth_core'] = _i10.Endpoints()
       ..initializeEndpoints(server);
   }
 }

@@ -1,38 +1,43 @@
+import 'dart:developer';
+
 import 'package:resonance_server/src/generated/protocol.dart';
-import 'package:serverpod/serverpod.dart';
-import 'package:youtube_transcript_api/youtube_transcript_api.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 /// Service for retrieving YouTube transcripts and metadata
 class YouTubeService {
-  /// Retrieves transcript from YouTube using youtube_transcript_api
-  /// Returns transcript segments with timestamps
-  static Future<FetchedTranscript> getTranscript(
-    Session session,
-    String youtubeUrl,
-  ) async {
+  /// Downloads audio from a YouTube video
+  Future<File> downloadYouTubeAudio(String videoUrl) async {
     try {
-      // Extract video ID from URL
-      final videoId = extractVideoId(youtubeUrl);
-      if (videoId == null) {
-        throw Exception('Invalid YouTube URL');
-      }
-      final api = YouTubeTranscriptApi();
+      final yt = YoutubeExplode();
 
-      // Use youtube_transcript_api to get transcript
-      final transcript = await api.fetch(videoId);
+      final video = await yt.videos.get(videoUrl);
+      final manifest = await yt.videos.streamsClient.getManifest(video.id);
+      final audioStreamInfo = manifest.audioOnly.withHighestBitrate();
+      final audioStream = yt.videos.streamsClient.get(audioStreamInfo);
 
-      return transcript;
+      final fileName = '${video.title}.${audioStreamInfo.container.name}'
+          .replaceAll(r'[\/:*?"<>|]', '');
+      final file = File(fileName);
+
+      final output = file.openWrite(mode: FileMode.writeOnlyAppend);
+      await audioStream.pipe(output);
+
+      await output.flush();
+      await output.close();
+      yt.close();
+
+      return file;
     } catch (e) {
-      session.log('Error fetching transcript: $e', level: LogLevel.error);
-      // Fallback to speech-to-text would go here
+      log('Error downloading audio: $e');
       rethrow;
     }
   }
 
   /// Extracts video ID from various YouTube URL formats
-  static String? extractVideoId(String url) {
+  String? extractVideoId(String url) {
     final regExp = RegExp(
       r'^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*',
     );
@@ -49,10 +54,7 @@ class YouTubeService {
   }
 
   /// Retrieves video metadata (title, channel, thumbnail)
-  static Future<VideoMetadata?> getVideoMetadata(
-    Session session,
-    String youtubeUrl,
-  ) async {
+  Future<VideoMetadata?> getVideoMetadata(String youtubeUrl) async {
     try {
       final videoId = extractVideoId(youtubeUrl);
       if (videoId == null) {
@@ -76,7 +78,7 @@ class YouTubeService {
         );
       }
     } catch (e) {
-      session.log('Error fetching metadata: $e', level: LogLevel.error);
+      log('Error fetching metadata: $e');
     }
 
     return null;

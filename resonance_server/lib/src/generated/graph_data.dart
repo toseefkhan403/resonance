@@ -11,52 +11,39 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
-import 'graph_node.dart' as _i2;
-import 'graph_link.dart' as _i3;
-import 'package:resonance_server/src/generated/protocol.dart' as _i4;
+import 'graph_granularity.dart' as _i2;
+import 'package:resonance_server/src/generated/protocol.dart' as _i3;
 
 abstract class GraphData
     implements _i1.SerializableModel, _i1.ProtocolSerialization {
-  GraphData._({
-    required this.nodes,
-    required this.links,
-  });
+  GraphData._({required this.graphWithGranularity});
 
   factory GraphData({
-    required List<_i2.GraphNode> nodes,
-    required List<_i3.GraphLink> links,
+    required List<_i2.GraphGranularity> graphWithGranularity,
   }) = _GraphDataImpl;
 
   factory GraphData.fromJson(Map<String, dynamic> jsonSerialization) {
     return GraphData(
-      nodes: _i4.Protocol().deserialize<List<_i2.GraphNode>>(
-        jsonSerialization['nodes'],
-      ),
-      links: _i4.Protocol().deserialize<List<_i3.GraphLink>>(
-        jsonSerialization['links'],
-      ),
+      graphWithGranularity: _i3.Protocol()
+          .deserialize<List<_i2.GraphGranularity>>(
+            jsonSerialization['graphWithGranularity'],
+          ),
     );
   }
 
-  /// All nodes in the graph
-  List<_i2.GraphNode> nodes;
-
-  /// All links in the graph
-  List<_i3.GraphLink> links;
+  List<_i2.GraphGranularity> graphWithGranularity;
 
   /// Returns a shallow copy of this [GraphData]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
-  GraphData copyWith({
-    List<_i2.GraphNode>? nodes,
-    List<_i3.GraphLink>? links,
-  });
+  GraphData copyWith({List<_i2.GraphGranularity>? graphWithGranularity});
   @override
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'GraphData',
-      'nodes': nodes.toJson(valueToJson: (v) => v.toJson()),
-      'links': links.toJson(valueToJson: (v) => v.toJson()),
+      'graphWithGranularity': graphWithGranularity.toJson(
+        valueToJson: (v) => v.toJson(),
+      ),
     };
   }
 
@@ -64,8 +51,9 @@ abstract class GraphData
   Map<String, dynamic> toJsonForProtocol() {
     return {
       '__className__': 'GraphData',
-      'nodes': nodes.toJson(valueToJson: (v) => v.toJsonForProtocol()),
-      'links': links.toJson(valueToJson: (v) => v.toJsonForProtocol()),
+      'graphWithGranularity': graphWithGranularity.toJson(
+        valueToJson: (v) => v.toJsonForProtocol(),
+      ),
     };
   }
 
@@ -76,25 +64,18 @@ abstract class GraphData
 }
 
 class _GraphDataImpl extends GraphData {
-  _GraphDataImpl({
-    required List<_i2.GraphNode> nodes,
-    required List<_i3.GraphLink> links,
-  }) : super._(
-         nodes: nodes,
-         links: links,
-       );
+  _GraphDataImpl({required List<_i2.GraphGranularity> graphWithGranularity})
+    : super._(graphWithGranularity: graphWithGranularity);
 
   /// Returns a shallow copy of this [GraphData]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
   @override
-  GraphData copyWith({
-    List<_i2.GraphNode>? nodes,
-    List<_i3.GraphLink>? links,
-  }) {
+  GraphData copyWith({List<_i2.GraphGranularity>? graphWithGranularity}) {
     return GraphData(
-      nodes: nodes ?? this.nodes.map((e0) => e0.copyWith()).toList(),
-      links: links ?? this.links.map((e0) => e0.copyWith()).toList(),
+      graphWithGranularity:
+          graphWithGranularity ??
+          this.graphWithGranularity.map((e0) => e0.copyWith()).toList(),
     );
   }
 }

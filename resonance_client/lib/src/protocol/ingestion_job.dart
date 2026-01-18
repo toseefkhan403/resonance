@@ -11,14 +11,11 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
-import 'podcast.dart' as _i2;
-import 'package:resonance_client/src/protocol/protocol.dart' as _i3;
 
 abstract class IngestionJob implements _i1.SerializableModel {
   IngestionJob._({
     this.id,
     required this.podcastId,
-    this.podcast,
     required this.userId,
     String? stage,
     String? status,
@@ -36,7 +33,6 @@ abstract class IngestionJob implements _i1.SerializableModel {
   factory IngestionJob({
     int? id,
     required int podcastId,
-    _i2.Podcast? podcast,
     required String userId,
     String? stage,
     String? status,
@@ -51,11 +47,6 @@ abstract class IngestionJob implements _i1.SerializableModel {
     return IngestionJob(
       id: jsonSerialization['id'] as int?,
       podcastId: jsonSerialization['podcastId'] as int,
-      podcast: jsonSerialization['podcast'] == null
-          ? null
-          : _i3.Protocol().deserialize<_i2.Podcast>(
-              jsonSerialization['podcast'],
-            ),
       userId: jsonSerialization['userId'] as String,
       stage: jsonSerialization['stage'] as String?,
       status: jsonSerialization['status'] as String?,
@@ -82,31 +73,20 @@ abstract class IngestionJob implements _i1.SerializableModel {
 
   int podcastId;
 
-  /// The podcast being processed
-  _i2.Podcast? podcast;
-
-  /// The user who owns this job
   String userId;
 
-  /// Current processing stage
   String stage;
 
-  /// Processing status: pending, processing, completed, failed
   String status;
 
-  /// Error message if failed
   String? errorMessage;
 
-  /// Progress percentage (0-100)
   int progress;
 
-  /// When the job was created
   DateTime createdAt;
 
-  /// When the job was last updated
   DateTime updatedAt;
 
-  /// When the job completed
   DateTime? completedAt;
 
   /// Returns a shallow copy of this [IngestionJob]
@@ -115,7 +95,6 @@ abstract class IngestionJob implements _i1.SerializableModel {
   IngestionJob copyWith({
     int? id,
     int? podcastId,
-    _i2.Podcast? podcast,
     String? userId,
     String? stage,
     String? status,
@@ -131,7 +110,6 @@ abstract class IngestionJob implements _i1.SerializableModel {
       '__className__': 'IngestionJob',
       if (id != null) 'id': id,
       'podcastId': podcastId,
-      if (podcast != null) 'podcast': podcast?.toJson(),
       'userId': userId,
       'stage': stage,
       'status': status,
@@ -155,7 +133,6 @@ class _IngestionJobImpl extends IngestionJob {
   _IngestionJobImpl({
     int? id,
     required int podcastId,
-    _i2.Podcast? podcast,
     required String userId,
     String? stage,
     String? status,
@@ -167,7 +144,6 @@ class _IngestionJobImpl extends IngestionJob {
   }) : super._(
          id: id,
          podcastId: podcastId,
-         podcast: podcast,
          userId: userId,
          stage: stage,
          status: status,
@@ -185,7 +161,6 @@ class _IngestionJobImpl extends IngestionJob {
   IngestionJob copyWith({
     Object? id = _Undefined,
     int? podcastId,
-    Object? podcast = _Undefined,
     String? userId,
     String? stage,
     String? status,
@@ -198,7 +173,6 @@ class _IngestionJobImpl extends IngestionJob {
     return IngestionJob(
       id: id is int? ? id : this.id,
       podcastId: podcastId ?? this.podcastId,
-      podcast: podcast is _i2.Podcast? ? podcast : this.podcast?.copyWith(),
       userId: userId ?? this.userId,
       stage: stage ?? this.stage,
       status: status ?? this.status,

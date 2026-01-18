@@ -17,43 +17,37 @@ abstract class Podcast
   Podcast._({
     this.id,
     required this.youtubeUrl,
+    required this.userId,
     required this.videoId,
     this.title,
     this.channelName,
     this.thumbnailUrl,
-    required this.userId,
     DateTime? createdAt,
-    DateTime? updatedAt,
-  }) : createdAt = createdAt ?? DateTime.now(),
-       updatedAt = updatedAt ?? DateTime.now();
+  }) : createdAt = createdAt ?? DateTime.now();
 
   factory Podcast({
     int? id,
     required String youtubeUrl,
+    required String userId,
     required String videoId,
     String? title,
     String? channelName,
     String? thumbnailUrl,
-    required String userId,
     DateTime? createdAt,
-    DateTime? updatedAt,
   }) = _PodcastImpl;
 
   factory Podcast.fromJson(Map<String, dynamic> jsonSerialization) {
     return Podcast(
       id: jsonSerialization['id'] as int?,
       youtubeUrl: jsonSerialization['youtubeUrl'] as String,
+      userId: jsonSerialization['userId'] as String,
       videoId: jsonSerialization['videoId'] as String,
       title: jsonSerialization['title'] as String?,
       channelName: jsonSerialization['channelName'] as String?,
       thumbnailUrl: jsonSerialization['thumbnailUrl'] as String?,
-      userId: jsonSerialization['userId'] as String,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
-      updatedAt: jsonSerialization['updatedAt'] == null
-          ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
     );
   }
 
@@ -64,29 +58,19 @@ abstract class Podcast
   @override
   int? id;
 
-  /// The YouTube URL of the podcast
   String youtubeUrl;
 
-  /// The unique YouTube Video ID
-  String videoId;
-
-  /// The title of the podcast (extracted from YouTube)
-  String? title;
-
-  /// The channel name
-  String? channelName;
-
-  /// The thumbnail URL
-  String? thumbnailUrl;
-
-  /// The user who owns this podcast
   String userId;
 
-  /// When the podcast was first ingested
-  DateTime createdAt;
+  String videoId;
 
-  /// When the podcast was last updated
-  DateTime updatedAt;
+  String? title;
+
+  String? channelName;
+
+  String? thumbnailUrl;
+
+  DateTime createdAt;
 
   @override
   _i1.Table<int?> get table => t;
@@ -97,13 +81,12 @@ abstract class Podcast
   Podcast copyWith({
     int? id,
     String? youtubeUrl,
+    String? userId,
     String? videoId,
     String? title,
     String? channelName,
     String? thumbnailUrl,
-    String? userId,
     DateTime? createdAt,
-    DateTime? updatedAt,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -111,13 +94,12 @@ abstract class Podcast
       '__className__': 'Podcast',
       if (id != null) 'id': id,
       'youtubeUrl': youtubeUrl,
+      'userId': userId,
       'videoId': videoId,
       if (title != null) 'title': title,
       if (channelName != null) 'channelName': channelName,
       if (thumbnailUrl != null) 'thumbnailUrl': thumbnailUrl,
-      'userId': userId,
       'createdAt': createdAt.toJson(),
-      'updatedAt': updatedAt.toJson(),
     };
   }
 
@@ -127,13 +109,12 @@ abstract class Podcast
       '__className__': 'Podcast',
       if (id != null) 'id': id,
       'youtubeUrl': youtubeUrl,
+      'userId': userId,
       'videoId': videoId,
       if (title != null) 'title': title,
       if (channelName != null) 'channelName': channelName,
       if (thumbnailUrl != null) 'thumbnailUrl': thumbnailUrl,
-      'userId': userId,
       'createdAt': createdAt.toJson(),
-      'updatedAt': updatedAt.toJson(),
     };
   }
 
@@ -173,23 +154,21 @@ class _PodcastImpl extends Podcast {
   _PodcastImpl({
     int? id,
     required String youtubeUrl,
+    required String userId,
     required String videoId,
     String? title,
     String? channelName,
     String? thumbnailUrl,
-    required String userId,
     DateTime? createdAt,
-    DateTime? updatedAt,
   }) : super._(
          id: id,
          youtubeUrl: youtubeUrl,
+         userId: userId,
          videoId: videoId,
          title: title,
          channelName: channelName,
          thumbnailUrl: thumbnailUrl,
-         userId: userId,
          createdAt: createdAt,
-         updatedAt: updatedAt,
        );
 
   /// Returns a shallow copy of this [Podcast]
@@ -199,24 +178,22 @@ class _PodcastImpl extends Podcast {
   Podcast copyWith({
     Object? id = _Undefined,
     String? youtubeUrl,
+    String? userId,
     String? videoId,
     Object? title = _Undefined,
     Object? channelName = _Undefined,
     Object? thumbnailUrl = _Undefined,
-    String? userId,
     DateTime? createdAt,
-    DateTime? updatedAt,
   }) {
     return Podcast(
       id: id is int? ? id : this.id,
       youtubeUrl: youtubeUrl ?? this.youtubeUrl,
+      userId: userId ?? this.userId,
       videoId: videoId ?? this.videoId,
       title: title is String? ? title : this.title,
       channelName: channelName is String? ? channelName : this.channelName,
       thumbnailUrl: thumbnailUrl is String? ? thumbnailUrl : this.thumbnailUrl,
-      userId: userId ?? this.userId,
       createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }
@@ -226,6 +203,11 @@ class PodcastUpdateTable extends _i1.UpdateTable<PodcastTable> {
 
   _i1.ColumnValue<String, String> youtubeUrl(String value) => _i1.ColumnValue(
     table.youtubeUrl,
+    value,
+  );
+
+  _i1.ColumnValue<String, String> userId(String value) => _i1.ColumnValue(
+    table.userId,
     value,
   );
 
@@ -250,20 +232,9 @@ class PodcastUpdateTable extends _i1.UpdateTable<PodcastTable> {
         value,
       );
 
-  _i1.ColumnValue<String, String> userId(String value) => _i1.ColumnValue(
-    table.userId,
-    value,
-  );
-
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
       _i1.ColumnValue(
         table.createdAt,
-        value,
-      );
-
-  _i1.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.updatedAt,
         value,
       );
 }
@@ -273,6 +244,10 @@ class PodcastTable extends _i1.Table<int?> {
     updateTable = PodcastUpdateTable(this);
     youtubeUrl = _i1.ColumnString(
       'youtubeUrl',
+      this,
+    );
+    userId = _i1.ColumnString(
+      'userId',
       this,
     );
     videoId = _i1.ColumnString(
@@ -291,17 +266,8 @@ class PodcastTable extends _i1.Table<int?> {
       'thumbnailUrl',
       this,
     );
-    userId = _i1.ColumnString(
-      'userId',
-      this,
-    );
     createdAt = _i1.ColumnDateTime(
       'createdAt',
-      this,
-      hasDefault: true,
-    );
-    updatedAt = _i1.ColumnDateTime(
-      'updatedAt',
       this,
       hasDefault: true,
     );
@@ -309,41 +275,30 @@ class PodcastTable extends _i1.Table<int?> {
 
   late final PodcastUpdateTable updateTable;
 
-  /// The YouTube URL of the podcast
   late final _i1.ColumnString youtubeUrl;
 
-  /// The unique YouTube Video ID
-  late final _i1.ColumnString videoId;
-
-  /// The title of the podcast (extracted from YouTube)
-  late final _i1.ColumnString title;
-
-  /// The channel name
-  late final _i1.ColumnString channelName;
-
-  /// The thumbnail URL
-  late final _i1.ColumnString thumbnailUrl;
-
-  /// The user who owns this podcast
   late final _i1.ColumnString userId;
 
-  /// When the podcast was first ingested
-  late final _i1.ColumnDateTime createdAt;
+  late final _i1.ColumnString videoId;
 
-  /// When the podcast was last updated
-  late final _i1.ColumnDateTime updatedAt;
+  late final _i1.ColumnString title;
+
+  late final _i1.ColumnString channelName;
+
+  late final _i1.ColumnString thumbnailUrl;
+
+  late final _i1.ColumnDateTime createdAt;
 
   @override
   List<_i1.Column> get columns => [
     id,
     youtubeUrl,
+    userId,
     videoId,
     title,
     channelName,
     thumbnailUrl,
-    userId,
     createdAt,
-    updatedAt,
   ];
 }
 

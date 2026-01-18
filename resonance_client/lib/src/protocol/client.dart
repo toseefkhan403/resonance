@@ -16,9 +16,11 @@ import 'package:serverpod_client/serverpod_client.dart' as _i2;
 import 'dart:async' as _i3;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i4;
-import 'package:resonance_client/src/protocol/ingestion_job.dart' as _i5;
-import 'package:resonance_client/src/protocol/podcast.dart' as _i6;
-import 'protocol.dart' as _i7;
+import 'package:resonance_client/src/protocol/speaker.dart' as _i5;
+import 'package:resonance_client/src/protocol/graph_data.dart' as _i6;
+import 'package:resonance_client/src/protocol/ingestion_job.dart' as _i7;
+import 'package:resonance_client/src/protocol/podcast.dart' as _i8;
+import 'protocol.dart' as _i9;
 
 /// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
 /// are made available on the server and enable the corresponding sign-in widget
@@ -259,6 +261,47 @@ class EndpointJwtRefresh extends _i4.EndpointRefreshJwtTokens {
   );
 }
 
+/// Endpoint for conversational AI ("Ask the speakers")
+/// {@category Endpoint}
+class EndpointConversation extends _i2.EndpointRef {
+  EndpointConversation(_i2.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'conversation';
+
+  /// Answers questions using stored knowledge graph and speaker perspective
+  /// streams the generated answer as chunks
+  _i3.Stream<String> askQuestion(
+    String question,
+    _i5.Speaker speaker,
+  ) => caller.callStreamingServerEndpoint<_i3.Stream<String>, String>(
+    'conversation',
+    'askQuestion',
+    {
+      'question': question,
+      'speaker': speaker,
+    },
+    {},
+  );
+}
+
+/// Endpoint for graph visualization data
+/// {@category Endpoint}
+class EndpointGraph extends _i2.EndpointRef {
+  EndpointGraph(_i2.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'graph';
+
+  /// Returns nodes and links for force-directed graph visualization
+  _i3.Future<_i6.GraphData> getGraphData() =>
+      caller.callServerEndpoint<_i6.GraphData>(
+        'graph',
+        'getGraphData',
+        {},
+      );
+}
+
 /// Endpoint for podcast ingestion and management
 /// {@category Endpoint}
 class EndpointPodcast extends _i2.EndpointRef {
@@ -270,19 +313,18 @@ class EndpointPodcast extends _i2.EndpointRef {
   /// Step 1: Ingestion orchestration
   /// Accepts a YouTube URL from an authenticated user
   /// Creates a background ingestion job and returns immediately
-  _i3.Future<_i5.IngestionJob> ingestPodcast(String youtubeUrl) =>
-      caller.callServerEndpoint<_i5.IngestionJob>(
+  _i3.Future<_i7.IngestionJob> ingestPodcast(String youtubeUrl) =>
+      caller.callServerEndpoint<_i7.IngestionJob>(
         'podcast',
         'ingestPodcast',
         {'youtubeUrl': youtubeUrl},
       );
 
-  /// Gets the status of an ingestion job
   /// Gets the status of an ingestion job as a stream
-  _i3.Stream<_i5.IngestionJob> getJobStatus(int jobId) =>
+  _i3.Stream<_i7.IngestionJob> getJobStatus(int jobId) =>
       caller.callStreamingServerEndpoint<
-        _i3.Stream<_i5.IngestionJob>,
-        _i5.IngestionJob
+        _i3.Stream<_i7.IngestionJob>,
+        _i7.IngestionJob
       >(
         'podcast',
         'getJobStatus',
@@ -291,8 +333,8 @@ class EndpointPodcast extends _i2.EndpointRef {
       );
 
   /// Lists all podcasts for the authenticated user
-  _i3.Future<List<_i6.Podcast>> listPodcasts() =>
-      caller.callServerEndpoint<List<_i6.Podcast>>(
+  _i3.Future<List<_i8.Podcast>> listPodcasts() =>
+      caller.callServerEndpoint<List<_i8.Podcast>>(
         'podcast',
         'listPodcasts',
         {},
@@ -330,7 +372,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i7.Protocol(),
+         _i9.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,
@@ -342,6 +384,8 @@ class Client extends _i2.ServerpodClientShared {
     emailIdp = EndpointEmailIdp(this);
     googleIdp = EndpointGoogleIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
+    conversation = EndpointConversation(this);
+    graph = EndpointGraph(this);
     podcast = EndpointPodcast(this);
     modules = Modules(this);
   }
@@ -352,6 +396,10 @@ class Client extends _i2.ServerpodClientShared {
 
   late final EndpointJwtRefresh jwtRefresh;
 
+  late final EndpointConversation conversation;
+
+  late final EndpointGraph graph;
+
   late final EndpointPodcast podcast;
 
   late final Modules modules;
@@ -361,6 +409,8 @@ class Client extends _i2.ServerpodClientShared {
     'emailIdp': emailIdp,
     'googleIdp': googleIdp,
     'jwtRefresh': jwtRefresh,
+    'conversation': conversation,
+    'graph': graph,
     'podcast': podcast,
   };
 

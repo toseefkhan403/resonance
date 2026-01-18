@@ -11,46 +11,42 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
-import 'category.dart' as _i2;
-import 'chunk_subtopic_mapping.dart' as _i3;
-import 'conversation_response.dart' as _i4;
-import 'graph_data.dart' as _i5;
-import 'graph_link.dart' as _i6;
-import 'graph_node.dart' as _i7;
-import 'graph_relationship.dart' as _i8;
-import 'ingestion_job.dart' as _i9;
-import 'podcast.dart' as _i10;
-import 'podcast_reference.dart' as _i11;
-import 'podcast_subtopic_evidence.dart' as _i12;
-import 'semantic_chunk.dart' as _i13;
-import 'subtopic.dart' as _i14;
-import 'subtopic_detail.dart' as _i15;
-import 'timestamp_reference.dart' as _i16;
-import 'transcript.dart' as _i17;
-import 'transcript_segment.dart' as _i18;
-import 'video_metadata.dart' as _i19;
-import 'package:resonance_client/src/protocol/podcast.dart' as _i20;
+import 'graph_category.dart' as _i2;
+import 'graph_data.dart' as _i3;
+import 'graph_edge.dart' as _i4;
+import 'graph_elements.dart' as _i5;
+import 'graph_granularity.dart' as _i6;
+import 'graph_link_display.dart' as _i7;
+import 'graph_node.dart' as _i8;
+import 'graph_node_display.dart' as _i9;
+import 'ingestion_job.dart' as _i10;
+import 'podcast.dart' as _i11;
+import 'quote_reference.dart' as _i12;
+import 'segmented_transcript.dart' as _i13;
+import 'speaker.dart' as _i14;
+import 'transcript_reference.dart' as _i15;
+import 'transcript_topic.dart' as _i16;
+import 'video_metadata.dart' as _i17;
+import 'package:resonance_client/src/protocol/podcast.dart' as _i18;
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
-    as _i21;
+    as _i19;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
-    as _i22;
-export 'category.dart';
-export 'chunk_subtopic_mapping.dart';
-export 'conversation_response.dart';
+    as _i20;
+export 'graph_category.dart';
 export 'graph_data.dart';
-export 'graph_link.dart';
+export 'graph_edge.dart';
+export 'graph_elements.dart';
+export 'graph_granularity.dart';
+export 'graph_link_display.dart';
 export 'graph_node.dart';
-export 'graph_relationship.dart';
+export 'graph_node_display.dart';
 export 'ingestion_job.dart';
 export 'podcast.dart';
-export 'podcast_reference.dart';
-export 'podcast_subtopic_evidence.dart';
-export 'semantic_chunk.dart';
-export 'subtopic.dart';
-export 'subtopic_detail.dart';
-export 'timestamp_reference.dart';
-export 'transcript.dart';
-export 'transcript_segment.dart';
+export 'quote_reference.dart';
+export 'segmented_transcript.dart';
+export 'speaker.dart';
+export 'transcript_reference.dart';
+export 'transcript_topic.dart';
 export 'video_metadata.dart';
 export 'client.dart';
 
@@ -88,195 +84,177 @@ class Protocol extends _i1.SerializationManager {
       }
     }
 
-    if (t == _i2.Category) {
-      return _i2.Category.fromJson(data) as T;
+    if (t == _i2.GraphCategory) {
+      return _i2.GraphCategory.fromJson(data) as T;
     }
-    if (t == _i3.ChunkSubtopicMapping) {
-      return _i3.ChunkSubtopicMapping.fromJson(data) as T;
+    if (t == _i3.GraphData) {
+      return _i3.GraphData.fromJson(data) as T;
     }
-    if (t == _i4.ConversationResponse) {
-      return _i4.ConversationResponse.fromJson(data) as T;
+    if (t == _i4.GraphEdge) {
+      return _i4.GraphEdge.fromJson(data) as T;
     }
-    if (t == _i5.GraphData) {
-      return _i5.GraphData.fromJson(data) as T;
+    if (t == _i5.GraphElements) {
+      return _i5.GraphElements.fromJson(data) as T;
     }
-    if (t == _i6.GraphLink) {
-      return _i6.GraphLink.fromJson(data) as T;
+    if (t == _i6.GraphGranularity) {
+      return _i6.GraphGranularity.fromJson(data) as T;
     }
-    if (t == _i7.GraphNode) {
-      return _i7.GraphNode.fromJson(data) as T;
+    if (t == _i7.GraphLinkDisplay) {
+      return _i7.GraphLinkDisplay.fromJson(data) as T;
     }
-    if (t == _i8.GraphRelationship) {
-      return _i8.GraphRelationship.fromJson(data) as T;
+    if (t == _i8.GraphNode) {
+      return _i8.GraphNode.fromJson(data) as T;
     }
-    if (t == _i9.IngestionJob) {
-      return _i9.IngestionJob.fromJson(data) as T;
+    if (t == _i9.GraphNodeDisplay) {
+      return _i9.GraphNodeDisplay.fromJson(data) as T;
     }
-    if (t == _i10.Podcast) {
-      return _i10.Podcast.fromJson(data) as T;
+    if (t == _i10.IngestionJob) {
+      return _i10.IngestionJob.fromJson(data) as T;
     }
-    if (t == _i11.PodcastReference) {
-      return _i11.PodcastReference.fromJson(data) as T;
+    if (t == _i11.Podcast) {
+      return _i11.Podcast.fromJson(data) as T;
     }
-    if (t == _i12.PodcastSubtopicEvidence) {
-      return _i12.PodcastSubtopicEvidence.fromJson(data) as T;
+    if (t == _i12.QuoteReference) {
+      return _i12.QuoteReference.fromJson(data) as T;
     }
-    if (t == _i13.SemanticChunk) {
-      return _i13.SemanticChunk.fromJson(data) as T;
+    if (t == _i13.SegmentedTranscript) {
+      return _i13.SegmentedTranscript.fromJson(data) as T;
     }
-    if (t == _i14.Subtopic) {
-      return _i14.Subtopic.fromJson(data) as T;
+    if (t == _i14.Speaker) {
+      return _i14.Speaker.fromJson(data) as T;
     }
-    if (t == _i15.SubtopicDetail) {
-      return _i15.SubtopicDetail.fromJson(data) as T;
+    if (t == _i15.TranscriptReference) {
+      return _i15.TranscriptReference.fromJson(data) as T;
     }
-    if (t == _i16.TimestampReference) {
-      return _i16.TimestampReference.fromJson(data) as T;
+    if (t == _i16.TranscriptTopic) {
+      return _i16.TranscriptTopic.fromJson(data) as T;
     }
-    if (t == _i17.Transcript) {
-      return _i17.Transcript.fromJson(data) as T;
+    if (t == _i17.VideoMetadata) {
+      return _i17.VideoMetadata.fromJson(data) as T;
     }
-    if (t == _i18.TranscriptSegment) {
-      return _i18.TranscriptSegment.fromJson(data) as T;
+    if (t == _i1.getType<_i2.GraphCategory?>()) {
+      return (data != null ? _i2.GraphCategory.fromJson(data) : null) as T;
     }
-    if (t == _i19.VideoMetadata) {
-      return _i19.VideoMetadata.fromJson(data) as T;
+    if (t == _i1.getType<_i3.GraphData?>()) {
+      return (data != null ? _i3.GraphData.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i2.Category?>()) {
-      return (data != null ? _i2.Category.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i4.GraphEdge?>()) {
+      return (data != null ? _i4.GraphEdge.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i3.ChunkSubtopicMapping?>()) {
-      return (data != null ? _i3.ChunkSubtopicMapping.fromJson(data) : null)
+    if (t == _i1.getType<_i5.GraphElements?>()) {
+      return (data != null ? _i5.GraphElements.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i6.GraphGranularity?>()) {
+      return (data != null ? _i6.GraphGranularity.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i7.GraphLinkDisplay?>()) {
+      return (data != null ? _i7.GraphLinkDisplay.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i8.GraphNode?>()) {
+      return (data != null ? _i8.GraphNode.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i9.GraphNodeDisplay?>()) {
+      return (data != null ? _i9.GraphNodeDisplay.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i10.IngestionJob?>()) {
+      return (data != null ? _i10.IngestionJob.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i11.Podcast?>()) {
+      return (data != null ? _i11.Podcast.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i12.QuoteReference?>()) {
+      return (data != null ? _i12.QuoteReference.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i13.SegmentedTranscript?>()) {
+      return (data != null ? _i13.SegmentedTranscript.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i4.ConversationResponse?>()) {
-      return (data != null ? _i4.ConversationResponse.fromJson(data) : null)
+    if (t == _i1.getType<_i14.Speaker?>()) {
+      return (data != null ? _i14.Speaker.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i15.TranscriptReference?>()) {
+      return (data != null ? _i15.TranscriptReference.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i5.GraphData?>()) {
-      return (data != null ? _i5.GraphData.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i16.TranscriptTopic?>()) {
+      return (data != null ? _i16.TranscriptTopic.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i6.GraphLink?>()) {
-      return (data != null ? _i6.GraphLink.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i17.VideoMetadata?>()) {
+      return (data != null ? _i17.VideoMetadata.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i7.GraphNode?>()) {
-      return (data != null ? _i7.GraphNode.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i8.GraphRelationship?>()) {
-      return (data != null ? _i8.GraphRelationship.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i9.IngestionJob?>()) {
-      return (data != null ? _i9.IngestionJob.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i10.Podcast?>()) {
-      return (data != null ? _i10.Podcast.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i11.PodcastReference?>()) {
-      return (data != null ? _i11.PodcastReference.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i12.PodcastSubtopicEvidence?>()) {
-      return (data != null ? _i12.PodcastSubtopicEvidence.fromJson(data) : null)
-          as T;
-    }
-    if (t == _i1.getType<_i13.SemanticChunk?>()) {
-      return (data != null ? _i13.SemanticChunk.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i14.Subtopic?>()) {
-      return (data != null ? _i14.Subtopic.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i15.SubtopicDetail?>()) {
-      return (data != null ? _i15.SubtopicDetail.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i16.TimestampReference?>()) {
-      return (data != null ? _i16.TimestampReference.fromJson(data) : null)
-          as T;
-    }
-    if (t == _i1.getType<_i17.Transcript?>()) {
-      return (data != null ? _i17.Transcript.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i18.TranscriptSegment?>()) {
-      return (data != null ? _i18.TranscriptSegment.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i19.VideoMetadata?>()) {
-      return (data != null ? _i19.VideoMetadata.fromJson(data) : null) as T;
-    }
-    if (t == List<String>) {
-      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
-    }
-    if (t == List<_i16.TimestampReference>) {
+    if (t == List<_i6.GraphGranularity>) {
       return (data as List)
-              .map((e) => deserialize<_i16.TimestampReference>(e))
+              .map((e) => deserialize<_i6.GraphGranularity>(e))
               .toList()
           as T;
     }
-    if (t == List<_i7.GraphNode>) {
-      return (data as List).map((e) => deserialize<_i7.GraphNode>(e)).toList()
-          as T;
-    }
-    if (t == List<_i6.GraphLink>) {
-      return (data as List).map((e) => deserialize<_i6.GraphLink>(e)).toList()
-          as T;
-    }
-    if (t == Map<String, String>) {
-      return (data as Map).map(
-            (k, v) => MapEntry(deserialize<String>(k), deserialize<String>(v)),
-          )
-          as T;
-    }
-    if (t == _i1.getType<Map<String, String>?>()) {
-      return (data != null
-              ? (data as Map).map(
-                  (k, v) =>
-                      MapEntry(deserialize<String>(k), deserialize<String>(v)),
-                )
-              : null)
-          as T;
-    }
-    if (t == List<_i11.PodcastReference>) {
+    if (t == List<_i2.GraphCategory>) {
       return (data as List)
-              .map((e) => deserialize<_i11.PodcastReference>(e))
+              .map((e) => deserialize<_i2.GraphCategory>(e))
               .toList()
           as T;
     }
-    if (t == List<_i18.TranscriptSegment>) {
+    if (t == List<_i9.GraphNodeDisplay>) {
       return (data as List)
-              .map((e) => deserialize<_i18.TranscriptSegment>(e))
+              .map((e) => deserialize<_i9.GraphNodeDisplay>(e))
               .toList()
           as T;
     }
-    if (t == List<_i20.Podcast>) {
-      return (data as List).map((e) => deserialize<_i20.Podcast>(e)).toList()
+    if (t == List<_i7.GraphLinkDisplay>) {
+      return (data as List)
+              .map((e) => deserialize<_i7.GraphLinkDisplay>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i12.QuoteReference>) {
+      return (data as List)
+              .map((e) => deserialize<_i12.QuoteReference>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i16.TranscriptTopic>) {
+      return (data as List)
+              .map((e) => deserialize<_i16.TranscriptTopic>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i15.TranscriptReference>) {
+      return (data as List)
+              .map((e) => deserialize<_i15.TranscriptReference>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i18.Podcast>) {
+      return (data as List).map((e) => deserialize<_i18.Podcast>(e)).toList()
           as T;
     }
     try {
-      return _i21.Protocol().deserialize<T>(data, t);
+      return _i19.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     try {
-      return _i22.Protocol().deserialize<T>(data, t);
+      return _i20.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     return super.deserialize<T>(data, t);
   }
 
   static String? getClassNameForType(Type type) {
     return switch (type) {
-      _i2.Category => 'Category',
-      _i3.ChunkSubtopicMapping => 'ChunkSubtopicMapping',
-      _i4.ConversationResponse => 'ConversationResponse',
-      _i5.GraphData => 'GraphData',
-      _i6.GraphLink => 'GraphLink',
-      _i7.GraphNode => 'GraphNode',
-      _i8.GraphRelationship => 'GraphRelationship',
-      _i9.IngestionJob => 'IngestionJob',
-      _i10.Podcast => 'Podcast',
-      _i11.PodcastReference => 'PodcastReference',
-      _i12.PodcastSubtopicEvidence => 'PodcastSubtopicEvidence',
-      _i13.SemanticChunk => 'SemanticChunk',
-      _i14.Subtopic => 'Subtopic',
-      _i15.SubtopicDetail => 'SubtopicDetail',
-      _i16.TimestampReference => 'TimestampReference',
-      _i17.Transcript => 'Transcript',
-      _i18.TranscriptSegment => 'TranscriptSegment',
-      _i19.VideoMetadata => 'VideoMetadata',
+      _i2.GraphCategory => 'GraphCategory',
+      _i3.GraphData => 'GraphData',
+      _i4.GraphEdge => 'GraphEdge',
+      _i5.GraphElements => 'GraphElements',
+      _i6.GraphGranularity => 'GraphGranularity',
+      _i7.GraphLinkDisplay => 'GraphLinkDisplay',
+      _i8.GraphNode => 'GraphNode',
+      _i9.GraphNodeDisplay => 'GraphNodeDisplay',
+      _i10.IngestionJob => 'IngestionJob',
+      _i11.Podcast => 'Podcast',
+      _i12.QuoteReference => 'QuoteReference',
+      _i13.SegmentedTranscript => 'SegmentedTranscript',
+      _i14.Speaker => 'Speaker',
+      _i15.TranscriptReference => 'TranscriptReference',
+      _i16.TranscriptTopic => 'TranscriptTopic',
+      _i17.VideoMetadata => 'VideoMetadata',
       _ => null,
     };
   }
@@ -291,48 +269,44 @@ class Protocol extends _i1.SerializationManager {
     }
 
     switch (data) {
-      case _i2.Category():
-        return 'Category';
-      case _i3.ChunkSubtopicMapping():
-        return 'ChunkSubtopicMapping';
-      case _i4.ConversationResponse():
-        return 'ConversationResponse';
-      case _i5.GraphData():
+      case _i2.GraphCategory():
+        return 'GraphCategory';
+      case _i3.GraphData():
         return 'GraphData';
-      case _i6.GraphLink():
-        return 'GraphLink';
-      case _i7.GraphNode():
+      case _i4.GraphEdge():
+        return 'GraphEdge';
+      case _i5.GraphElements():
+        return 'GraphElements';
+      case _i6.GraphGranularity():
+        return 'GraphGranularity';
+      case _i7.GraphLinkDisplay():
+        return 'GraphLinkDisplay';
+      case _i8.GraphNode():
         return 'GraphNode';
-      case _i8.GraphRelationship():
-        return 'GraphRelationship';
-      case _i9.IngestionJob():
+      case _i9.GraphNodeDisplay():
+        return 'GraphNodeDisplay';
+      case _i10.IngestionJob():
         return 'IngestionJob';
-      case _i10.Podcast():
+      case _i11.Podcast():
         return 'Podcast';
-      case _i11.PodcastReference():
-        return 'PodcastReference';
-      case _i12.PodcastSubtopicEvidence():
-        return 'PodcastSubtopicEvidence';
-      case _i13.SemanticChunk():
-        return 'SemanticChunk';
-      case _i14.Subtopic():
-        return 'Subtopic';
-      case _i15.SubtopicDetail():
-        return 'SubtopicDetail';
-      case _i16.TimestampReference():
-        return 'TimestampReference';
-      case _i17.Transcript():
-        return 'Transcript';
-      case _i18.TranscriptSegment():
-        return 'TranscriptSegment';
-      case _i19.VideoMetadata():
+      case _i12.QuoteReference():
+        return 'QuoteReference';
+      case _i13.SegmentedTranscript():
+        return 'SegmentedTranscript';
+      case _i14.Speaker():
+        return 'Speaker';
+      case _i15.TranscriptReference():
+        return 'TranscriptReference';
+      case _i16.TranscriptTopic():
+        return 'TranscriptTopic';
+      case _i17.VideoMetadata():
         return 'VideoMetadata';
     }
-    className = _i21.Protocol().getClassNameForObject(data);
+    className = _i19.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_idp.$className';
     }
-    className = _i22.Protocol().getClassNameForObject(data);
+    className = _i20.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_core.$className';
     }
@@ -345,67 +319,61 @@ class Protocol extends _i1.SerializationManager {
     if (dataClassName is! String) {
       return super.deserializeByClassName(data);
     }
-    if (dataClassName == 'Category') {
-      return deserialize<_i2.Category>(data['data']);
-    }
-    if (dataClassName == 'ChunkSubtopicMapping') {
-      return deserialize<_i3.ChunkSubtopicMapping>(data['data']);
-    }
-    if (dataClassName == 'ConversationResponse') {
-      return deserialize<_i4.ConversationResponse>(data['data']);
+    if (dataClassName == 'GraphCategory') {
+      return deserialize<_i2.GraphCategory>(data['data']);
     }
     if (dataClassName == 'GraphData') {
-      return deserialize<_i5.GraphData>(data['data']);
+      return deserialize<_i3.GraphData>(data['data']);
     }
-    if (dataClassName == 'GraphLink') {
-      return deserialize<_i6.GraphLink>(data['data']);
+    if (dataClassName == 'GraphEdge') {
+      return deserialize<_i4.GraphEdge>(data['data']);
+    }
+    if (dataClassName == 'GraphElements') {
+      return deserialize<_i5.GraphElements>(data['data']);
+    }
+    if (dataClassName == 'GraphGranularity') {
+      return deserialize<_i6.GraphGranularity>(data['data']);
+    }
+    if (dataClassName == 'GraphLinkDisplay') {
+      return deserialize<_i7.GraphLinkDisplay>(data['data']);
     }
     if (dataClassName == 'GraphNode') {
-      return deserialize<_i7.GraphNode>(data['data']);
+      return deserialize<_i8.GraphNode>(data['data']);
     }
-    if (dataClassName == 'GraphRelationship') {
-      return deserialize<_i8.GraphRelationship>(data['data']);
+    if (dataClassName == 'GraphNodeDisplay') {
+      return deserialize<_i9.GraphNodeDisplay>(data['data']);
     }
     if (dataClassName == 'IngestionJob') {
-      return deserialize<_i9.IngestionJob>(data['data']);
+      return deserialize<_i10.IngestionJob>(data['data']);
     }
     if (dataClassName == 'Podcast') {
-      return deserialize<_i10.Podcast>(data['data']);
+      return deserialize<_i11.Podcast>(data['data']);
     }
-    if (dataClassName == 'PodcastReference') {
-      return deserialize<_i11.PodcastReference>(data['data']);
+    if (dataClassName == 'QuoteReference') {
+      return deserialize<_i12.QuoteReference>(data['data']);
     }
-    if (dataClassName == 'PodcastSubtopicEvidence') {
-      return deserialize<_i12.PodcastSubtopicEvidence>(data['data']);
+    if (dataClassName == 'SegmentedTranscript') {
+      return deserialize<_i13.SegmentedTranscript>(data['data']);
     }
-    if (dataClassName == 'SemanticChunk') {
-      return deserialize<_i13.SemanticChunk>(data['data']);
+    if (dataClassName == 'Speaker') {
+      return deserialize<_i14.Speaker>(data['data']);
     }
-    if (dataClassName == 'Subtopic') {
-      return deserialize<_i14.Subtopic>(data['data']);
+    if (dataClassName == 'TranscriptReference') {
+      return deserialize<_i15.TranscriptReference>(data['data']);
     }
-    if (dataClassName == 'SubtopicDetail') {
-      return deserialize<_i15.SubtopicDetail>(data['data']);
-    }
-    if (dataClassName == 'TimestampReference') {
-      return deserialize<_i16.TimestampReference>(data['data']);
-    }
-    if (dataClassName == 'Transcript') {
-      return deserialize<_i17.Transcript>(data['data']);
-    }
-    if (dataClassName == 'TranscriptSegment') {
-      return deserialize<_i18.TranscriptSegment>(data['data']);
+    if (dataClassName == 'TranscriptTopic') {
+      return deserialize<_i16.TranscriptTopic>(data['data']);
     }
     if (dataClassName == 'VideoMetadata') {
-      return deserialize<_i19.VideoMetadata>(data['data']);
+      return deserialize<_i17.VideoMetadata>(data['data']);
     }
     if (dataClassName.startsWith('serverpod_auth_idp.')) {
       data['className'] = dataClassName.substring(19);
-      return _i21.Protocol().deserializeByClassName(data);
+      return _i19.Protocol().deserializeByClassName(data);
     }
     if (dataClassName.startsWith('serverpod_auth_core.')) {
       data['className'] = dataClassName.substring(20);
-      return _i22.Protocol().deserializeByClassName(data);
+      return _i20.Protocol().deserializeByClassName(data);
     }
     return super.deserializeByClassName(data);
   }
@@ -420,10 +388,10 @@ class Protocol extends _i1.SerializationManager {
       return null;
     }
     try {
-      return _i21.Protocol().mapRecordToJson(record);
+      return _i19.Protocol().mapRecordToJson(record);
     } catch (_) {}
     try {
-      return _i22.Protocol().mapRecordToJson(record);
+      return _i20.Protocol().mapRecordToJson(record);
     } catch (_) {}
     throw Exception('Unsupported record type ${record.runtimeType}');
   }

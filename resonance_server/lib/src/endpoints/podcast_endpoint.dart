@@ -18,7 +18,9 @@ class PodcastEndpoint extends Endpoint {
       throw Exception('User not authenticated');
     }
 
-    final videoId = YouTubeService.extractVideoId(youtubeUrl);
+    final ytService = YouTubeService();
+
+    final videoId = ytService.extractVideoId(youtubeUrl);
     if (videoId == null) {
       throw Exception('Invalid YouTube URL');
     }
@@ -39,14 +41,13 @@ class PodcastEndpoint extends Endpoint {
       );
       if (existingJob != null) {
         return existingJob;
+      } else {
+        throw Exception('Podcast already exists for this user');
       }
     }
 
     // Get video metadata
-    final metadata = await YouTubeService.getVideoMetadata(
-      session,
-      youtubeUrl,
-    );
+    final metadata = await ytService.getVideoMetadata(youtubeUrl);
 
     if (metadata == null) {
       throw Exception('Failed to fetch video metadata');
@@ -92,7 +93,6 @@ class PodcastEndpoint extends Endpoint {
     return job;
   }
 
-  /// Gets the status of an ingestion job
   /// Gets the status of an ingestion job as a stream
   Stream<IngestionJob> getJobStatus(
     Session session,
@@ -105,7 +105,7 @@ class PodcastEndpoint extends Endpoint {
 
     final job = await IngestionJob.db.findById(session, jobId);
     if (job == null || job.userId != userId) {
-      return;
+      throw Exception('Job not found or the user doesn\'t have access to it');
     }
 
     yield job;

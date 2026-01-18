@@ -1,9 +1,0 @@
-# TranscriptSegment is embedded in Transcript
-class: TranscriptSegment
-fields:
-  ### Start time in seconds
-  start: double
-  ### Duration in seconds
-  duration: double
-  ### The text content
-  text: String

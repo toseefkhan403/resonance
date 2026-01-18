@@ -3,7 +3,6 @@ import '../generated/protocol.dart';
 
 /// Endpoint for graph visualization data
 class GraphEndpoint extends Endpoint {
-  /// Step 10: Graph materialization for UI
   /// Returns nodes and links for force-directed graph visualization
   Future<GraphData> getGraphData(Session session) async {
     final userId = session.authenticated?.userIdentifier;
@@ -11,149 +10,161 @@ class GraphEndpoint extends Endpoint {
       throw Exception('User not authenticated');
     }
 
-    // Get all categories
-    final categories = await Category.db.find(
+    final nodes = await GraphNode.db.find(
+      session,
+      where: (c) => c.userId.equals(userId),
+      orderBy: (c) => c.impactScore,
+      orderDescending: true,
+    );
+
+    final edges = await GraphEdge.db.find(
       session,
       where: (c) => c.userId.equals(userId),
     );
 
-    // Get all subtopics
-    final subtopics = await Subtopic.db.find(
-      session,
-      where: (s) => s.userId.equals(userId),
-    );
+    final granularities = <GraphGranularity>[];
+    // based on the number of nodes in others -> make a new granularity -> add 3 everytime
+    var maxCategoryCount = 3;
+    var level = 0;
+    while (maxCategoryCount < nodes.length) {
+      if (level >= 3) {
+        break;
+      }
 
-    // Build nodes
-    final nodes = <GraphNode>[];
-
-    // Add category nodes
-    for (final category in categories) {
-      nodes.add(
-        GraphNode(
-          id: category.id!,
-          type: 'category',
-          label: category.name,
-          category: null,
-          importanceScore: 1.0,
-          summary: category.description,
-        ),
+      final (graph, otherNodeCount) = _buildGraphWithGranularity(
+        level,
+        maxCategoryCount,
+        nodes,
+        edges,
       );
+      granularities.add(graph);
+
+      if (otherNodeCount <= 5) {
+        break;
+      }
+
+      maxCategoryCount += 3;
+      level++;
     }
 
-    // Add subtopic nodes
-    for (final subtopic in subtopics) {
-      nodes.add(
-        GraphNode(
-          id: subtopic.id!,
-          type: 'subtopic',
-          label: subtopic.name,
-          category: subtopic.category?.name,
-          importanceScore: subtopic.importanceScore,
-          summary: subtopic.summary,
-        ),
-      );
-    }
-
-    // Get all relationships
-    final relationships = await GraphRelationship.db.find(
-      session,
-      where: (r) => r.userId.equals(userId),
-    );
-
-    // Build links
-    final links = relationships
-        .map(
-          (r) => GraphLink(
-            source: r.sourceId,
-            target: r.targetId,
-            weight: r.weight,
-            relationType: r.relationType,
-          ),
-        )
-        .toList();
-
-    return GraphData(
-      nodes: nodes,
-      links: links,
-    );
+    return GraphData(graphWithGranularity: granularities);
   }
 
-  /// Step 11: Node interaction behavior
-  /// Returns detailed information when a subtopic node is clicked
-  Future<SubtopicDetail> getSubtopicDetail(
-    Session session,
-    int subtopicId,
-  ) async {
-    final userId = session.authenticated?.userIdentifier;
-    if (userId == null) {
-      throw Exception('User not authenticated');
+  (GraphGranularity, int) _buildGraphWithGranularity(
+    int level,
+    int maxCategoryCount,
+    List<GraphNode> allNodes,
+    List<GraphEdge> allEdges,
+  ) {
+    // Identify anchors (categories)
+    final validCategoryCount = maxCategoryCount > allNodes.length
+        ? allNodes.length
+        : maxCategoryCount;
+
+    final anchors = allNodes.sublist(0, validCategoryCount);
+    final anchorIds = anchors.map((n) => n.id!).toSet();
+
+    // Build Categories List
+    final categories = anchors
+        .map((n) => GraphCategory(name: n.label))
+        .toList();
+
+    // Add 'Other' category if we are not including all nodes as categories
+    final hasOther = validCategoryCount < allNodes.length;
+    if (hasOther) {
+      categories.add(GraphCategory(name: 'Other'));
     }
 
-    // Get subtopic
-    final subtopic = await Subtopic.db.findFirstRow(
-      session,
-      where: (s) => s.id.equals(subtopicId) & s.userId.equals(userId),
-    );
+    // Build Nodes List
+    final nodeDisplays = <GraphNodeDisplay>[];
+    final nodeIdToIndex = <int, int>{};
+    var otherNodeCount = 0;
 
-    if (subtopic == null) {
-      throw Exception('Subtopic not found');
-    }
+    for (var i = 0; i < allNodes.length; i++) {
+      final node = allNodes[i];
+      nodeIdToIndex[node.id!] = i;
 
-    // Get all podcasts that reference this subtopic
-    final evidence = await PodcastSubtopicEvidence.db.find(
-      session,
-      where: (e) => e.subtopic.equals(subtopic),
-    );
+      int categoryIndex;
+      double symbolSize;
 
-    final podcasts = <PodcastReference>[];
-    final timestamps = <TimestampReference>[];
+      if (anchorIds.contains(node.id)) {
+        // This node is an anchor
+        // Find its index in the anchor list to assign matching category
+        categoryIndex = anchors.indexWhere((a) => a.id == node.id);
+        symbolSize = 20.0;
+      } else {
+        // Find which anchor it is connected to
+        // We prefer the highest impact anchor (lowest index in anchors list)
+        int bestAnchorIndex = -1; // -1 means Other
 
-    for (final ev in evidence) {
-      final podcast = await ev.podcast;
-      if (podcast != null) {
-        podcasts.add(
-          PodcastReference(
-            podcastId: podcast.id!,
-            youtubeUrl: podcast.youtubeUrl,
-            title: podcast.title,
-            frequency: ev.frequency,
-          ),
-        );
+        // Find neighbors in graph
+        final neighborIds = <int>{};
+        for (final edge in allEdges) {
+          if (edge.sourceNodeId == node.id) neighborIds.add(edge.targetNodeId);
+          if (edge.targetNodeId == node.id) neighborIds.add(edge.sourceNodeId);
+        }
 
-        // Get chunks for this subtopic and podcast
-        final mappings = await ChunkSubtopicMapping.db.find(
-          session,
-          where: (m) =>
-              m.subtopic.equals(subtopic) &
-              (m.chunk?.podcast?.equals(podcast) ?? false),
-        );
-
-        for (final mapping in mappings) {
-          final chunk = await mapping.chunk;
-          if (chunk != null) {
-            timestamps.add(
-              TimestampReference(
-                podcastId: podcast.id!,
-                youtubeUrl: podcast.youtubeUrl,
-                startTime: chunk.startTime,
-                endTime: chunk.endTime,
-                previewText: chunk.text.length > 100
-                    ? '${chunk.text.substring(0, 100)}...'
-                    : chunk.text,
-              ),
-            );
+        // Check which neighbors are anchors
+        for (var idx = 0; idx < anchors.length; idx++) {
+          final anchor = anchors[idx];
+          if (neighborIds.contains(anchor.id)) {
+            bestAnchorIndex = idx;
+            break; // Found highest impact anchor
           }
         }
+
+        if (bestAnchorIndex != -1) {
+          categoryIndex = bestAnchorIndex;
+        } else {
+          // Assign to "Other"
+          categoryIndex = categories.length - 1;
+          otherNodeCount++;
+        }
+        symbolSize = 10.0;
+      }
+
+      nodeDisplays.add(
+        GraphNodeDisplay(
+          name: node.label,
+          nodeId: node.id!,
+          videoId: node.videoId,
+          summary: node.summary,
+          primarySpeakerId: node.primarySpeakerId,
+          references: node.references,
+          value: node.impactScore,
+          category: categoryIndex,
+          symbolSize: symbolSize,
+        ),
+      );
+    }
+
+    // Build Links
+    final linkDisplays = <GraphLinkDisplay>[];
+    for (final edge in allEdges) {
+      final sourceIndex = nodeIdToIndex[edge.sourceNodeId];
+      final targetIndex = nodeIdToIndex[edge.targetNodeId];
+
+      if (sourceIndex != null && targetIndex != null) {
+        linkDisplays.add(
+          GraphLinkDisplay(
+            source: sourceIndex,
+            target: targetIndex,
+          ),
+        );
       }
     }
 
-    return SubtopicDetail(
-      subtopicId: subtopic.id!,
-      name: subtopic.name,
-      category: subtopic.category?.name,
-      summary: subtopic.summary,
-      podcasts: podcasts,
-      timestamps: timestamps,
+    // return tuple of (graph, otherNodeCount)
+    return (
+      GraphGranularity(
+        granularity: level,
+        graph: GraphElements(
+          categories: categories,
+          nodes: nodeDisplays,
+          links: linkDisplays,
+        ),
+      ),
+      otherNodeCount,
     );
   }
 }

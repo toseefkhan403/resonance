@@ -1,232 +1,117 @@
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
-import 'embedding_service.dart';
+import 'llm_service.dart';
 
-/// Service for graph construction and merging
+/// Service for graph construction and linking
 class GraphService {
-  /// Similarity threshold for merging subtopics
-  static const double mergeThreshold = 0.85;
+  final linkThreshold = 0.2;
 
-  /// Merges a new subtopic with existing subtopics in the user's graph
-  /// Returns the existing subtopic if merged, or creates a new one
-  static Future<Subtopic> mergeOrCreateSubtopic(
+  Future<int> mergeOrCreateSpeaker(
     Session session,
     String userId,
-    String subtopicName,
-    Vector embedding,
-    String categoryName,
-    List<String> secondaryConcepts,
-    String summary,
+    String speakerName,
   ) async {
-    // Get all existing subtopics for this user
-    final existingSubtopics = await Subtopic.db.find(
+    final normalizedName = speakerName.toLowerCase().replaceAll(' ', '').trim();
+
+    final existingSpeaker = await Speaker.db.findFirstRow(
       session,
-      where: (t) => t.userId.equals(userId),
+      where: (t) =>
+          t.userId.equals(userId) & t.normalizedName.equals(normalizedName),
     );
 
-    // Find the most similar existing subtopic
-    double maxSimilarity = 0.0;
-    Subtopic? mostSimilar;
-
-    for (final existing in existingSubtopics) {
-      final similarity = EmbeddingService.cosineSimilarity(
-        embedding,
-        existing.embedding,
+    if (existingSpeaker != null && existingSpeaker.id != null) {
+      await Speaker.db.updateRow(
+        session,
+        existingSpeaker.copyWith(
+          detectedCount: existingSpeaker.detectedCount + 1,
+          updatedAt: DateTime.now(),
+        ),
       );
-
-      if (similarity > maxSimilarity) {
-        maxSimilarity = similarity;
-        mostSimilar = existing;
-      }
+      return existingSpeaker.id!;
     }
 
-    // Merge if similarity exceeds threshold
-    if (maxSimilarity >= mergeThreshold && mostSimilar != null) {
-      // Update existing subtopic with merged information
-      final updatedSecondaryConcepts = [
-        ...mostSimilar.secondaryConcepts,
-        ...secondaryConcepts,
-      ].toSet().toList(); // Remove duplicates
+    final speaker = Speaker(
+      userId: userId,
+      name: speakerName,
+      normalizedName: normalizedName,
+      detectedCount: 1,
+    );
 
-      final updatedSummary = _mergeSummaries(
-        mostSimilar.summary,
-        summary,
+    await Speaker.db.insertRow(session, speaker);
+    return speaker.id!;
+  }
+
+  /// Creates nodes and links for a segmented transcript
+  /// Returns the number of nodes created
+  Future<int> processTranscriptIdeas(
+    Session session,
+    String userId,
+    int podcastId,
+    String videoId,
+    List<TranscriptTopic> ideas,
+  ) async {
+    final llmService = LLMService();
+    int nodesCreated = 0;
+
+    for (final idea in ideas) {
+      // 1. Generate embedding for the new node
+      final ideaEmbedding = await llmService.generateEmbedding(
+        '${idea.label}: ${idea.summary}',
       );
 
-      // Update importance score (average or weighted)
-      final updatedImportance = (mostSimilar.importanceScore + 0.5) / 2.0;
-
-      // Update the existing subtopic
-      final updatedSubtopic = mostSimilar.copyWith(
-        secondaryConcepts: updatedSecondaryConcepts,
-        summary: updatedSummary,
-        importanceScore: updatedImportance,
-        updatedAt: DateTime.now(),
-      );
-      
-      await Subtopic.db.updateRow(session, updatedSubtopic);
-      
-      return updatedSubtopic;
-    } else {
-      // Create new subtopic
-      // First, get or create the category
-      final category = await _getOrCreateCategory(
+      // 2. Identify speaker
+      final speakerId = await mergeOrCreateSpeaker(
         session,
         userId,
-        categoryName,
+        idea.primarySpeaker,
       );
 
-      return Subtopic(
-        userId: userId,
-        name: subtopicName,
-        category: category,
-        secondaryConcepts: secondaryConcepts,
-        summary: summary,
-        embedding: embedding,
-        importanceScore: 0.5,
-      );
-    }
-  }
-
-  /// Gets or creates a category
-  static Future<Category> _getOrCreateCategory(
-    Session session,
-    String userId,
-    String categoryName,
-  ) async {
-    final existing = await Category.db.findFirstRow(
-      session,
-      where: (c) => c.userId.equals(userId) & c.name.equals(categoryName),
-    );
-
-    if (existing != null) {
-      return existing;
-    }
-
-    return await Category.db.insertRow(
-      session,
-      Category(
-        userId: userId,
-        name: categoryName,
-        description: null,
-      ),
-    );
-  }
-
-  /// Merges two summaries intelligently
-  static String _mergeSummaries(String summary1, String summary2) {
-    // Simple merge: combine if different, otherwise return the longer one
-    if (summary1 == summary2) {
-      return summary1.length > summary2.length ? summary1 : summary2;
-    }
-
-    // Combine summaries, removing redundancy
-    final combined = '$summary1 $summary2';
-    // In a production system, you might use LLM to merge summaries
-    return combined;
-  }
-
-  /// Creates graph relationships
-  static Future<void> createRelationships(
-    Session session,
-    String userId,
-    Subtopic subtopic,
-    Podcast podcast,
-    List<Subtopic> relatedSubtopics,
-  ) async {
-    // Category → Subtopic (membership)
-    if (subtopic.category != null) {
-      await _createOrUpdateRelationship(
+      // 3. Create the Node
+      final ideaNode = await GraphNode.db.insertRow(
         session,
-        userId,
-        subtopic.category!.id!,
-        'category',
-        subtopic.id!,
-        'subtopic',
-        'membership',
-        1.0,
+        GraphNode(
+          userId: userId,
+          videoId: videoId,
+          label: idea.label,
+          impactScore: idea.impactScore,
+          summary: idea.summary,
+          primarySpeakerId: speakerId,
+          references: idea.references
+              .map(
+                (r) => QuoteReference(
+                  startTime: r.start,
+                  endTime: r.end,
+                  verbatimQuote: r.quote,
+                ),
+              )
+              .toList(),
+          embedding: ideaEmbedding,
+        ),
       );
-    }
+      nodesCreated++;
 
-    // Subtopic → Subtopic (semantic similarity)
-    for (final related in relatedSubtopics) {
-      final similarity = EmbeddingService.cosineSimilarity(
-        subtopic.embedding,
-        related.embedding,
+      // 4. Link similar topics based on distanceCosine (user specific)
+      final similarNodes = await GraphNode.db.find(
+        session,
+        where: (n) =>
+            n.userId.equals(userId) &
+            (n.embedding.distanceCosine(ideaEmbedding) < linkThreshold),
       );
 
-      if (similarity >= 0.7) {
-        await _createOrUpdateRelationship(
+      for (final similarNode in similarNodes) {
+        if (similarNode.id == ideaNode.id) continue;
+
+        await GraphEdge.db.insertRow(
           session,
-          userId,
-          subtopic.id!,
-          'subtopic',
-          related.id!,
-          'subtopic',
-          'similarity',
-          similarity,
+          GraphEdge(
+            userId: userId,
+            sourceNodeId: ideaNode.id!,
+            targetNodeId: similarNode.id!,
+          ),
         );
       }
     }
 
-    // Subtopic → Podcast (evidence and provenance)
-    await _createOrUpdateRelationship(
-      session,
-      userId,
-      subtopic.id!,
-      'subtopic',
-      podcast.id!,
-      'podcast',
-      'provenance',
-      1.0,
-    );
-  }
-
-  /// Creates or updates a graph relationship
-  static Future<void> _createOrUpdateRelationship(
-    Session session,
-    String userId,
-    int sourceId,
-    String sourceType,
-    int targetId,
-    String targetType,
-    String relationType,
-    double weight,
-  ) async {
-    final existing = await GraphRelationship.db.findFirstRow(
-      session,
-      where: (r) =>
-          r.userId.equals(userId) &
-          r.sourceId.equals(sourceId) &
-          r.targetId.equals(targetId) &
-          r.relationType.equals(relationType),
-    );
-
-    if (existing != null) {
-      // Update weight (could be average, max, or sum depending on use case)
-      await session.db.update(
-        'graph_relationship',
-        {
-          'weight': (existing.weight + weight) / 2.0,
-          'updatedAt': DateTime.now().toIso8601String(),
-        },
-        where: 'id = @id',
-        substitutionValues: {'id': existing.id},
-      );
-    } else {
-      // Create new relationship
-      await GraphRelationship.db.insertRow(
-        session,
-        GraphRelationship(
-          userId: userId,
-          sourceId: sourceId,
-          sourceType: sourceType,
-          targetId: targetId,
-          targetType: targetType,
-          relationType: relationType,
-          weight: weight,
-        ),
-      );
-    }
+    return nodesCreated;
   }
 }

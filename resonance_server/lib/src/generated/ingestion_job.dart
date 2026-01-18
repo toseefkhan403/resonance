@@ -8,19 +8,15 @@
 // ignore_for_file: type_literal_in_constant_pattern
 // ignore_for_file: use_super_parameters
 // ignore_for_file: invalid_use_of_internal_member
-// ignore_for_file: unnecessary_null_comparison
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
-import 'podcast.dart' as _i2;
-import 'package:resonance_server/src/generated/protocol.dart' as _i3;
 
 abstract class IngestionJob
     implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
   IngestionJob._({
     this.id,
     required this.podcastId,
-    this.podcast,
     required this.userId,
     String? stage,
     String? status,
@@ -38,7 +34,6 @@ abstract class IngestionJob
   factory IngestionJob({
     int? id,
     required int podcastId,
-    _i2.Podcast? podcast,
     required String userId,
     String? stage,
     String? status,
@@ -53,11 +48,6 @@ abstract class IngestionJob
     return IngestionJob(
       id: jsonSerialization['id'] as int?,
       podcastId: jsonSerialization['podcastId'] as int,
-      podcast: jsonSerialization['podcast'] == null
-          ? null
-          : _i3.Protocol().deserialize<_i2.Podcast>(
-              jsonSerialization['podcast'],
-            ),
       userId: jsonSerialization['userId'] as String,
       stage: jsonSerialization['stage'] as String?,
       status: jsonSerialization['status'] as String?,
@@ -86,31 +76,20 @@ abstract class IngestionJob
 
   int podcastId;
 
-  /// The podcast being processed
-  _i2.Podcast? podcast;
-
-  /// The user who owns this job
   String userId;
 
-  /// Current processing stage
   String stage;
 
-  /// Processing status: pending, processing, completed, failed
   String status;
 
-  /// Error message if failed
   String? errorMessage;
 
-  /// Progress percentage (0-100)
   int progress;
 
-  /// When the job was created
   DateTime createdAt;
 
-  /// When the job was last updated
   DateTime updatedAt;
 
-  /// When the job completed
   DateTime? completedAt;
 
   @override
@@ -122,7 +101,6 @@ abstract class IngestionJob
   IngestionJob copyWith({
     int? id,
     int? podcastId,
-    _i2.Podcast? podcast,
     String? userId,
     String? stage,
     String? status,
@@ -138,7 +116,6 @@ abstract class IngestionJob
       '__className__': 'IngestionJob',
       if (id != null) 'id': id,
       'podcastId': podcastId,
-      if (podcast != null) 'podcast': podcast?.toJson(),
       'userId': userId,
       'stage': stage,
       'status': status,
@@ -156,7 +133,6 @@ abstract class IngestionJob
       '__className__': 'IngestionJob',
       if (id != null) 'id': id,
       'podcastId': podcastId,
-      if (podcast != null) 'podcast': podcast?.toJsonForProtocol(),
       'userId': userId,
       'stage': stage,
       'status': status,
@@ -168,8 +144,8 @@ abstract class IngestionJob
     };
   }
 
-  static IngestionJobInclude include({_i2.PodcastInclude? podcast}) {
-    return IngestionJobInclude._(podcast: podcast);
+  static IngestionJobInclude include() {
+    return IngestionJobInclude._();
   }
 
   static IngestionJobIncludeList includeList({
@@ -204,7 +180,6 @@ class _IngestionJobImpl extends IngestionJob {
   _IngestionJobImpl({
     int? id,
     required int podcastId,
-    _i2.Podcast? podcast,
     required String userId,
     String? stage,
     String? status,
@@ -216,7 +191,6 @@ class _IngestionJobImpl extends IngestionJob {
   }) : super._(
          id: id,
          podcastId: podcastId,
-         podcast: podcast,
          userId: userId,
          stage: stage,
          status: status,
@@ -234,7 +208,6 @@ class _IngestionJobImpl extends IngestionJob {
   IngestionJob copyWith({
     Object? id = _Undefined,
     int? podcastId,
-    Object? podcast = _Undefined,
     String? userId,
     String? stage,
     String? status,
@@ -247,7 +220,6 @@ class _IngestionJobImpl extends IngestionJob {
     return IngestionJob(
       id: id is int? ? id : this.id,
       podcastId: podcastId ?? this.podcastId,
-      podcast: podcast is _i2.Podcast? ? podcast : this.podcast?.copyWith(),
       userId: userId ?? this.userId,
       stage: stage ?? this.stage,
       status: status ?? this.status,
@@ -363,45 +335,21 @@ class IngestionJobTable extends _i1.Table<int?> {
 
   late final _i1.ColumnInt podcastId;
 
-  /// The podcast being processed
-  _i2.PodcastTable? _podcast;
-
-  /// The user who owns this job
   late final _i1.ColumnString userId;
 
-  /// Current processing stage
   late final _i1.ColumnString stage;
 
-  /// Processing status: pending, processing, completed, failed
   late final _i1.ColumnString status;
 
-  /// Error message if failed
   late final _i1.ColumnString errorMessage;
 
-  /// Progress percentage (0-100)
   late final _i1.ColumnInt progress;
 
-  /// When the job was created
   late final _i1.ColumnDateTime createdAt;
 
-  /// When the job was last updated
   late final _i1.ColumnDateTime updatedAt;
 
-  /// When the job completed
   late final _i1.ColumnDateTime completedAt;
-
-  _i2.PodcastTable get podcast {
-    if (_podcast != null) return _podcast!;
-    _podcast = _i1.createRelationTable(
-      relationFieldName: 'podcast',
-      field: IngestionJob.t.podcastId,
-      foreignField: _i2.Podcast.t.id,
-      tableRelation: tableRelation,
-      createTable: (foreignTableRelation) =>
-          _i2.PodcastTable(tableRelation: foreignTableRelation),
-    );
-    return _podcast!;
-  }
 
   @override
   List<_i1.Column> get columns => [
@@ -416,25 +364,13 @@ class IngestionJobTable extends _i1.Table<int?> {
     updatedAt,
     completedAt,
   ];
-
-  @override
-  _i1.Table? getRelationTable(String relationField) {
-    if (relationField == 'podcast') {
-      return podcast;
-    }
-    return null;
-  }
 }
 
 class IngestionJobInclude extends _i1.IncludeObject {
-  IngestionJobInclude._({_i2.PodcastInclude? podcast}) {
-    _podcast = podcast;
-  }
-
-  _i2.PodcastInclude? _podcast;
+  IngestionJobInclude._();
 
   @override
-  Map<String, _i1.Include?> get includes => {'podcast': _podcast};
+  Map<String, _i1.Include?> get includes => {};
 
   @override
   _i1.Table<int?> get table => IngestionJob.t;
@@ -462,8 +398,6 @@ class IngestionJobIncludeList extends _i1.IncludeList {
 
 class IngestionJobRepository {
   const IngestionJobRepository._();
-
-  final attachRow = const IngestionJobAttachRowRepository._();
 
   /// Returns a list of [IngestionJob]s matching the given query parameters.
   ///
@@ -496,7 +430,6 @@ class IngestionJobRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<IngestionJobTable>? orderByList,
     _i1.Transaction? transaction,
-    IngestionJobInclude? include,
   }) async {
     return session.db.find<IngestionJob>(
       where: where?.call(IngestionJob.t),
@@ -506,7 +439,6 @@ class IngestionJobRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
-      include: include,
     );
   }
 
@@ -535,7 +467,6 @@ class IngestionJobRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<IngestionJobTable>? orderByList,
     _i1.Transaction? transaction,
-    IngestionJobInclude? include,
   }) async {
     return session.db.findFirstRow<IngestionJob>(
       where: where?.call(IngestionJob.t),
@@ -544,7 +475,6 @@ class IngestionJobRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
-      include: include,
     );
   }
 
@@ -553,12 +483,10 @@ class IngestionJobRepository {
     _i1.Session session,
     int id, {
     _i1.Transaction? transaction,
-    IngestionJobInclude? include,
   }) async {
     return session.db.findById<IngestionJob>(
       id,
       transaction: transaction,
-      include: include,
     );
   }
 
@@ -716,33 +644,6 @@ class IngestionJobRepository {
     return session.db.count<IngestionJob>(
       where: where?.call(IngestionJob.t),
       limit: limit,
-      transaction: transaction,
-    );
-  }
-}
-
-class IngestionJobAttachRowRepository {
-  const IngestionJobAttachRowRepository._();
-
-  /// Creates a relation between the given [IngestionJob] and [Podcast]
-  /// by setting the [IngestionJob]'s foreign key `podcastId` to refer to the [Podcast].
-  Future<void> podcast(
-    _i1.Session session,
-    IngestionJob ingestionJob,
-    _i2.Podcast podcast, {
-    _i1.Transaction? transaction,
-  }) async {
-    if (ingestionJob.id == null) {
-      throw ArgumentError.notNull('ingestionJob.id');
-    }
-    if (podcast.id == null) {
-      throw ArgumentError.notNull('podcast.id');
-    }
-
-    var $ingestionJob = ingestionJob.copyWith(podcastId: podcast.id);
-    await session.db.updateRow<IngestionJob>(
-      $ingestionJob,
-      columns: [IngestionJob.t.podcastId],
       transaction: transaction,
     );
   }

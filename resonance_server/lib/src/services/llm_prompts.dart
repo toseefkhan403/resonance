@@ -1,0 +1,117 @@
+import 'package:json_schema/json_schema.dart';
+
+class LLMPrompts {
+  static String segmentedTranscriptPrompt(String? title, String? channelName) =>
+      '''
+You are an expert Knowledge Extraction system.
+
+Listen to this podcast audio and extract atomic semantic ideas.
+A semantic idea represents a single, self-contained concept.
+
+${title != null ? 'Podcast Title: $title' : ''}
+${channelName != null ? 'Channel Name: $channelName' : ''}
+
+Rules:
+1. Extract atleast 10 distinct semantic ideas from the podcast.
+2. Each idea must include:
+   - A concise label (2–6 words)
+   - A detailed summary explaining the idea
+   - Impact score (0-1) - How important is this idea?
+   - Primary speaker - Who is the main speaker of this idea?
+   - One or more timestamped references where the idea is discussed
+3. Only include references spoken by the guest(s). Do NOT include the interviewer or host. Keep only one primary speaker for each idea.
+4. Speaker names must be the full, human-readable name.
+5. Do not invent ideas. Only extract ideas clearly discussed in the audio.
+6. Output must be JSON.
+
+Example output:
+{
+  "ideas": [
+    {
+      "label": "Dopamine and Motivation",
+      "summary": "Dopamine primarily drives motivation and craving rather than pleasure, influencing goal-seeking behavior over time.",
+      "impactScore": 0.85,
+      "primarySpeaker": "Andrew Huberman",
+      "references": [
+        {
+          "quote": "Dopamine is the currency of craving.",
+          "start": 120.5,
+          "end": 135.0
+        }
+      ]
+    }
+  ]
+}
+''';
+
+  static final JsonSchema segmentedTranscriptSchema = JsonSchema.create({
+    'type': 'object',
+    'properties': {
+      'ideas': {
+        'type': 'array',
+        'minItems': 5,
+        'items': {
+          'type': 'object',
+          'properties': {
+            'label': {'type': 'string'},
+            'summary': {'type': 'string'},
+            'impactScore': {'type': 'number'},
+            'primarySpeaker': {'type': 'string'},
+            'references': {
+              'type': 'array',
+              'minItems': 1,
+              'items': {
+                'type': 'object',
+                'properties': {
+                  'speaker': {'type': 'string'},
+                  'quote': {'type': 'string'},
+                  'start': {'type': 'number'},
+                  'end': {'type': 'number'},
+                },
+                'required': ['speaker', 'quote', 'start', 'end'],
+              },
+            },
+          },
+          'required': [
+            'label',
+            'summary',
+            'impactScore',
+            'primarySpeaker',
+            'references',
+          ],
+        },
+      },
+    },
+    'required': ['ideas'],
+  });
+
+  static String conversationalAnswerPrompt(
+    String question,
+    String speakerName,
+    String contextText,
+  ) =>
+      '''
+You are answering a question as if you were $speakerName from a podcast.
+
+Question: "$question"
+
+Context from the podcast:
+$contextText
+
+Answer the question using ONLY the information provided in the context. 
+Maintain the tone and perspective of $speakerName.
+Do not make up information not present in the context.
+If the context doesn't contain enough information, say so clearly.
+
+Format your response exactly as follows:
+[$speakerName]: [Your answer here...]
+References: 'verbatimQuote' - [youtubeLink]
+
+Example:
+[Andrew Huberman]: Dopamine is actually about craving, not just pleasure. It drives us to seek things out.
+References: "Dopamine is the currency of craving." - https://youtube.com/watch?v=videoId&t=120
+''';
+
+  static const String conversationalAnswerSystemMessage =
+      'You are a podcast speaker answering questions based on the provided context.';
+}

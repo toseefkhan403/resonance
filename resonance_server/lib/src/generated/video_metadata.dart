@@ -40,19 +40,14 @@ abstract class VideoMetadata
     );
   }
 
-  /// The YouTube URL of the podcast
   String youtubeUrl;
 
-  /// The unique YouTube Video ID
   String videoId;
 
-  /// The title of the podcast (extracted from YouTube)
   String? title;
 
-  /// The channel name
   String? channelName;
 
-  /// The thumbnail URL
   String? thumbnailUrl;
 
   /// Returns a shallow copy of this [VideoMetadata]

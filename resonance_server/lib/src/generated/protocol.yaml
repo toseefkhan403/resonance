@@ -10,6 +10,10 @@ googleIdp:
   - login:
 jwtRefresh:
   - refreshAccessToken:
+conversation:
+  - askQuestion:
+graph:
+  - getGraphData:
 podcast:
   - ingestPodcast:
   - getJobStatus:

@@ -6,11 +6,7 @@ class ProcessPodcastCall extends FutureCall<ProcessPodcastParams> {
   @override
   Future<void> invoke(Session session, ProcessPodcastParams? object) async {
     if (object == null) {
-      session.log(
-        'ProcessPodcastCall invoked with null params',
-        level: LogLevel.error,
-      );
-      return;
+      throw Exception('ProcessPodcastCall invoked with null params');
     }
 
     await IngestionPipeline.processPodcast(
