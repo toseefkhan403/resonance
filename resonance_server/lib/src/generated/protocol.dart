@@ -26,13 +26,14 @@ import 'graph_node.dart' as _i11;
 import 'graph_node_display.dart' as _i12;
 import 'ingestion_job.dart' as _i13;
 import 'podcast.dart' as _i14;
-import 'quote_reference.dart' as _i15;
-import 'segmented_transcript.dart' as _i16;
-import 'speaker.dart' as _i17;
-import 'transcript_reference.dart' as _i18;
-import 'transcript_topic.dart' as _i19;
-import 'video_metadata.dart' as _i20;
-import 'package:resonance_server/src/generated/podcast.dart' as _i21;
+import 'process_podcast_params.dart' as _i15;
+import 'quote_reference.dart' as _i16;
+import 'segmented_transcript.dart' as _i17;
+import 'speaker.dart' as _i18;
+import 'transcript_reference.dart' as _i19;
+import 'transcript_topic.dart' as _i20;
+import 'video_metadata.dart' as _i21;
+import 'package:resonance_server/src/generated/podcast.dart' as _i22;
 export 'graph_category.dart';
 export 'graph_data.dart';
 export 'graph_edge.dart';
@@ -43,6 +44,7 @@ export 'graph_node.dart';
 export 'graph_node_display.dart';
 export 'ingestion_job.dart';
 export 'podcast.dart';
+export 'process_podcast_params.dart';
 export 'quote_reference.dart';
 export 'segmented_transcript.dart';
 export 'speaker.dart';
@@ -583,23 +585,26 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i14.Podcast) {
       return _i14.Podcast.fromJson(data) as T;
     }
-    if (t == _i15.QuoteReference) {
-      return _i15.QuoteReference.fromJson(data) as T;
+    if (t == _i15.ProcessPodcastParams) {
+      return _i15.ProcessPodcastParams.fromJson(data) as T;
     }
-    if (t == _i16.SegmentedTranscript) {
-      return _i16.SegmentedTranscript.fromJson(data) as T;
+    if (t == _i16.QuoteReference) {
+      return _i16.QuoteReference.fromJson(data) as T;
     }
-    if (t == _i17.Speaker) {
-      return _i17.Speaker.fromJson(data) as T;
+    if (t == _i17.SegmentedTranscript) {
+      return _i17.SegmentedTranscript.fromJson(data) as T;
     }
-    if (t == _i18.TranscriptReference) {
-      return _i18.TranscriptReference.fromJson(data) as T;
+    if (t == _i18.Speaker) {
+      return _i18.Speaker.fromJson(data) as T;
     }
-    if (t == _i19.TranscriptTopic) {
-      return _i19.TranscriptTopic.fromJson(data) as T;
+    if (t == _i19.TranscriptReference) {
+      return _i19.TranscriptReference.fromJson(data) as T;
     }
-    if (t == _i20.VideoMetadata) {
-      return _i20.VideoMetadata.fromJson(data) as T;
+    if (t == _i20.TranscriptTopic) {
+      return _i20.TranscriptTopic.fromJson(data) as T;
+    }
+    if (t == _i21.VideoMetadata) {
+      return _i21.VideoMetadata.fromJson(data) as T;
     }
     if (t == _i1.getType<_i5.GraphCategory?>()) {
       return (data != null ? _i5.GraphCategory.fromJson(data) : null) as T;
@@ -631,25 +636,29 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i1.getType<_i14.Podcast?>()) {
       return (data != null ? _i14.Podcast.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i15.QuoteReference?>()) {
-      return (data != null ? _i15.QuoteReference.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i16.SegmentedTranscript?>()) {
-      return (data != null ? _i16.SegmentedTranscript.fromJson(data) : null)
+    if (t == _i1.getType<_i15.ProcessPodcastParams?>()) {
+      return (data != null ? _i15.ProcessPodcastParams.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i17.Speaker?>()) {
-      return (data != null ? _i17.Speaker.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i16.QuoteReference?>()) {
+      return (data != null ? _i16.QuoteReference.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i18.TranscriptReference?>()) {
-      return (data != null ? _i18.TranscriptReference.fromJson(data) : null)
+    if (t == _i1.getType<_i17.SegmentedTranscript?>()) {
+      return (data != null ? _i17.SegmentedTranscript.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i19.TranscriptTopic?>()) {
-      return (data != null ? _i19.TranscriptTopic.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i18.Speaker?>()) {
+      return (data != null ? _i18.Speaker.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i20.VideoMetadata?>()) {
-      return (data != null ? _i20.VideoMetadata.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i19.TranscriptReference?>()) {
+      return (data != null ? _i19.TranscriptReference.fromJson(data) : null)
+          as T;
+    }
+    if (t == _i1.getType<_i20.TranscriptTopic?>()) {
+      return (data != null ? _i20.TranscriptTopic.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i21.VideoMetadata?>()) {
+      return (data != null ? _i21.VideoMetadata.fromJson(data) : null) as T;
     }
     if (t == List<_i9.GraphGranularity>) {
       return (data as List)
@@ -675,26 +684,26 @@ class Protocol extends _i1.SerializationManagerServer {
               .toList()
           as T;
     }
-    if (t == List<_i15.QuoteReference>) {
+    if (t == List<_i16.QuoteReference>) {
       return (data as List)
-              .map((e) => deserialize<_i15.QuoteReference>(e))
+              .map((e) => deserialize<_i16.QuoteReference>(e))
               .toList()
           as T;
     }
-    if (t == List<_i19.TranscriptTopic>) {
+    if (t == List<_i20.TranscriptTopic>) {
       return (data as List)
-              .map((e) => deserialize<_i19.TranscriptTopic>(e))
+              .map((e) => deserialize<_i20.TranscriptTopic>(e))
               .toList()
           as T;
     }
-    if (t == List<_i18.TranscriptReference>) {
+    if (t == List<_i19.TranscriptReference>) {
       return (data as List)
-              .map((e) => deserialize<_i18.TranscriptReference>(e))
+              .map((e) => deserialize<_i19.TranscriptReference>(e))
               .toList()
           as T;
     }
-    if (t == List<_i21.Podcast>) {
-      return (data as List).map((e) => deserialize<_i21.Podcast>(e)).toList()
+    if (t == List<_i22.Podcast>) {
+      return (data as List).map((e) => deserialize<_i22.Podcast>(e)).toList()
           as T;
     }
     try {
@@ -721,12 +730,13 @@ class Protocol extends _i1.SerializationManagerServer {
       _i12.GraphNodeDisplay => 'GraphNodeDisplay',
       _i13.IngestionJob => 'IngestionJob',
       _i14.Podcast => 'Podcast',
-      _i15.QuoteReference => 'QuoteReference',
-      _i16.SegmentedTranscript => 'SegmentedTranscript',
-      _i17.Speaker => 'Speaker',
-      _i18.TranscriptReference => 'TranscriptReference',
-      _i19.TranscriptTopic => 'TranscriptTopic',
-      _i20.VideoMetadata => 'VideoMetadata',
+      _i15.ProcessPodcastParams => 'ProcessPodcastParams',
+      _i16.QuoteReference => 'QuoteReference',
+      _i17.SegmentedTranscript => 'SegmentedTranscript',
+      _i18.Speaker => 'Speaker',
+      _i19.TranscriptReference => 'TranscriptReference',
+      _i20.TranscriptTopic => 'TranscriptTopic',
+      _i21.VideoMetadata => 'VideoMetadata',
       _ => null,
     };
   }
@@ -761,17 +771,19 @@ class Protocol extends _i1.SerializationManagerServer {
         return 'IngestionJob';
       case _i14.Podcast():
         return 'Podcast';
-      case _i15.QuoteReference():
+      case _i15.ProcessPodcastParams():
+        return 'ProcessPodcastParams';
+      case _i16.QuoteReference():
         return 'QuoteReference';
-      case _i16.SegmentedTranscript():
+      case _i17.SegmentedTranscript():
         return 'SegmentedTranscript';
-      case _i17.Speaker():
+      case _i18.Speaker():
         return 'Speaker';
-      case _i18.TranscriptReference():
+      case _i19.TranscriptReference():
         return 'TranscriptReference';
-      case _i19.TranscriptTopic():
+      case _i20.TranscriptTopic():
         return 'TranscriptTopic';
-      case _i20.VideoMetadata():
+      case _i21.VideoMetadata():
         return 'VideoMetadata';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -825,23 +837,26 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'Podcast') {
       return deserialize<_i14.Podcast>(data['data']);
     }
+    if (dataClassName == 'ProcessPodcastParams') {
+      return deserialize<_i15.ProcessPodcastParams>(data['data']);
+    }
     if (dataClassName == 'QuoteReference') {
-      return deserialize<_i15.QuoteReference>(data['data']);
+      return deserialize<_i16.QuoteReference>(data['data']);
     }
     if (dataClassName == 'SegmentedTranscript') {
-      return deserialize<_i16.SegmentedTranscript>(data['data']);
+      return deserialize<_i17.SegmentedTranscript>(data['data']);
     }
     if (dataClassName == 'Speaker') {
-      return deserialize<_i17.Speaker>(data['data']);
+      return deserialize<_i18.Speaker>(data['data']);
     }
     if (dataClassName == 'TranscriptReference') {
-      return deserialize<_i18.TranscriptReference>(data['data']);
+      return deserialize<_i19.TranscriptReference>(data['data']);
     }
     if (dataClassName == 'TranscriptTopic') {
-      return deserialize<_i19.TranscriptTopic>(data['data']);
+      return deserialize<_i20.TranscriptTopic>(data['data']);
     }
     if (dataClassName == 'VideoMetadata') {
-      return deserialize<_i20.VideoMetadata>(data['data']);
+      return deserialize<_i21.VideoMetadata>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -887,10 +902,10 @@ class Protocol extends _i1.SerializationManagerServer {
         return _i13.IngestionJob.t;
       case _i14.Podcast:
         return _i14.Podcast.t;
-      case _i16.SegmentedTranscript:
-        return _i16.SegmentedTranscript.t;
-      case _i17.Speaker:
-        return _i17.Speaker.t;
+      case _i17.SegmentedTranscript:
+        return _i17.SegmentedTranscript.t;
+      case _i18.Speaker:
+        return _i18.Speaker.t;
     }
     return null;
   }

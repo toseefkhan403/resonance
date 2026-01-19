@@ -21,17 +21,18 @@ import 'graph_node.dart' as _i8;
 import 'graph_node_display.dart' as _i9;
 import 'ingestion_job.dart' as _i10;
 import 'podcast.dart' as _i11;
-import 'quote_reference.dart' as _i12;
-import 'segmented_transcript.dart' as _i13;
-import 'speaker.dart' as _i14;
-import 'transcript_reference.dart' as _i15;
-import 'transcript_topic.dart' as _i16;
-import 'video_metadata.dart' as _i17;
-import 'package:resonance_client/src/protocol/podcast.dart' as _i18;
+import 'process_podcast_params.dart' as _i12;
+import 'quote_reference.dart' as _i13;
+import 'segmented_transcript.dart' as _i14;
+import 'speaker.dart' as _i15;
+import 'transcript_reference.dart' as _i16;
+import 'transcript_topic.dart' as _i17;
+import 'video_metadata.dart' as _i18;
+import 'package:resonance_client/src/protocol/podcast.dart' as _i19;
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
-    as _i19;
-import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i20;
+import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
+    as _i21;
 export 'graph_category.dart';
 export 'graph_data.dart';
 export 'graph_edge.dart';
@@ -42,6 +43,7 @@ export 'graph_node.dart';
 export 'graph_node_display.dart';
 export 'ingestion_job.dart';
 export 'podcast.dart';
+export 'process_podcast_params.dart';
 export 'quote_reference.dart';
 export 'segmented_transcript.dart';
 export 'speaker.dart';
@@ -114,23 +116,26 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i11.Podcast) {
       return _i11.Podcast.fromJson(data) as T;
     }
-    if (t == _i12.QuoteReference) {
-      return _i12.QuoteReference.fromJson(data) as T;
+    if (t == _i12.ProcessPodcastParams) {
+      return _i12.ProcessPodcastParams.fromJson(data) as T;
     }
-    if (t == _i13.SegmentedTranscript) {
-      return _i13.SegmentedTranscript.fromJson(data) as T;
+    if (t == _i13.QuoteReference) {
+      return _i13.QuoteReference.fromJson(data) as T;
     }
-    if (t == _i14.Speaker) {
-      return _i14.Speaker.fromJson(data) as T;
+    if (t == _i14.SegmentedTranscript) {
+      return _i14.SegmentedTranscript.fromJson(data) as T;
     }
-    if (t == _i15.TranscriptReference) {
-      return _i15.TranscriptReference.fromJson(data) as T;
+    if (t == _i15.Speaker) {
+      return _i15.Speaker.fromJson(data) as T;
     }
-    if (t == _i16.TranscriptTopic) {
-      return _i16.TranscriptTopic.fromJson(data) as T;
+    if (t == _i16.TranscriptReference) {
+      return _i16.TranscriptReference.fromJson(data) as T;
     }
-    if (t == _i17.VideoMetadata) {
-      return _i17.VideoMetadata.fromJson(data) as T;
+    if (t == _i17.TranscriptTopic) {
+      return _i17.TranscriptTopic.fromJson(data) as T;
+    }
+    if (t == _i18.VideoMetadata) {
+      return _i18.VideoMetadata.fromJson(data) as T;
     }
     if (t == _i1.getType<_i2.GraphCategory?>()) {
       return (data != null ? _i2.GraphCategory.fromJson(data) : null) as T;
@@ -162,25 +167,29 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i1.getType<_i11.Podcast?>()) {
       return (data != null ? _i11.Podcast.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i12.QuoteReference?>()) {
-      return (data != null ? _i12.QuoteReference.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i13.SegmentedTranscript?>()) {
-      return (data != null ? _i13.SegmentedTranscript.fromJson(data) : null)
+    if (t == _i1.getType<_i12.ProcessPodcastParams?>()) {
+      return (data != null ? _i12.ProcessPodcastParams.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i14.Speaker?>()) {
-      return (data != null ? _i14.Speaker.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i13.QuoteReference?>()) {
+      return (data != null ? _i13.QuoteReference.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i15.TranscriptReference?>()) {
-      return (data != null ? _i15.TranscriptReference.fromJson(data) : null)
+    if (t == _i1.getType<_i14.SegmentedTranscript?>()) {
+      return (data != null ? _i14.SegmentedTranscript.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i16.TranscriptTopic?>()) {
-      return (data != null ? _i16.TranscriptTopic.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i15.Speaker?>()) {
+      return (data != null ? _i15.Speaker.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i17.VideoMetadata?>()) {
-      return (data != null ? _i17.VideoMetadata.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i16.TranscriptReference?>()) {
+      return (data != null ? _i16.TranscriptReference.fromJson(data) : null)
+          as T;
+    }
+    if (t == _i1.getType<_i17.TranscriptTopic?>()) {
+      return (data != null ? _i17.TranscriptTopic.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i18.VideoMetadata?>()) {
+      return (data != null ? _i18.VideoMetadata.fromJson(data) : null) as T;
     }
     if (t == List<_i6.GraphGranularity>) {
       return (data as List)
@@ -206,33 +215,33 @@ class Protocol extends _i1.SerializationManager {
               .toList()
           as T;
     }
-    if (t == List<_i12.QuoteReference>) {
+    if (t == List<_i13.QuoteReference>) {
       return (data as List)
-              .map((e) => deserialize<_i12.QuoteReference>(e))
+              .map((e) => deserialize<_i13.QuoteReference>(e))
               .toList()
           as T;
     }
-    if (t == List<_i16.TranscriptTopic>) {
+    if (t == List<_i17.TranscriptTopic>) {
       return (data as List)
-              .map((e) => deserialize<_i16.TranscriptTopic>(e))
+              .map((e) => deserialize<_i17.TranscriptTopic>(e))
               .toList()
           as T;
     }
-    if (t == List<_i15.TranscriptReference>) {
+    if (t == List<_i16.TranscriptReference>) {
       return (data as List)
-              .map((e) => deserialize<_i15.TranscriptReference>(e))
+              .map((e) => deserialize<_i16.TranscriptReference>(e))
               .toList()
           as T;
     }
-    if (t == List<_i18.Podcast>) {
-      return (data as List).map((e) => deserialize<_i18.Podcast>(e)).toList()
+    if (t == List<_i19.Podcast>) {
+      return (data as List).map((e) => deserialize<_i19.Podcast>(e)).toList()
           as T;
     }
-    try {
-      return _i19.Protocol().deserialize<T>(data, t);
-    } on _i1.DeserializationTypeNotFoundException catch (_) {}
     try {
       return _i20.Protocol().deserialize<T>(data, t);
+    } on _i1.DeserializationTypeNotFoundException catch (_) {}
+    try {
+      return _i21.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     return super.deserialize<T>(data, t);
   }
@@ -249,12 +258,13 @@ class Protocol extends _i1.SerializationManager {
       _i9.GraphNodeDisplay => 'GraphNodeDisplay',
       _i10.IngestionJob => 'IngestionJob',
       _i11.Podcast => 'Podcast',
-      _i12.QuoteReference => 'QuoteReference',
-      _i13.SegmentedTranscript => 'SegmentedTranscript',
-      _i14.Speaker => 'Speaker',
-      _i15.TranscriptReference => 'TranscriptReference',
-      _i16.TranscriptTopic => 'TranscriptTopic',
-      _i17.VideoMetadata => 'VideoMetadata',
+      _i12.ProcessPodcastParams => 'ProcessPodcastParams',
+      _i13.QuoteReference => 'QuoteReference',
+      _i14.SegmentedTranscript => 'SegmentedTranscript',
+      _i15.Speaker => 'Speaker',
+      _i16.TranscriptReference => 'TranscriptReference',
+      _i17.TranscriptTopic => 'TranscriptTopic',
+      _i18.VideoMetadata => 'VideoMetadata',
       _ => null,
     };
   }
@@ -289,24 +299,26 @@ class Protocol extends _i1.SerializationManager {
         return 'IngestionJob';
       case _i11.Podcast():
         return 'Podcast';
-      case _i12.QuoteReference():
+      case _i12.ProcessPodcastParams():
+        return 'ProcessPodcastParams';
+      case _i13.QuoteReference():
         return 'QuoteReference';
-      case _i13.SegmentedTranscript():
+      case _i14.SegmentedTranscript():
         return 'SegmentedTranscript';
-      case _i14.Speaker():
+      case _i15.Speaker():
         return 'Speaker';
-      case _i15.TranscriptReference():
+      case _i16.TranscriptReference():
         return 'TranscriptReference';
-      case _i16.TranscriptTopic():
+      case _i17.TranscriptTopic():
         return 'TranscriptTopic';
-      case _i17.VideoMetadata():
+      case _i18.VideoMetadata():
         return 'VideoMetadata';
     }
-    className = _i19.Protocol().getClassNameForObject(data);
+    className = _i20.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_idp.$className';
     }
-    className = _i20.Protocol().getClassNameForObject(data);
+    className = _i21.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_core.$className';
     }
@@ -349,31 +361,34 @@ class Protocol extends _i1.SerializationManager {
     if (dataClassName == 'Podcast') {
       return deserialize<_i11.Podcast>(data['data']);
     }
+    if (dataClassName == 'ProcessPodcastParams') {
+      return deserialize<_i12.ProcessPodcastParams>(data['data']);
+    }
     if (dataClassName == 'QuoteReference') {
-      return deserialize<_i12.QuoteReference>(data['data']);
+      return deserialize<_i13.QuoteReference>(data['data']);
     }
     if (dataClassName == 'SegmentedTranscript') {
-      return deserialize<_i13.SegmentedTranscript>(data['data']);
+      return deserialize<_i14.SegmentedTranscript>(data['data']);
     }
     if (dataClassName == 'Speaker') {
-      return deserialize<_i14.Speaker>(data['data']);
+      return deserialize<_i15.Speaker>(data['data']);
     }
     if (dataClassName == 'TranscriptReference') {
-      return deserialize<_i15.TranscriptReference>(data['data']);
+      return deserialize<_i16.TranscriptReference>(data['data']);
     }
     if (dataClassName == 'TranscriptTopic') {
-      return deserialize<_i16.TranscriptTopic>(data['data']);
+      return deserialize<_i17.TranscriptTopic>(data['data']);
     }
     if (dataClassName == 'VideoMetadata') {
-      return deserialize<_i17.VideoMetadata>(data['data']);
+      return deserialize<_i18.VideoMetadata>(data['data']);
     }
     if (dataClassName.startsWith('serverpod_auth_idp.')) {
       data['className'] = dataClassName.substring(19);
-      return _i19.Protocol().deserializeByClassName(data);
+      return _i20.Protocol().deserializeByClassName(data);
     }
     if (dataClassName.startsWith('serverpod_auth_core.')) {
       data['className'] = dataClassName.substring(20);
-      return _i20.Protocol().deserializeByClassName(data);
+      return _i21.Protocol().deserializeByClassName(data);
     }
     return super.deserializeByClassName(data);
   }
@@ -388,10 +403,10 @@ class Protocol extends _i1.SerializationManager {
       return null;
     }
     try {
-      return _i19.Protocol().mapRecordToJson(record);
+      return _i20.Protocol().mapRecordToJson(record);
     } catch (_) {}
     try {
-      return _i20.Protocol().mapRecordToJson(record);
+      return _i21.Protocol().mapRecordToJson(record);
     } catch (_) {}
     throw Exception('Unsupported record type ${record.runtimeType}');
   }
