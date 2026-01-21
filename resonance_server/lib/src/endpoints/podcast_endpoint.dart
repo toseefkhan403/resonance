@@ -99,6 +99,7 @@ class PodcastEndpoint extends Endpoint {
     int jobId,
   ) async* {
     final userId = session.authenticated?.userIdentifier;
+    session.log('userID from job: $userId');
     if (userId == null) {
       throw Exception('User not authenticated');
     }
