@@ -108,6 +108,7 @@ class GraphService {
       for (final similarNode in similarNodes) {
         if (similarNode.id == ideaNode.id) continue;
 
+        // todo consider adding weight
         await GraphEdge.db.insertRow(
           session,
           GraphEdge(

@@ -60,12 +60,26 @@ class GraphEndpoint extends Endpoint {
     List<GraphNode> allNodes,
     List<GraphEdge> allEdges,
   ) {
+    // Calculate node degrees from edges
+    final nodeDegrees = <int, int>{};
+    for (final edge in allEdges) {
+      nodeDegrees[edge.sourceNodeId] =
+          (nodeDegrees[edge.sourceNodeId] ?? 0) + 1;
+      nodeDegrees[edge.targetNodeId] =
+          (nodeDegrees[edge.targetNodeId] ?? 0) + 1;
+    }
+
+    // Filter potential anchors: must have at least 2 edges
+    final candidateAnchors = allNodes
+        .where((n) => (nodeDegrees[n.id] ?? 0) >= 2)
+        .toList();
+
     // Identify anchors (categories)
-    final validCategoryCount = maxCategoryCount > allNodes.length
-        ? allNodes.length
+    final validCategoryCount = maxCategoryCount > candidateAnchors.length
+        ? candidateAnchors.length
         : maxCategoryCount;
 
-    final anchors = allNodes.sublist(0, validCategoryCount);
+    final anchors = candidateAnchors.sublist(0, validCategoryCount);
     final anchorIds = anchors.map((n) => n.id!).toSet();
 
     // Build Categories List
@@ -99,6 +113,7 @@ class GraphEndpoint extends Endpoint {
       } else {
         // Find which anchor it is connected to
         // We prefer the highest impact anchor (lowest index in anchors list)
+        // todo consider comparing by edge weight
         int bestAnchorIndex = -1; // -1 means Other
 
         // Find neighbors in graph

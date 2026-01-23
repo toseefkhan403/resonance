@@ -22,7 +22,8 @@ Rules:
 3. Only include references spoken by the guest(s). Do NOT include the interviewer or host. Keep only one primary speaker for each idea.
 4. Speaker names must be the full, human-readable name.
 5. Do not invent ideas. Only extract ideas clearly discussed in the audio.
-6. Output must be JSON.
+6. Keep the same language in the output through out the conversation as the podcast.
+7. Output must be JSON.
 
 Example output:
 {
@@ -104,11 +105,11 @@ Do not make up information not present in the context.
 If the context doesn't contain enough information, say so clearly.
 
 Format your response exactly as follows:
-[$speakerName]: [Your answer here...]
-References: 'verbatimQuote' - [youtubeLink]
+[$speakerName] [Summarized answer here - don't use the verbatim quote here]
+References: "verbatimQuote" - [youtubeLink]
 
 Example:
-[Andrew Huberman]: Dopamine is actually about craving, not just pleasure. It drives us to seek things out.
+[Andrew Huberman] Dopamine is actually about craving, not just pleasure. It drives us to seek things out.
 References: "Dopamine is the currency of craving." - https://youtube.com/watch?v=videoId&t=120
 ''';
 
