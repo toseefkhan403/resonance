@@ -4,7 +4,7 @@ import 'llm_service.dart';
 
 /// Service for graph construction and linking
 class GraphService {
-  final linkThreshold = 0.5;
+  final linkThreshold = 0.4;
 
   Future<int> mergeOrCreateSpeaker(
     Session session,

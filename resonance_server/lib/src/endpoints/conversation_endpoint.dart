@@ -4,7 +4,7 @@ import '../services/llm_service.dart';
 
 /// Endpoint for conversational AI ("Ask the speakers")
 class ConversationEndpoint extends Endpoint {
-  final double distanceThreshold = 0.5;
+  final double distanceThreshold = 0.4;
 
   /// Answers questions using stored knowledge graph and speaker perspective
   /// streams the generated answer as chunks
@@ -41,5 +41,31 @@ class ConversationEndpoint extends Endpoint {
     await for (var chunk in answerStream) {
       yield chunk;
     }
+  }
+
+  // list speakers for a podcast
+  Future<List<Speaker>> listSpeakers(Session session) async {
+    final userId = session.authenticated?.userIdentifier;
+    session.log('listSpeakers: invoked by user $userId');
+
+    if (userId == null) {
+      session.log(
+        'listSpeakers: User not authenticated',
+        level: LogLevel.warning,
+      );
+      throw Exception('User not authenticated');
+    }
+
+    final speakers = await Speaker.db.find(
+      session,
+      where: (p) => p.userId.equals(userId),
+      orderBy: (p) => p.createdAt,
+      orderDescending: true,
+    );
+
+    session.log(
+      'listSpeakers: Found ${speakers.length} speakers for user $userId',
+    );
+    return speakers;
   }
 }

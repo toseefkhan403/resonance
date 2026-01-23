@@ -17,6 +17,10 @@ class GraphEndpoint extends Endpoint {
       orderDescending: true,
     );
 
+    if (nodes.isEmpty) {
+      return GraphData(graphWithGranularity: []);
+    }
+
     final edges = await GraphEdge.db.find(
       session,
       where: (c) => c.userId.equals(userId),
@@ -39,7 +43,7 @@ class GraphEndpoint extends Endpoint {
       );
       granularities.add(graph);
 
-      if (otherNodeCount <= 5) {
+      if (otherNodeCount <= 4) {
         break;
       }
 
@@ -91,7 +95,7 @@ class GraphEndpoint extends Endpoint {
         // This node is an anchor
         // Find its index in the anchor list to assign matching category
         categoryIndex = anchors.indexWhere((a) => a.id == node.id);
-        symbolSize = 20.0;
+        symbolSize = 20;
       } else {
         // Find which anchor it is connected to
         // We prefer the highest impact anchor (lowest index in anchors list)
@@ -120,7 +124,7 @@ class GraphEndpoint extends Endpoint {
           categoryIndex = categories.length - 1;
           otherNodeCount++;
         }
-        symbolSize = 10.0;
+        symbolSize = 10;
       }
 
       nodeDisplays.add(

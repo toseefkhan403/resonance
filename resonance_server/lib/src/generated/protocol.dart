@@ -33,7 +33,8 @@ import 'speaker.dart' as _i18;
 import 'transcript_reference.dart' as _i19;
 import 'transcript_topic.dart' as _i20;
 import 'video_metadata.dart' as _i21;
-import 'package:resonance_server/src/generated/podcast.dart' as _i22;
+import 'package:resonance_server/src/generated/speaker.dart' as _i22;
+import 'package:resonance_server/src/generated/podcast.dart' as _i23;
 export 'graph_category.dart';
 export 'graph_data.dart';
 export 'graph_edge.dart';
@@ -709,8 +710,12 @@ class Protocol extends _i1.SerializationManagerServer {
               .toList()
           as T;
     }
-    if (t == List<_i22.Podcast>) {
-      return (data as List).map((e) => deserialize<_i22.Podcast>(e)).toList()
+    if (t == List<_i22.Speaker>) {
+      return (data as List).map((e) => deserialize<_i22.Speaker>(e)).toList()
+          as T;
+    }
+    if (t == List<_i23.Podcast>) {
+      return (data as List).map((e) => deserialize<_i23.Podcast>(e)).toList()
           as T;
     }
     try {

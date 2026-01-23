@@ -283,6 +283,13 @@ class EndpointConversation extends _i2.EndpointRef {
     },
     {},
   );
+
+  _i3.Future<List<_i5.Speaker>> listSpeakers() =>
+      caller.callServerEndpoint<List<_i5.Speaker>>(
+        'conversation',
+        'listSpeakers',
+        {},
+      );
 }
 
 /// Endpoint for graph visualization data

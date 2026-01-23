@@ -295,6 +295,16 @@ class Endpoints extends _i1.EndpointDispatch {
       name: 'conversation',
       endpoint: endpoints['conversation']!,
       methodConnectors: {
+        'listSpeakers': _i1.MethodConnector(
+          name: 'listSpeakers',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['conversation'] as _i5.ConversationEndpoint)
+                  .listSpeakers(session),
+        ),
         'askQuestion': _i1.MethodStreamConnector(
           name: 'askQuestion',
           params: {

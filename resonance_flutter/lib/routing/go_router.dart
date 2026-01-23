@@ -2,6 +2,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:resonance_flutter/application/auth_service.dart';
+import 'package:resonance_flutter/presentation/force_directed_graph_screen.dart';
 import 'package:resonance_flutter/presentation/home_page.dart';
 import 'package:resonance_flutter/presentation/sign_in_page.dart';
 import 'package:resonance_flutter/presentation/unknown_page.dart';
@@ -17,7 +18,7 @@ GoRouter goRouter(Ref ref) {
       try {
         // login and logout rebuilds the router and brings to /
         final authState = ref.watch(authStateChangesProvider);
-        final uid = authState.asData?.value?.authUserId;
+        final uid = authState.asData?.value?.authUserId; // not reliable
         final isLoggedIn = uid != null;
 
         debugPrint('isLoggedIn: $isLoggedIn');
@@ -25,7 +26,7 @@ GoRouter goRouter(Ref ref) {
         final isHome = state.matchedLocation == '/home';
 
         if (isRoot) {
-          if (isLoggedIn) return '/home';
+          if (isLoggedIn) return '/graph';
         } else if (isHome) {
           if (!isLoggedIn) return '/';
         }
@@ -51,6 +52,13 @@ GoRouter goRouter(Ref ref) {
         },
       ),
       GoRoute(
+        path: '/graph',
+        name: AppRoute.graph.name,
+        builder: (context, state) {
+          return const ForceDirectedGraphScreen();
+        },
+      ),
+      GoRoute(
         path: '/unknown',
         name: AppRoute.unknown.name,
         builder: (context, state) => const UnknownPage(),
@@ -65,6 +73,7 @@ GoRouter goRouter(Ref ref) {
 
 enum AppRoute {
   home,
+  graph,
   signIn,
   unknown,
 }

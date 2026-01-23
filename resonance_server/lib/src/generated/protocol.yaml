@@ -12,6 +12,7 @@ jwtRefresh:
   - refreshAccessToken:
 conversation:
   - askQuestion:
+  - listSpeakers:
 graph:
   - getGraphData:
 podcast:

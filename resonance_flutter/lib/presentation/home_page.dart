@@ -65,7 +65,7 @@ class _HomePageState extends State<HomePage> {
               });
             }
           },
-          onError: (e) {
+          onError: (Object e) {
             if (mounted) {
               setState(() {
                 _errorMessage = e.toString();

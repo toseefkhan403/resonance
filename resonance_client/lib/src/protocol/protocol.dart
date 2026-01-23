@@ -28,11 +28,12 @@ import 'speaker.dart' as _i15;
 import 'transcript_reference.dart' as _i16;
 import 'transcript_topic.dart' as _i17;
 import 'video_metadata.dart' as _i18;
-import 'package:resonance_client/src/protocol/podcast.dart' as _i19;
+import 'package:resonance_client/src/protocol/speaker.dart' as _i19;
+import 'package:resonance_client/src/protocol/podcast.dart' as _i20;
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
-    as _i20;
-import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i21;
+import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
+    as _i22;
 export 'graph_category.dart';
 export 'graph_data.dart';
 export 'graph_edge.dart';
@@ -233,15 +234,19 @@ class Protocol extends _i1.SerializationManager {
               .toList()
           as T;
     }
-    if (t == List<_i19.Podcast>) {
-      return (data as List).map((e) => deserialize<_i19.Podcast>(e)).toList()
+    if (t == List<_i19.Speaker>) {
+      return (data as List).map((e) => deserialize<_i19.Speaker>(e)).toList()
+          as T;
+    }
+    if (t == List<_i20.Podcast>) {
+      return (data as List).map((e) => deserialize<_i20.Podcast>(e)).toList()
           as T;
     }
     try {
-      return _i20.Protocol().deserialize<T>(data, t);
+      return _i21.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     try {
-      return _i21.Protocol().deserialize<T>(data, t);
+      return _i22.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     return super.deserialize<T>(data, t);
   }
@@ -314,11 +319,11 @@ class Protocol extends _i1.SerializationManager {
       case _i18.VideoMetadata():
         return 'VideoMetadata';
     }
-    className = _i20.Protocol().getClassNameForObject(data);
+    className = _i21.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_idp.$className';
     }
-    className = _i21.Protocol().getClassNameForObject(data);
+    className = _i22.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_core.$className';
     }
@@ -384,11 +389,11 @@ class Protocol extends _i1.SerializationManager {
     }
     if (dataClassName.startsWith('serverpod_auth_idp.')) {
       data['className'] = dataClassName.substring(19);
-      return _i20.Protocol().deserializeByClassName(data);
+      return _i21.Protocol().deserializeByClassName(data);
     }
     if (dataClassName.startsWith('serverpod_auth_core.')) {
       data['className'] = dataClassName.substring(20);
-      return _i21.Protocol().deserializeByClassName(data);
+      return _i22.Protocol().deserializeByClassName(data);
     }
     return super.deserializeByClassName(data);
   }
@@ -403,10 +408,10 @@ class Protocol extends _i1.SerializationManager {
       return null;
     }
     try {
-      return _i20.Protocol().mapRecordToJson(record);
+      return _i21.Protocol().mapRecordToJson(record);
     } catch (_) {}
     try {
-      return _i21.Protocol().mapRecordToJson(record);
+      return _i22.Protocol().mapRecordToJson(record);
     } catch (_) {}
     throw Exception('Unsupported record type ${record.runtimeType}');
   }
