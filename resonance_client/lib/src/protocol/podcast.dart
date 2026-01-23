@@ -22,7 +22,9 @@ abstract class Podcast implements _i1.SerializableModel {
     this.channelName,
     this.thumbnailUrl,
     DateTime? createdAt,
-  }) : createdAt = createdAt ?? DateTime.now();
+    bool? graphExists,
+  }) : createdAt = createdAt ?? DateTime.now(),
+       graphExists = graphExists ?? false;
 
   factory Podcast({
     int? id,
@@ -33,6 +35,7 @@ abstract class Podcast implements _i1.SerializableModel {
     String? channelName,
     String? thumbnailUrl,
     DateTime? createdAt,
+    bool? graphExists,
   }) = _PodcastImpl;
 
   factory Podcast.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -47,6 +50,7 @@ abstract class Podcast implements _i1.SerializableModel {
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+      graphExists: jsonSerialization['graphExists'] as bool?,
     );
   }
 
@@ -69,6 +73,8 @@ abstract class Podcast implements _i1.SerializableModel {
 
   DateTime createdAt;
 
+  bool graphExists;
+
   /// Returns a shallow copy of this [Podcast]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -81,6 +87,7 @@ abstract class Podcast implements _i1.SerializableModel {
     String? channelName,
     String? thumbnailUrl,
     DateTime? createdAt,
+    bool? graphExists,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -94,6 +101,7 @@ abstract class Podcast implements _i1.SerializableModel {
       if (channelName != null) 'channelName': channelName,
       if (thumbnailUrl != null) 'thumbnailUrl': thumbnailUrl,
       'createdAt': createdAt.toJson(),
+      'graphExists': graphExists,
     };
   }
 
@@ -115,6 +123,7 @@ class _PodcastImpl extends Podcast {
     String? channelName,
     String? thumbnailUrl,
     DateTime? createdAt,
+    bool? graphExists,
   }) : super._(
          id: id,
          youtubeUrl: youtubeUrl,
@@ -124,6 +133,7 @@ class _PodcastImpl extends Podcast {
          channelName: channelName,
          thumbnailUrl: thumbnailUrl,
          createdAt: createdAt,
+         graphExists: graphExists,
        );
 
   /// Returns a shallow copy of this [Podcast]
@@ -139,6 +149,7 @@ class _PodcastImpl extends Podcast {
     Object? channelName = _Undefined,
     Object? thumbnailUrl = _Undefined,
     DateTime? createdAt,
+    bool? graphExists,
   }) {
     return Podcast(
       id: id is int? ? id : this.id,
@@ -149,6 +160,7 @@ class _PodcastImpl extends Podcast {
       channelName: channelName is String? ? channelName : this.channelName,
       thumbnailUrl: thumbnailUrl is String? ? thumbnailUrl : this.thumbnailUrl,
       createdAt: createdAt ?? this.createdAt,
+      graphExists: graphExists ?? this.graphExists,
     );
   }
 }

@@ -1,50 +1,104 @@
 import 'package:resonance_server/src/generated/protocol.dart';
+import 'package:resonance_server/src/services/ingestion_pipeline.dart';
 import 'package:resonance_server/src/services/youtube_service.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:dartantic_ai/dartantic_ai.dart';
 
-import 'package:dartantic_interface/dartantic_interface.dart';
 import 'package:resonance_server/src/services/llm_prompts.dart';
 
 /// Service for LLM-based topic extraction and summarization using Gemini
 class LLMService {
-  final String _geminiAPIKey;
+  late final String _geminiAPIKey;
 
   LLMService()
-    : _geminiAPIKey = Serverpod.instance.getPassword('geminiAPIKey')!;
-
-  LLMService.withAPIKey(String geminiAPIKey) : _geminiAPIKey = geminiAPIKey;
+    : _geminiAPIKey = Serverpod.instance.getPassword('geminiApiKey')!;
 
   /// Returns Agentic segmented transcript with speaker info and timestamps
   Future<SegmentedTranscript> getSegmentedTranscript(
     Session session,
     Podcast podcast,
+    int jobId,
   ) async {
+    session.log(
+      'LLMService: getSegmentedTranscript invoked for podcast: ${podcast.title}',
+    );
     try {
       final ytService = YouTubeService();
 
-      final audioFile = await ytService.downloadYouTubeAudio(
-        podcast.youtubeUrl,
+      session.log('LLMService: Downloading audio for: ${podcast.youtubeUrl}');
+      await IngestionPipeline.updateJobStatus(
+        session,
+        jobId,
+        'processing',
+        'downloading_audio',
+        20,
       );
-      final audioBytes = await audioFile.readAsBytes();
-      final agent = _createAgent();
+      final audioFile = await ytService.downloadYouTubeAudio(
+        podcast.videoId,
+        onProgress: (progress) {
+          IngestionPipeline.updateJobStatus(
+            session,
+            jobId,
+            'processing',
+            'downloading_audio',
+            progress,
+          );
+        },
+      );
+      session.log('LLMService: Audio downloaded: ${audioFile.path}');
 
+      final audioBytes = await audioFile.readAsBytes();
+      session.log(
+        'LLMService: Audio file read, size: ${audioBytes.length} bytes',
+      );
+      await IngestionPipeline.updateJobStatus(
+        session,
+        jobId,
+        'processing',
+        'downloaded_audio',
+        30,
+      );
+
+      final agent = _createAgent();
+      await IngestionPipeline.updateJobStatus(
+        session,
+        jobId,
+        'processing',
+        'agent_created',
+        35,
+      );
+
+      session.log('LLMService: Sending audio to Gemini for segmentation');
       final result = await agent.sendFor<SegmentedTranscript>(
         LLMPrompts.segmentedTranscriptPrompt(
           podcast.title,
           podcast.channelName,
         ),
         attachments: [
-          DataPart(audioBytes, mimeType: 'audio/mp3'),
+          DataPart(
+            audioBytes,
+            mimeType: 'audio/${audioFile.path.split('.').last}',
+          ),
         ],
         outputSchema: LLMPrompts.segmentedTranscriptSchema,
         outputFromJson: SegmentedTranscript.fromJson,
       );
+      session.log('LLMService: Received response from Gemini');
+      await IngestionPipeline.updateJobStatus(
+        session,
+        jobId,
+        'processing',
+        '${result.output}',
+        40,
+      );
+
+      // delete audio file
+      await audioFile.delete();
 
       return result.output;
     } catch (e) {
       session.log(
-        'Error fetching segmented transcript: $e',
+        'LLMService: Error fetching segmented transcript: $e',
         level: LogLevel.error,
       );
       rethrow;
@@ -105,7 +159,7 @@ class LLMService {
   Agent _createAgent() {
     Agent.environment['GEMINI_API_KEY'] = _geminiAPIKey;
     return Agent(
-      'google?chat=gemini-2.5-flash&embeddings=text-embedding-004',
+      'google?chat=gemini-3-flash-preview&embeddings=text-embedding-004',
       embeddingsModelOptions: const GoogleEmbeddingsModelOptions(
         dimensions: 768,
       ),

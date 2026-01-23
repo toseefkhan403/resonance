@@ -14,4 +14,3 @@ fields:
 indexes:
   graph_node_idx:
     fields: userId, videoId, primarySpeakerId
-    unique: true

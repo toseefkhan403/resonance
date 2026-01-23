@@ -9,3 +9,4 @@ fields:
   channelName: String?
   thumbnailUrl: String?
   createdAt: DateTime, default=now
+  graphExists: bool, default=false

@@ -4,7 +4,7 @@ import 'llm_service.dart';
 
 /// Service for graph construction and linking
 class GraphService {
-  final linkThreshold = 0.2;
+  final linkThreshold = 0.5;
 
   Future<int> mergeOrCreateSpeaker(
     Session session,
@@ -20,6 +20,7 @@ class GraphService {
     );
 
     if (existingSpeaker != null && existingSpeaker.id != null) {
+      session.log('GraphService: found existing speaker: $speakerName (id: ${existingSpeaker.id})');
       await Speaker.db.updateRow(
         session,
         existingSpeaker.copyWith(
@@ -30,6 +31,7 @@ class GraphService {
       return existingSpeaker.id!;
     }
 
+    session.log('GraphService: Creating new speaker: $speakerName');
     final speaker = Speaker(
       userId: userId,
       name: speakerName,
@@ -37,8 +39,8 @@ class GraphService {
       detectedCount: 1,
     );
 
-    await Speaker.db.insertRow(session, speaker);
-    return speaker.id!;
+    final insertedSpeaker = await Speaker.db.insertRow(session, speaker);
+    return insertedSpeaker.id!;
   }
 
   /// Creates nodes and links for a segmented transcript
@@ -50,6 +52,7 @@ class GraphService {
     String videoId,
     List<TranscriptTopic> ideas,
   ) async {
+    session.log('GraphService: processTranscriptIdeas started with ${ideas.length} ideas');
     final llmService = LLMService();
     int nodesCreated = 0;
 
@@ -97,6 +100,10 @@ class GraphService {
             n.userId.equals(userId) &
             (n.embedding.distanceCosine(ideaEmbedding) < linkThreshold),
       );
+      
+      if (similarNodes.isNotEmpty) {
+          session.log('GraphService: Found ${similarNodes.length} similar nodes for ${idea.label}');
+      }
 
       for (final similarNode in similarNodes) {
         if (similarNode.id == ideaNode.id) continue;
@@ -112,6 +119,7 @@ class GraphService {
       }
     }
 
+    session.log('GraphService: processTranscriptIdeas completed. Nodes created: $nodesCreated');
     return nodesCreated;
   }
 }

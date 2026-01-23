@@ -21,6 +21,9 @@ import 'dart:convert' as _i6;
 import 'package:resonance_server/src/generated/graph_data.dart' as _i7;
 import 'package:resonance_server/src/generated/ingestion_job.dart' as _i8;
 import 'package:resonance_server/src/generated/podcast.dart' as _i9;
+import 'package:resonance_server/src/generated/process_podcast_params.dart'
+    as _i10;
+import 'package:resonance_server/src/generated/future_calls.dart' as _i11;
 import 'package:resonance_server/src/generated/protocol.dart';
 import 'package:resonance_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -128,6 +131,8 @@ void withServerpod(
 }
 
 class TestEndpoints {
+  late final futureCalls = _FutureCalls();
+
   late final _EmailIdpEndpoint emailIdp;
 
   late final _GoogleIdpEndpoint googleIdp;
@@ -173,6 +178,10 @@ class _InternalTestEndpoints extends TestEndpoints
       serializationManager,
     );
   }
+}
+
+class _FutureCalls {
+  late final processPodcastCall = _ProcessPodcastCallFutureCall();
 }
 
 class _EmailIdpEndpoint {
@@ -702,5 +711,23 @@ class _PodcastEndpoint {
         await _localUniqueSession.close();
       }
     });
+  }
+}
+
+class _ProcessPodcastCallFutureCall {
+  Future<void> processPodcast(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i10.ProcessPodcastParams? object,
+  ) async {
+    var _localUniqueSession = (sessionBuilder as _i1.InternalTestSessionBuilder)
+        .internalBuild();
+    try {
+      await _i11.ProcessPodcastCallProcessPodcastFutureCall().invoke(
+        _localUniqueSession,
+        object,
+      );
+    } finally {
+      await _localUniqueSession.close();
+    }
   }
 }

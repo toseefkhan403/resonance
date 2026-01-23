@@ -23,7 +23,9 @@ abstract class Podcast
     this.channelName,
     this.thumbnailUrl,
     DateTime? createdAt,
-  }) : createdAt = createdAt ?? DateTime.now();
+    bool? graphExists,
+  }) : createdAt = createdAt ?? DateTime.now(),
+       graphExists = graphExists ?? false;
 
   factory Podcast({
     int? id,
@@ -34,6 +36,7 @@ abstract class Podcast
     String? channelName,
     String? thumbnailUrl,
     DateTime? createdAt,
+    bool? graphExists,
   }) = _PodcastImpl;
 
   factory Podcast.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -48,6 +51,7 @@ abstract class Podcast
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+      graphExists: jsonSerialization['graphExists'] as bool?,
     );
   }
 
@@ -72,6 +76,8 @@ abstract class Podcast
 
   DateTime createdAt;
 
+  bool graphExists;
+
   @override
   _i1.Table<int?> get table => t;
 
@@ -87,6 +93,7 @@ abstract class Podcast
     String? channelName,
     String? thumbnailUrl,
     DateTime? createdAt,
+    bool? graphExists,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -100,6 +107,7 @@ abstract class Podcast
       if (channelName != null) 'channelName': channelName,
       if (thumbnailUrl != null) 'thumbnailUrl': thumbnailUrl,
       'createdAt': createdAt.toJson(),
+      'graphExists': graphExists,
     };
   }
 
@@ -115,6 +123,7 @@ abstract class Podcast
       if (channelName != null) 'channelName': channelName,
       if (thumbnailUrl != null) 'thumbnailUrl': thumbnailUrl,
       'createdAt': createdAt.toJson(),
+      'graphExists': graphExists,
     };
   }
 
@@ -160,6 +169,7 @@ class _PodcastImpl extends Podcast {
     String? channelName,
     String? thumbnailUrl,
     DateTime? createdAt,
+    bool? graphExists,
   }) : super._(
          id: id,
          youtubeUrl: youtubeUrl,
@@ -169,6 +179,7 @@ class _PodcastImpl extends Podcast {
          channelName: channelName,
          thumbnailUrl: thumbnailUrl,
          createdAt: createdAt,
+         graphExists: graphExists,
        );
 
   /// Returns a shallow copy of this [Podcast]
@@ -184,6 +195,7 @@ class _PodcastImpl extends Podcast {
     Object? channelName = _Undefined,
     Object? thumbnailUrl = _Undefined,
     DateTime? createdAt,
+    bool? graphExists,
   }) {
     return Podcast(
       id: id is int? ? id : this.id,
@@ -194,6 +206,7 @@ class _PodcastImpl extends Podcast {
       channelName: channelName is String? ? channelName : this.channelName,
       thumbnailUrl: thumbnailUrl is String? ? thumbnailUrl : this.thumbnailUrl,
       createdAt: createdAt ?? this.createdAt,
+      graphExists: graphExists ?? this.graphExists,
     );
   }
 }
@@ -237,6 +250,11 @@ class PodcastUpdateTable extends _i1.UpdateTable<PodcastTable> {
         table.createdAt,
         value,
       );
+
+  _i1.ColumnValue<bool, bool> graphExists(bool value) => _i1.ColumnValue(
+    table.graphExists,
+    value,
+  );
 }
 
 class PodcastTable extends _i1.Table<int?> {
@@ -271,6 +289,11 @@ class PodcastTable extends _i1.Table<int?> {
       this,
       hasDefault: true,
     );
+    graphExists = _i1.ColumnBool(
+      'graphExists',
+      this,
+      hasDefault: true,
+    );
   }
 
   late final PodcastUpdateTable updateTable;
@@ -289,6 +312,8 @@ class PodcastTable extends _i1.Table<int?> {
 
   late final _i1.ColumnDateTime createdAt;
 
+  late final _i1.ColumnBool graphExists;
+
   @override
   List<_i1.Column> get columns => [
     id,
@@ -299,6 +324,7 @@ class PodcastTable extends _i1.Table<int?> {
     channelName,
     thumbnailUrl,
     createdAt,
+    graphExists,
   ];
 }
 

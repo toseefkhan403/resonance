@@ -9,29 +9,83 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 /// Service for retrieving YouTube transcripts and metadata
 class YouTubeService {
   /// Downloads audio from a YouTube video
-  Future<File> downloadYouTubeAudio(String videoUrl) async {
+  Future<File> downloadYouTubeAudio(
+    String videoId, {
+    void Function(int)? onProgress,
+  }) async {
     try {
-      final yt = YoutubeExplode();
+      var yt = YoutubeExplode();
+      final manifests = await yt.videos.streams.getManifest(
+        videoId,
+        ytClients: [
+          YoutubeApiClient({
+            'context': {
+              'client': {
+                'clientName': 'ANDROID',
+                'clientVersion': '20.10.38',
+                'userAgent':
+                    'com.google.android.youtube/20.10.38 (Linux; U; Android 11) gzip',
+                'hl': 'en',
+                'timeZone': 'UTC',
+                'utcOffsetMinutes': 0,
+                'osName': 'Android',
+                'osVersion': '11',
+              },
+            },
+          }, 'https://www.youtube.com/youtubei/v1/player?prettyPrint=false'),
+        ],
+      );
 
-      final video = await yt.videos.get(videoUrl);
-      final manifest = await yt.videos.streamsClient.getManifest(video.id);
-      final audioStreamInfo = manifest.audioOnly.withHighestBitrate();
-      final audioStream = yt.videos.streamsClient.get(audioStreamInfo);
+      final availableManifests = <AudioStreamInfo>[];
 
-      final fileName = '${video.title}.${audioStreamInfo.container.name}'
-          .replaceAll(r'[\/:*?"<>|]', '');
-      final file = File(fileName);
+      // Check availability of each stream
+      await Future.wait([
+        for (final manifest in manifests.audio)
+          http.head(manifest.url).then((res) {
+            if (res.statusCode >= 200 && res.statusCode <= 299) {
+              availableManifests.add(manifest);
+            }
+          }),
+      ]);
 
-      final output = file.openWrite(mode: FileMode.writeOnlyAppend);
-      await audioStream.pipe(output);
+      if (availableManifests.isEmpty) {
+        throw Exception('No valid audio streams found.');
+      }
+
+      // Sort by bitrate ascending (lowest first)
+      availableManifests.sort(
+        (a, b) => a.bitrate.bitsPerSecond.compareTo(b.bitrate.bitsPerSecond),
+      );
+      final firstStream = availableManifests.first;
+
+      log(
+        'Selected Lowest Bitrate: ${firstStream.bitrate.bitsPerSecond / 1000} kbps',
+      );
+
+      var totalBytes = firstStream.size.totalBytes;
+      var receivedBytes = 0;
+
+      var file = File('$videoId.${firstStream.container}');
+      var output = file.openWrite();
+
+      var stream = yt.videos.streams.get(firstStream);
+
+      await for (final data in stream) {
+        receivedBytes += data.length;
+
+        var progress = ((receivedBytes / totalBytes) * 100).ceil();
+        stdout.write('\rDownload Progress: $progress%');
+        onProgress?.call(progress);
+        output.add(data);
+      }
 
       await output.flush();
       await output.close();
       yt.close();
-
+      log('\nDownload complete: $videoId.webm');
       return file;
     } catch (e) {
-      log('Error downloading audio: $e');
+      log('\nError downloading audio: $e');
       rethrow;
     }
   }
