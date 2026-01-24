@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:resonance_client/resonance_client.dart';
-import 'package:resonance_flutter/main.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:resonance_flutter/presentation/controllers/home_controller.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends ConsumerState<HomePage> {
   final TextEditingController _urlController = TextEditingController();
-  IngestionJob? _ingestionJob;
-  bool _isSubmitting = false;
-  String? _errorMessage;
 
   @override
   void dispose() {
@@ -23,60 +20,15 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _handleGenerate() async {
     final url = _urlController.text.trim();
-    if (url.isEmpty) {
-      setState(() {
-        _errorMessage = 'Please enter a YouTube URL';
-      });
-      return;
-    }
-
-    setState(() {
-      _isSubmitting = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final job = await client.podcast.ingestPodcast(url);
-      if (mounted) {
-        setState(() {
-          _ingestionJob = job;
-          _isSubmitting = false;
-        });
-        _monitorJobStatus(job.id!);
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _errorMessage = e.toString();
-          _isSubmitting = false;
-        });
-      }
-    }
-  }
-
-  void _monitorJobStatus(int jobId) {
-    client.podcast
-        .getJobStatus(jobId)
-        .listen(
-          (job) {
-            if (mounted) {
-              setState(() {
-                _ingestionJob = job;
-              });
-            }
-          },
-          onError: (Object e) {
-            if (mounted) {
-              setState(() {
-                _errorMessage = e.toString();
-              });
-            }
-          },
-        );
+    await ref.read(homeControllerProvider.notifier).generate(url);
   }
 
   @override
   Widget build(BuildContext context) {
+    final homeState = ref.watch(homeControllerProvider);
+    final ingestionJob = homeState.ingestionJob;
+    final isSubmitting = homeState.isSubmitting;
+
     return Scaffold(
       body: Center(
         child: Container(
@@ -84,16 +36,16 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.all(24),
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
-            child: _ingestionJob == null && !_isSubmitting
-                ? _buildInputForm()
-                : _buildProgressView(),
+            child: ingestionJob == null && !isSubmitting
+                ? _buildInputForm(homeState.errorMessage)
+                : _buildProgressView(homeState),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildInputForm() {
+  Widget _buildInputForm(String? errorMessage) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -117,7 +69,7 @@ class _HomePageState extends State<HomePage> {
               borderRadius: BorderRadius.circular(12),
             ),
             prefixIcon: const Icon(Icons.link),
-            errorText: _errorMessage,
+            errorText: errorMessage,
           ),
           onSubmitted: (_) => _handleGenerate(),
         ),
@@ -139,10 +91,11 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildProgressView() {
-    final progress = _ingestionJob?.progress ?? 0;
-    final status = _ingestionJob?.status ?? 'Pending';
-    final stage = _ingestionJob?.stage ?? 'Initializing';
+  Widget _buildProgressView(HomeState homeState) {
+    final ingestionJob = homeState.ingestionJob;
+    final progress = ingestionJob?.progress ?? 0;
+    final status = ingestionJob?.status ?? 'Pending';
+    final stage = ingestionJob?.stage ?? 'Initializing';
     final isError = status == 'failed';
     final isCompleted = status == 'completed';
 
@@ -161,7 +114,7 @@ class _HomePageState extends State<HomePage> {
             child: CircularProgressIndicator(
               value: progress / 100,
               strokeWidth: 6,
-              backgroundColor: Colors.grey.withOpacity(0.2),
+              backgroundColor: Colors.grey.withValues(alpha: 0.2),
             ),
           ),
         const SizedBox(height: 32),
@@ -177,7 +130,9 @@ class _HomePageState extends State<HomePage> {
         ),
         const SizedBox(height: 8),
         Text(
-          isError ? (_errorMessage ?? 'Unknown error') : '$status - $stage',
+          isError
+              ? (homeState.errorMessage ?? 'Unknown error')
+              : '$status - $stage',
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
             color: Colors.grey[600],
           ),
@@ -186,11 +141,8 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: 32),
           OutlinedButton(
             onPressed: () {
-              setState(() {
-                _ingestionJob = null;
-                _errorMessage = null;
-                _urlController.clear();
-              });
+              ref.read(homeControllerProvider.notifier).reset();
+              _urlController.clear();
             },
             child: const Text('Start Over'),
           ),

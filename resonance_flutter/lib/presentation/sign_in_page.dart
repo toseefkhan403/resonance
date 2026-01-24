@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:resonance_flutter/main.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:resonance_flutter/application/serverpod_client.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
-class SignInPage extends StatefulWidget {
+class SignInPage extends ConsumerWidget {
   const SignInPage({super.key});
 
   @override
-  State<SignInPage> createState() => _SignInPageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final client = ref.watch(serverpodClientProvider);
 
-class _SignInPageState extends State<SignInPage> {
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF050000),
       body: Padding(
@@ -37,8 +35,7 @@ class _SignInPageState extends State<SignInPage> {
                             ),
                         child: child,
                       ),
-              onError: (error) {
-                // Handle errors
+              onError: (error) {                
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Error: $error')),
                 );
