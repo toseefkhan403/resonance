@@ -4,10 +4,16 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:resonance_flutter/presentation/utils/resonance_colors.dart';
 
 class HoverLinkText extends StatefulWidget {
-  const HoverLinkText({required this.text, required this.onTap, super.key});
+  const HoverLinkText({
+    required this.text,
+    required this.onTap,
+    this.isActive = false,
+    super.key,
+  });
 
   final String text;
   final VoidCallback onTap;
+  final bool isActive;
 
   @override
   State<HoverLinkText> createState() => _HoverLinkTextState();
@@ -26,7 +32,7 @@ class _HoverLinkTextState extends State<HoverLinkText> {
         child: AnimatedDefaultTextStyle(
           duration: const Duration(milliseconds: 300),
           style: GoogleFonts.rajdhani(
-            color: _isHovered
+            color: _isHovered || widget.isActive
                 ? ResonanceColors.accent
                 : ResonanceColors.textGrey,
             fontWeight: FontWeight.w600,

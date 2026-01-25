@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:resonance_flutter/application/auth_service.dart';
 import 'package:resonance_flutter/application/graph_service.dart';
@@ -6,6 +6,7 @@ import 'package:resonance_flutter/presentation/force_directed_graph_page.dart';
 import 'package:resonance_flutter/presentation/home_page.dart';
 import 'package:resonance_flutter/presentation/sign_in_page.dart';
 import 'package:resonance_flutter/presentation/unknown_page.dart';
+import 'package:resonance_flutter/presentation/widgets/resonance_layout.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'go_router.g.dart';
@@ -49,45 +50,78 @@ GoRouter goRouter(Ref ref) {
 
       return null;
     },
-    routes: <GoRoute>[
+    routes: <RouteBase>[
       GoRoute(
         path: '/',
         name: AppRoute.signIn.name,
-        builder: (context, state) {
-          return const SignInPage();
-        },
+        pageBuilder: (context, state) => _buildPageWithAnimation(
+          child: const SignInPage(),
+          state: state,
+        ),
       ),
-      GoRoute(
-        path: '/home',
-        name: AppRoute.home.name,
-        builder: (context, state) {
-          return const HomePage();
+      ShellRoute(
+        pageBuilder: (context, state, child) {
+          return _buildPageWithAnimation(
+            child: ResonanceLayout(child: child),
+            state: state,
+          );
         },
-      ),
-      GoRoute(
-        path: '/graph',
-        name: AppRoute.graph.name,
-        builder: (context, state) {
-          return const ForceDirectedGraphPage();
-        },
-      ),
-      GoRoute(
-        path: '/demo-graph',
-        name: AppRoute.demoGraph.name,
-        builder: (context, state) {
-          return const ForceDirectedGraphPage(isDemo: true);
-        },
-      ),
-      GoRoute(
-        path: '/unknown',
-        name: AppRoute.unknown.name,
-        builder: (context, state) => const UnknownPage(),
+        routes: [
+          GoRoute(
+            path: '/home',
+            name: AppRoute.home.name,
+            pageBuilder: (context, state) => _buildPageWithAnimation(
+              child: const HomePage(),
+              state: state,
+            ),
+          ),
+          GoRoute(
+            path: '/graph',
+            name: AppRoute.graph.name,
+            pageBuilder: (context, state) => _buildPageWithAnimation(
+              child: const ForceDirectedGraphPage(),
+              state: state,
+            ),
+          ),
+          GoRoute(
+            path: '/demo-graph',
+            name: AppRoute.demoGraph.name,
+            pageBuilder: (context, state) => _buildPageWithAnimation(
+              child: const ForceDirectedGraphPage(isDemo: true),
+              state: state,
+            ),
+          ),
+          GoRoute(
+            path: '/unknown',
+            name: AppRoute.unknown.name,
+            pageBuilder: (context, state) => _buildPageWithAnimation(
+              child: const UnknownPage(),
+              state: state,
+            ),
+          ),
+        ],
       ),
     ],
     onException: (context, state, error) {
       debugPrint('Error in router: $error');
     },
     debugLogDiagnostics: true,
+  );
+}
+
+Page<dynamic> _buildPageWithAnimation({
+  required Widget child,
+  required GoRouterState state,
+}) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(
+        opacity: CurveTween(curve: Curves.easeInOut).animate(animation),
+        child: child,
+      );
+    },
   );
 }
 

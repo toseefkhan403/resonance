@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:live_indicator/live_indicator.dart';
@@ -14,6 +13,7 @@ import 'package:resonance_flutter/presentation/utils/url_launcher.dart';
 import 'package:resonance_flutter/presentation/widgets/animated_background.dart';
 import 'package:resonance_flutter/presentation/widgets/cyberpunk_button.dart';
 import 'package:resonance_flutter/presentation/widgets/hover_link_text.dart';
+import 'package:resonance_flutter/presentation/widgets/resonance_header.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
 class SignInPage extends ConsumerWidget {
@@ -28,11 +28,11 @@ class SignInPage extends ConsumerWidget {
         child: SafeArea(
           child: Column(
             children: [
-              _buildHeader(context),
+              const ResonanceHeader(),
               Expanded(
                 child: SingleChildScrollView(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -54,46 +54,6 @@ class SignInPage extends ConsumerWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Row(
-        children: [
-          SvgPicture.asset(
-            'assets/svg/logo.svg',
-            width: 28,
-            height: 28,
-          ),
-          const SizedBox(width: 12),
-          _title(),
-          const Spacer(),
-          _buildLinkText(
-            'WHAT IS RESONANCE',
-            onTap: () {
-              // open dialog box
-              showDialog<void>(
-                context: context,
-                builder: (context) => const AlertDialog(
-                  title: Text('What is Resonance?'),
-                  content: Text(
-                    'Resonance is a platform that allows you to connect with your brain and extract information from it. It uses advanced AI technology to extract information from your brain and convert it into text that can be used to create a graph of your thoughts.',
-                  ),
-                ),
-              );
-            },
-          ),
-          _buildLinkText(
-            'DEMO GRAPH',
-            onTap: () {
-              // redirect to demo graph page
-              context.go('/demo-graph');
-            },
-          ),
-        ],
       ),
     );
   }
