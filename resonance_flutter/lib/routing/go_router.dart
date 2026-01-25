@@ -1,4 +1,3 @@
-// ignore_for_file: avoid_manual_providers_as_generated_provider_dependency
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:resonance_flutter/application/auth_service.dart';
@@ -73,6 +72,13 @@ GoRouter goRouter(Ref ref) {
         },
       ),
       GoRoute(
+        path: '/demo-graph',
+        name: AppRoute.demoGraph.name,
+        builder: (context, state) {
+          return const ForceDirectedGraphPage(isDemo: true);
+        },
+      ),
+      GoRoute(
         path: '/unknown',
         name: AppRoute.unknown.name,
         builder: (context, state) => const UnknownPage(),
@@ -87,6 +93,7 @@ GoRouter goRouter(Ref ref) {
 
 enum AppRoute {
   home,
+  demoGraph,
   graph,
   signIn,
   unknown,

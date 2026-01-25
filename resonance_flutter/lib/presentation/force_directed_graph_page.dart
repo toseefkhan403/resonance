@@ -1,11 +1,17 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:graphify/graphify.dart';
 import 'package:resonance_flutter/presentation/controllers/graph_controller.dart';
+import 'package:resonance_flutter/presentation/utils/resonance_colors.dart';
 import 'package:resonance_flutter/presentation/widgets/chat_panel.dart';
+import 'package:resonance_flutter/presentation/widgets/cyberpunk_button.dart';
 
 class ForceDirectedGraphPage extends ConsumerStatefulWidget {
-  const ForceDirectedGraphPage({super.key});
+  const ForceDirectedGraphPage({super.key, this.isDemo = false});
+
+  final bool isDemo;
 
   @override
   ConsumerState<ForceDirectedGraphPage> createState() =>
@@ -92,17 +98,81 @@ class _ForceDirectedGraphPageState
 
   @override
   Widget build(BuildContext context) {
-    final graphState = ref.watch(graphControllerProvider);
+    final graphState = ref.watch(
+      graphControllerProvider(isDemo: widget.isDemo),
+    );
 
     if (graphState.isLoading) {
       return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+        body: Center(
+          child: CupertinoActivityIndicator(color: ResonanceColors.accent),
+        ),
       );
     }
 
     if (graphState.error != null) {
       return Scaffold(
-        body: Center(child: Text('Graph Error: ${graphState.error}')),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Graph Error: ${graphState.error}',
+                  style: const TextStyle(color: ResonanceColors.accent),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: 200,
+                  child: CyberpunkButton(
+                    text: 'RETRY',
+                    icon: Icons.refresh,
+                    onPressed: () => ref
+                        .read(
+                          graphControllerProvider(
+                            isDemo: widget.isDemo,
+                          ).notifier,
+                        )
+                        .loadData(isDemo: widget.isDemo),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (graphState.graphData?.graphWithGranularity.isEmpty ?? true) {
+      return Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'No graph data available. Have you added a podcast yet?',
+                  style: TextStyle(color: ResonanceColors.accent),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: 200,
+                  child: CyberpunkButton(
+                    text: 'ADD A PODCAST',
+                    icon: Icons.add_outlined,
+                    onPressed: () {
+                      context.go('/home');
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       );
     }
 
@@ -143,7 +213,11 @@ class _ForceDirectedGraphPageState
                     label: const Text('Cycle Granularity'),
                     icon: const Icon(Icons.grain),
                     onPressed: () => ref
-                        .read(graphControllerProvider.notifier)
+                        .read(
+                          graphControllerProvider(
+                            isDemo: widget.isDemo,
+                          ).notifier,
+                        )
                         .cycleGranularity(),
                   ),
                 const Expanded(child: ChatPanel()),

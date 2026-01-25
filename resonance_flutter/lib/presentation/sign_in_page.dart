@@ -1,6 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:live_indicator/live_indicator.dart';
+import 'package:resonance_client/resonance_client.dart';
 import 'package:resonance_flutter/application/serverpod_client.dart';
+import 'package:resonance_flutter/constants.dart';
+import 'package:resonance_flutter/presentation/utils/resonance_colors.dart';
+import 'package:resonance_flutter/presentation/utils/url_launcher.dart';
+import 'package:resonance_flutter/presentation/widgets/animated_background.dart';
+import 'package:resonance_flutter/presentation/widgets/cyberpunk_button.dart';
+import 'package:resonance_flutter/presentation/widgets/hover_link_text.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
 class SignInPage extends ConsumerWidget {
@@ -11,38 +24,331 @@ class SignInPage extends ConsumerWidget {
     final client = ref.watch(serverpodClientProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF050000),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-        child: Center(
-          child: SizedBox(
-            width: 450,
-            child: GoogleSignInWidget(
-              client: client,
-              buttonWrapper:
-                  ({required child, required onPressed, required style}) =>
-                      FilledButton(
-                        onPressed: onPressed,
-                        style:
-                            FilledButton.styleFrom(
-                              backgroundColor: const Color(0xFF050000),
-                              padding: EdgeInsets.zero,
-                            ).copyWith(
-                              splashFactory: NoSplash.splashFactory,
-                              overlayColor: WidgetStateProperty.all(
-                                Colors.transparent,
-                              ),
-                            ),
-                        child: child,
-                      ),
-              onError: (error) {                
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error: $error')),
-                );
-              },
-            ),
+      body: AnimatedBackground(
+        child: SafeArea(
+          child: Column(
+            children: [
+              _buildHeader(context),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 40),
+                        _buildStatusBar(),
+                        const SizedBox(height: 20),
+                        _title(fontSize: 64),
+                        const SizedBox(height: 10),
+                        _buildSubtitle(),
+                        const SizedBox(height: 60),
+                        _buildLoginCard(context, client),
+                        const SizedBox(height: 60),
+                        _buildFooterStatus(),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Row(
+        children: [
+          SvgPicture.asset(
+            'assets/svg/logo.svg',
+            width: 28,
+            height: 28,
+          ),
+          const SizedBox(width: 12),
+          _title(),
+          const Spacer(),
+          _buildLinkText(
+            'WHAT IS RESONANCE',
+            onTap: () {
+              // open dialog box
+              showDialog<void>(
+                context: context,
+                builder: (context) => const AlertDialog(
+                  title: Text('What is Resonance?'),
+                  content: Text(
+                    'Resonance is a platform that allows you to connect with your brain and extract information from it. It uses advanced AI technology to extract information from your brain and convert it into text that can be used to create a graph of your thoughts.',
+                  ),
+                ),
+              );
+            },
+          ),
+          _buildLinkText(
+            'DEMO GRAPH',
+            onTap: () {
+              // redirect to demo graph page
+              context.go('/demo-graph');
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _title({double fontSize = 24}) => Text(
+    'RESONANCE',
+    style: TextStyle(
+      color: ResonanceColors.white,
+      fontSize: fontSize,
+      fontWeight: FontWeight.bold,
+      letterSpacing: 4,
+      shadows: [
+        BoxShadow(
+          color: ResonanceColors.accent.withValues(alpha: 0.8),
+          blurRadius: 8,
+        ),
+        BoxShadow(
+          color: ResonanceColors.accent.withValues(alpha: 0.4),
+          blurRadius: 20,
+        ),
+      ],
+    ),
+  );
+
+  Widget _buildLinkText(String text, {required VoidCallback onTap}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: HoverLinkText(text: text, onTap: onTap),
+    );
+  }
+
+  Widget _buildStatusBar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      decoration: BoxDecoration(
+        border: Border.all(color: const Color(0xFF330000)),
+        color: const Color(0xFF1A0505),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          LiveIndicator(
+            color: ResonanceColors.accent,
+            spreadRadius: 5,
+            waitDuration: Durations.long1,
+          ),
+          const SizedBox(width: 10),
+          Text(
+            'KNOWLEDGE GRAPH BUILDER',
+            style: GoogleFonts.robotoMono(
+              color: ResonanceColors.accent,
+              fontSize: 12,
+              letterSpacing: 2,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubtitle() {
+    return Text(
+      '''Turn podcasts into structured knowledge graphs you can search, explore, and recall.'''
+          .toUpperCase(),
+      textAlign: TextAlign.center,
+      style: GoogleFonts.rajdhani(
+        color: ResonanceColors.accent,
+        fontSize: 14,
+        letterSpacing: 2,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+
+  Widget _buildLoginCard(BuildContext context, Client client) {
+    return Container(
+      width: 400,
+      decoration: BoxDecoration(
+        color: ResonanceColors.primary.withValues(alpha: 0.6),
+        border: Border.all(
+          color: ResonanceColors.accentDark.withValues(alpha: 0.7),
+        ),
+      ),
+      child: Stack(
+        children: [
+          // Corner accents
+          Positioned(
+            top: 0,
+            left: 0,
+            child: _buildCorner(isTop: true, isLeft: true),
+          ),
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: _buildCorner(isTop: false, isLeft: false),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.all(40),
+            child: Column(
+              children: [
+                const Text(
+                  'ACCESS THE GRAPH',
+                  style: TextStyle(
+                    color: ResonanceColors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 3,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'AUTHORIZE CREDENTIALS TO INITIATE KNOWLEDGE MAPPING',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.rajdhani(
+                    color: ResonanceColors.textGrey,
+                    fontSize: 12,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 40),
+                GoogleSignInWidget(
+                  client: client,
+                  buttonWrapper:
+                      ({
+                        required child,
+                        required onPressed,
+                        required style,
+                      }) => CyberpunkButton(
+                        onPressed: onPressed,
+                        text: 'LOGIN WITH GOOGLE',
+                        icon: Icons.g_mobiledata,
+                      ),
+                  onError: (error) {
+                    // Handle error visually
+                  },
+                ),
+                const SizedBox(height: 30),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        height: 1,
+                        color: ResonanceColors.accentDarker,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(
+                        'OR',
+                        style: GoogleFonts.rajdhani(
+                          color: ResonanceColors.accentDark,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        height: 1,
+                        color: ResonanceColors.accentDarker,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 30),
+                CyberpunkButton(
+                  onPressed: () {
+                    context.go('/demo-graph');
+                  },
+                  text: 'EXPLORE DEMO GRAPH',
+                  icon: Icons.grid_goldenratio,
+                  isPrimary: false,
+                ),
+                const SizedBox(height: 40),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCorner({required bool isTop, required bool isLeft}) {
+    return Container(
+      width: 20,
+      height: 20,
+      decoration: BoxDecoration(
+        border: Border(
+          top: isTop
+              ? const BorderSide(color: Colors.redAccent, width: 2)
+              : BorderSide.none,
+          bottom: !isTop
+              ? const BorderSide(color: Colors.redAccent, width: 2)
+              : BorderSide.none,
+          left: isLeft
+              ? const BorderSide(color: Colors.redAccent, width: 2)
+              : BorderSide.none,
+          right: !isLeft
+              ? const BorderSide(color: Colors.redAccent, width: 2)
+              : BorderSide.none,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFooterStatus() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      decoration: const BoxDecoration(
+        border: Border(top: BorderSide(color: Color(0xFF111111))),
+      ),
+      child: Row(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'BUILT WITH',
+                style: GoogleFonts.rajdhani(
+                  color: ResonanceColors.accentDark,
+                  fontSize: 10,
+                  letterSpacing: 1,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'SERVERPOD & FLUTTER',
+                style: GoogleFonts.shareTechMono(
+                  color: Colors.grey,
+                  fontSize: 10,
+                ),
+              ),
+            ],
+          ),
+          const Spacer(),
+          _buildLinkText(
+            'VIEW ON GITHUB',
+            onTap: () {
+              unawaited(
+                UrlLauncher.launchURLNewTab(ResonanceConstants.githubUrl),
+              );
+            },
+          ),
+          _buildLinkText(
+            'VIEW ON DEVPOST',
+            onTap: () {
+              unawaited(
+                UrlLauncher.launchURLNewTab(ResonanceConstants.devpostUrl),
+              );
+            },
+          ),
+        ],
       ),
     );
   }

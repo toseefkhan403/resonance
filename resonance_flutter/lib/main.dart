@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:resonance_client/resonance_client.dart';
 import 'package:resonance_flutter/application/serverpod_client.dart';
 
 import 'package:resonance_flutter/configure_nonweb.dart'
     if (dart.library.html) 'configure_web.dart';
+import 'package:resonance_flutter/presentation/utils/resonance_colors.dart';
 import 'package:resonance_flutter/routing/go_router.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
@@ -61,7 +63,11 @@ class MainApp extends ConsumerWidget {
     return MaterialApp.router(
       routerConfig: goRouter,
       title: 'Resonance',
-      theme: ThemeData(primarySwatch: Colors.deepPurple),
+      theme: ThemeData(
+        textTheme: GoogleFonts.orbitronTextTheme(),
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: ResonanceColors.primary,
+      ),
       debugShowCheckedModeBanner: false,
     );
   }

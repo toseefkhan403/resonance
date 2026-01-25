@@ -8,7 +8,7 @@ class GraphService {
   GraphService(this._client);
   final Client _client;
 
-  Future<GraphData> getGraphData() {
+  Future<GraphData> getGraphData({bool isDemo = false}) {
     return _client.graph.getGraphData();
   }
 }

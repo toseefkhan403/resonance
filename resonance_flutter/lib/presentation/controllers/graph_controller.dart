@@ -40,16 +40,16 @@ class GraphState {
 @riverpod
 class GraphController extends _$GraphController {
   @override
-  GraphState build() {
+  GraphState build({bool isDemo = false}) {
     // Load data initially
-    unawaited(_loadData());
+    unawaited(loadData(isDemo: isDemo));
     return const GraphState();
   }
 
-  Future<void> _loadData() async {
+  Future<void> loadData({bool isDemo = false}) async {
     try {
       final service = ref.read(graphServiceProvider);
-      final data = await service.getGraphData();
+      final data = await service.getGraphData(isDemo: isDemo);
 
       var granularityIndex = 0;
       if (data.graphWithGranularity.isNotEmpty) {
