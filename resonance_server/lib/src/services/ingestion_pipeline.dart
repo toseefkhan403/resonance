@@ -1,3 +1,4 @@
+import 'package:resonance_server/src/services/youtube_service.dart';
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
 import 'llm_service.dart';
@@ -5,7 +6,6 @@ import 'graph_service.dart';
 
 /// Main pipeline orchestrator for processing podcasts
 class IngestionPipeline {
-  /// Processes a podcast through all stages
   static Future<void> processPodcast(
     Session session,
     int jobId,
@@ -16,15 +16,11 @@ class IngestionPipeline {
       'IngestionPipeline: processPodcast started for job $jobId, podcast $podcastId',
     );
     try {
-      // Update job status
-      session.log(
-        'IngestionPipeline: Updating status to segmented_transcript_acquisition',
-      );
-      await updateJobStatus(
+      await _updateJobStatus(
         session,
         jobId,
         'processing',
-        'segmented_transcript_acquisition',
+        'Initializing ingestion',
         10,
       );
 
@@ -38,12 +34,12 @@ class IngestionPipeline {
         throw Exception('Podcast not found');
       }
 
-      await updateJobStatus(
+      await _updateJobStatus(
         session,
         jobId,
         'processing',
-        'found_podcast',
-        12,
+        'Podcast verified',
+        15,
       );
 
       final llmService = LLMService();
@@ -54,12 +50,12 @@ class IngestionPipeline {
         where: (t) => t.videoId.equals(podcast.videoId),
       );
 
-      await updateJobStatus(
+      await _updateJobStatus(
         session,
         jobId,
         'processing',
-        'found_transcript',
-        30,
+        'Checking transcript cache',
+        20,
       );
 
       if (existingTranscript != null) {
@@ -71,20 +67,62 @@ class IngestionPipeline {
         session.log(
           'IngestionPipeline: Fetching new segmented transcript for video ${podcast.videoId}',
         );
-        await updateJobStatus(
+        await _updateJobStatus(
           session,
           jobId,
           'processing',
-          'fetching_transcript',
-          15,
+          'Generating transcript',
+          25,
         );
+
+        await _updateJobStatus(
+          session,
+          jobId,
+          'processing',
+          'Analyzing audio',
+          30,
+        );
+
+        final ytService = YouTubeService();
+
+        final (audioFile, captionFile) = await ytService
+            .convertVideoToTranscript(
+              podcast.videoId,
+              onProgress: (progress) {
+                _updateJobStatus(
+                  session,
+                  jobId,
+                  'processing',
+                  'Analyzing audio',
+                  30 + (progress * 0.1).toInt(),
+                );
+              },
+            );
+
+        await _updateJobStatus(
+          session,
+          jobId,
+          'processing',
+          'AI Agent processing',
+          45,
+        );
+
         final fetchedTranscript = await llmService.getSegmentedTranscript(
           session,
           podcast,
           jobId,
+          audioFile,
+          captionFile: captionFile,
         );
         segmentedTranscript = fetchedTranscript.copyWith(
           videoId: podcast.videoId,
+        );
+        await _updateJobStatus(
+          session,
+          jobId,
+          'processing',
+          'AI generation completed',
+          60,
         );
 
         // Store transcript for the user
@@ -92,30 +130,26 @@ class IngestionPipeline {
         session.log(
           'IngestionPipeline: Transcript inserted for video ${podcast.videoId}',
         );
-        await updateJobStatus(
+        await _updateJobStatus(
           session,
           jobId,
           'processing',
-          'stored_transcript',
-          45,
+          'Transcript stored',
+          70,
         );
       }
 
-      session.log('IngestionPipeline: Updating status to node_construction');
-      await updateJobStatus(
+      await _updateJobStatus(
         session,
         jobId,
         'processing',
-        'node_construction',
-        50,
+        'Building knowledge graph',
+        80,
       );
 
       final graphService = GraphService();
 
       // Node construction, link similar topics
-      session.log(
-        'IngestionPipeline: Starting node construction for podcast $podcastId',
-      );
       final nodeCount = await graphService.processTranscriptIdeas(
         session,
         userId,
@@ -123,7 +157,6 @@ class IngestionPipeline {
         podcast.videoId,
         segmentedTranscript.ideas,
       );
-      session.log('IngestionPipeline: Created $nodeCount nodes');
 
       if (nodeCount == 0) {
         session.log(
@@ -133,24 +166,23 @@ class IngestionPipeline {
         throw Exception('No nodes created for podcast');
       }
 
-      session.log('IngestionPipeline: Job $jobId completed successfully');
       // update podcast graphExists to true
       await Podcast.db.updateRow(
         session,
         podcast.copyWith(graphExists: true),
       );
-      await updateJobStatus(session, jobId, 'completed', 'completed', 100);
+      await _updateJobStatus(session, jobId, 'completed', 'Completed', 100);
     } catch (e, stackTrace) {
       session.log(
         'IngestionPipeline: Error processing podcast: $e',
         level: LogLevel.error,
         stackTrace: stackTrace,
       );
-      await updateJobStatus(
+      await _updateJobStatus(
         session,
         jobId,
         'failed',
-        'error',
+        'Error',
         0,
         errorMessage: e.toString(),
       );
@@ -158,8 +190,7 @@ class IngestionPipeline {
     }
   }
 
-  /// Updates ingestion job status
-  static Future<void> updateJobStatus(
+  static Future<void> _updateJobStatus(
     Session session,
     int jobId,
     String status,

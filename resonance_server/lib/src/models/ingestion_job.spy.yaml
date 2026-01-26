@@ -4,7 +4,7 @@ table: ingestion_job
 fields:
   podcastId: int
   userId: String
-  stage: String, default="pending"
+  stage: String, default="booting up"
   status: String, default="pending"
   errorMessage: String?
   progress: int, default=0

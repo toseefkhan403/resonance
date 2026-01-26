@@ -2,12 +2,10 @@ import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
 import '../services/llm_service.dart';
 
-/// Endpoint for conversational AI ("Ask the speakers")
 class ConversationEndpoint extends Endpoint {
-  final double distanceThreshold = 0.4;
+  final double distanceThreshold = 0.3;
 
   /// Answers questions using stored knowledge graph and speaker perspective
-  /// streams the generated answer as chunks
   Stream<String> askQuestion(
     Session session,
     String question,
@@ -27,15 +25,13 @@ class ConversationEndpoint extends Endpoint {
           n.userId.equals(userId) &
           n.primarySpeakerId.equals(speaker.id!) &
           (n.embedding.distanceCosine(questionEmbedding) < distanceThreshold),
+      limit: 5,
     );
 
-    final limitedNodes = nodes.take(5).toList();
-
-    // Generate answer using LLM with speaker perspective
     final answerStream = llmService.generateConversationalAnswer(
       question,
       speaker.name,
-      limitedNodes,
+      nodes,
     );
 
     await for (var chunk in answerStream) {
@@ -43,10 +39,8 @@ class ConversationEndpoint extends Endpoint {
     }
   }
 
-  // list speakers for a podcast
   Future<List<Speaker>> listSpeakers(Session session) async {
     final userId = session.authenticated?.userIdentifier;
-    session.log('listSpeakers: invoked by user $userId');
 
     if (userId == null) {
       session.log(

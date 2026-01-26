@@ -4,3 +4,4 @@ fields:
   userId: String
   sourceNodeId: int
   targetNodeId: int
+  weight: double

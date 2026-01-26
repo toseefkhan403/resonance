@@ -24,7 +24,7 @@ abstract class IngestionJob implements _i1.SerializableModel {
     DateTime? createdAt,
     DateTime? updatedAt,
     this.completedAt,
-  }) : stage = stage ?? 'pending',
+  }) : stage = stage ?? 'booting up',
        status = status ?? 'pending',
        progress = progress ?? 0,
        createdAt = createdAt ?? DateTime.now(),

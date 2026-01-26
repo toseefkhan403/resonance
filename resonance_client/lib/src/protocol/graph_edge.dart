@@ -18,6 +18,7 @@ abstract class GraphEdge implements _i1.SerializableModel {
     required this.userId,
     required this.sourceNodeId,
     required this.targetNodeId,
+    required this.weight,
   });
 
   factory GraphEdge({
@@ -25,6 +26,7 @@ abstract class GraphEdge implements _i1.SerializableModel {
     required String userId,
     required int sourceNodeId,
     required int targetNodeId,
+    required double weight,
   }) = _GraphEdgeImpl;
 
   factory GraphEdge.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -33,6 +35,7 @@ abstract class GraphEdge implements _i1.SerializableModel {
       userId: jsonSerialization['userId'] as String,
       sourceNodeId: jsonSerialization['sourceNodeId'] as int,
       targetNodeId: jsonSerialization['targetNodeId'] as int,
+      weight: (jsonSerialization['weight'] as num).toDouble(),
     );
   }
 
@@ -47,6 +50,8 @@ abstract class GraphEdge implements _i1.SerializableModel {
 
   int targetNodeId;
 
+  double weight;
+
   /// Returns a shallow copy of this [GraphEdge]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -55,6 +60,7 @@ abstract class GraphEdge implements _i1.SerializableModel {
     String? userId,
     int? sourceNodeId,
     int? targetNodeId,
+    double? weight,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -64,6 +70,7 @@ abstract class GraphEdge implements _i1.SerializableModel {
       'userId': userId,
       'sourceNodeId': sourceNodeId,
       'targetNodeId': targetNodeId,
+      'weight': weight,
     };
   }
 
@@ -81,11 +88,13 @@ class _GraphEdgeImpl extends GraphEdge {
     required String userId,
     required int sourceNodeId,
     required int targetNodeId,
+    required double weight,
   }) : super._(
          id: id,
          userId: userId,
          sourceNodeId: sourceNodeId,
          targetNodeId: targetNodeId,
+         weight: weight,
        );
 
   /// Returns a shallow copy of this [GraphEdge]
@@ -97,12 +106,14 @@ class _GraphEdgeImpl extends GraphEdge {
     String? userId,
     int? sourceNodeId,
     int? targetNodeId,
+    double? weight,
   }) {
     return GraphEdge(
       id: id is int? ? id : this.id,
       userId: userId ?? this.userId,
       sourceNodeId: sourceNodeId ?? this.sourceNodeId,
       targetNodeId: targetNodeId ?? this.targetNodeId,
+      weight: weight ?? this.weight,
     );
   }
 }

@@ -1,0 +1,48 @@
+{
+  "__className__": "serverpod.DatabaseMigration",
+  "actions": [
+    {
+      "__className__": "serverpod.DatabaseMigrationAction",
+      "type": "alterTable",
+      "alterTable": {
+        "__className__": "serverpod.TableMigration",
+        "name": "ingestion_job",
+        "schema": "public",
+        "addColumns": [],
+        "deleteColumns": [
+          "stageProgress"
+        ],
+        "modifyColumns": [],
+        "addIndexes": [],
+        "deleteIndexes": [],
+        "addForeignKeys": [],
+        "deleteForeignKeys": [],
+        "warnings": [
+          {
+            "__className__": "serverpod.DatabaseMigrationWarning",
+            "type": "columnDropped",
+            "message": "Column \"stageProgress\" of table \"ingestion_job\" will be dropped.",
+            "table": "ingestion_job",
+            "columns": [
+              "stageProgress"
+            ],
+            "destrucive": true
+          }
+        ]
+      }
+    }
+  ],
+  "warnings": [
+    {
+      "__className__": "serverpod.DatabaseMigrationWarning",
+      "type": "columnDropped",
+      "message": "Column \"stageProgress\" of table \"ingestion_job\" will be dropped.",
+      "table": "ingestion_job",
+      "columns": [
+        "stageProgress"
+      ],
+      "destrucive": true
+    }
+  ],
+  "migrationApiVersion": 1
+}

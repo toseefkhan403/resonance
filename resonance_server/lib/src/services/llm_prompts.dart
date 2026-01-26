@@ -5,14 +5,14 @@ class LLMPrompts {
       '''
 You are an expert Knowledge Extraction system.
 
-Listen to this podcast audio and extract atomic semantic ideas.
+Listen to this podcast audio and read the attached closed captions to extract atomic semantic ideas.
 A semantic idea represents a single, self-contained concept.
 
 ${title != null ? 'Podcast Title: $title' : ''}
 ${channelName != null ? 'Channel Name: $channelName' : ''}
 
 Rules:
-1. Extract atleast 10 distinct semantic ideas from the podcast.
+1. Extract at least 10 distinct semantic ideas from the podcast.
 2. Each idea must include:
    - A concise label (2–6 words)
    - A detailed summary explaining the idea
@@ -22,7 +22,7 @@ Rules:
 3. Only include references spoken by the guest(s). Do NOT include the interviewer or host. Keep only one primary speaker for each idea.
 4. Speaker names must be the full, human-readable name.
 5. Do not invent ideas. Only extract ideas clearly discussed in the audio.
-6. Keep the same language in the output through out the conversation as the podcast.
+6. Output must be strictly in English. Do not translate the audio.
 7. Output must be JSON.
 
 Example output:

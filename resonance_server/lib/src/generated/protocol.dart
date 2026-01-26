@@ -92,6 +92,12 @@ class Protocol extends _i1.SerializationManagerServer {
           isNullable: false,
           dartType: 'int',
         ),
+        _i2.ColumnDefinition(
+          name: 'weight',
+          columnType: _i2.ColumnType.doublePrecision,
+          isNullable: false,
+          dartType: 'double',
+        ),
       ],
       foreignKeys: [],
       indexes: [
@@ -257,7 +263,7 @@ class Protocol extends _i1.SerializationManagerServer {
           columnType: _i2.ColumnType.text,
           isNullable: false,
           dartType: 'String',
-          columnDefault: '\'pending\'::text',
+          columnDefault: '\'booting up\'::text',
         ),
         _i2.ColumnDefinition(
           name: 'status',

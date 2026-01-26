@@ -2,9 +2,8 @@ import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
 import 'llm_service.dart';
 
-/// Service for graph construction and linking
 class GraphService {
-  final linkThreshold = 0.4;
+  final linkThreshold = 0.3;
 
   Future<int> mergeOrCreateSpeaker(
     Session session,
@@ -20,7 +19,9 @@ class GraphService {
     );
 
     if (existingSpeaker != null && existingSpeaker.id != null) {
-      session.log('GraphService: found existing speaker: $speakerName (id: ${existingSpeaker.id})');
+      session.log(
+        'GraphService: found existing speaker: $speakerName (id: ${existingSpeaker.id})',
+      );
       await Speaker.db.updateRow(
         session,
         existingSpeaker.copyWith(
@@ -52,24 +53,37 @@ class GraphService {
     String videoId,
     List<TranscriptTopic> ideas,
   ) async {
-    session.log('GraphService: processTranscriptIdeas started with ${ideas.length} ideas');
+    session.log(
+      'GraphService: processTranscriptIdeas started with ${ideas.length} ideas',
+    );
     final llmService = LLMService();
     int nodesCreated = 0;
 
-    for (final idea in ideas) {
-      // 1. Generate embedding for the new node
-      final ideaEmbedding = await llmService.generateEmbedding(
-        '${idea.label}: ${idea.summary}',
-      );
+    // 1. Generate embeddings in parallel
+    final embeddingTexts = ideas
+        .map((idea) => '${idea.label}: ${idea.summary}')
+        .toList();
+    final embeddings = await llmService.generateEmbeddings(embeddingTexts);
 
-      // 2. Identify speaker
-      final speakerId = await mergeOrCreateSpeaker(
+    // 2. Pre-process speakers (Cache IDs)
+    final speakerCache = <String, int>{};
+    final uniqueSpeakers = ideas.map((e) => e.primarySpeaker).toSet();
+
+    for (final speakerName in uniqueSpeakers) {
+      speakerCache[speakerName] = await mergeOrCreateSpeaker(
         session,
         userId,
-        idea.primarySpeaker,
+        speakerName,
       );
+    }
 
-      // 3. Create the Node
+    // 3. Create Nodes and Links
+    for (var i = 0; i < ideas.length; i++) {
+      final idea = ideas[i];
+      final ideaEmbedding = embeddings[i];
+
+      final speakerId = speakerCache[idea.primarySpeaker]!;
+
       final ideaNode = await GraphNode.db.insertRow(
         session,
         GraphNode(
@@ -93,34 +107,37 @@ class GraphService {
       );
       nodesCreated++;
 
-      // 4. Link similar topics based on distanceCosine (user specific)
+      // Link similar topics based on distanceCosine (user specific)
       final similarNodes = await GraphNode.db.find(
         session,
         where: (n) =>
             n.userId.equals(userId) &
             (n.embedding.distanceCosine(ideaEmbedding) < linkThreshold),
+        orderBy: (n) => n.embedding.distanceCosine(ideaEmbedding),
       );
-      
-      if (similarNodes.isNotEmpty) {
-          session.log('GraphService: Found ${similarNodes.length} similar nodes for ${idea.label}');
-      }
 
+      var rank = 0;
       for (final similarNode in similarNodes) {
         if (similarNode.id == ideaNode.id) continue;
 
-        // todo consider adding weight
+        final weight = (1.0 - (rank * 0.1)).clamp(0.4, 1.0);
+        rank++;
+
         await GraphEdge.db.insertRow(
           session,
           GraphEdge(
             userId: userId,
             sourceNodeId: ideaNode.id!,
             targetNodeId: similarNode.id!,
+            weight: weight,
           ),
         );
       }
     }
 
-    session.log('GraphService: processTranscriptIdeas completed. Nodes created: $nodesCreated');
+    session.log(
+      'GraphService: processTranscriptIdeas completed. Nodes created: $nodesCreated',
+    );
     return nodesCreated;
   }
 }

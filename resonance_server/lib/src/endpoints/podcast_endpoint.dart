@@ -4,18 +4,11 @@ import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
 import '../services/youtube_service.dart';
 
-/// Endpoint for podcast ingestion and management
 class PodcastEndpoint extends Endpoint {
-  /// Step 1: Ingestion orchestration
-  /// Accepts a YouTube URL from an authenticated user
-  /// Creates a background ingestion job and returns immediately
   Future<IngestionJob> ingestPodcast(
     Session session,
     String youtubeUrl,
   ) async {
-    session.log('ingestPodcast: invoked with URL: $youtubeUrl');
-
-    // Get authenticated user
     final userId = session.authenticated?.userIdentifier;
     if (userId == null) {
       session.log(
@@ -24,10 +17,8 @@ class PodcastEndpoint extends Endpoint {
       );
       throw Exception('User not authenticated');
     }
-    session.log('ingestPodcast: User authenticated: $userId');
 
     final ytService = YouTubeService();
-
     final videoId = ytService.extractVideoId(youtubeUrl);
     if (videoId == null) {
       session.log(
@@ -36,9 +27,7 @@ class PodcastEndpoint extends Endpoint {
       );
       throw Exception('Invalid YouTube URL');
     }
-    session.log('ingestPodcast: Extracted video ID: $videoId');
 
-    // Check if podcast already exists for this user
     final existingPodcast = await Podcast.db.findFirstRow(
       session,
       where: (p) => p.userId.equals(userId) & p.videoId.equals(videoId),
@@ -58,8 +47,6 @@ class PodcastEndpoint extends Endpoint {
         throw Exception('Graph already exists for this podcast');
       }
     } else {
-      session.log('ingestPodcast: Fetching video metadata');
-      // Get video metadata
       final metadata = await ytService.getVideoMetadata(youtubeUrl);
 
       if (metadata == null) {
@@ -69,9 +56,7 @@ class PodcastEndpoint extends Endpoint {
         );
         throw Exception('Failed to fetch video metadata');
       }
-      session.log('ingestPodcast: Metadata fetched: ${metadata.title}');
 
-      // Create podcast record
       podcast = await Podcast.db.insertRow(
         session,
         Podcast(
@@ -83,10 +68,8 @@ class PodcastEndpoint extends Endpoint {
           userId: userId,
         ),
       );
-      session.log('ingestPodcast: Created new podcast record: ${podcast}');
     }
 
-    // Create ingestion job
     final job = await IngestionJob.db.insertRow(
       session,
       IngestionJob(
@@ -97,9 +80,7 @@ class PodcastEndpoint extends Endpoint {
         progress: 0,
       ),
     );
-    session.log('ingestPodcast: Created new ingestion job: ${job}');
 
-    // Schedule background processing using FutureCall
     await session.serverpod.futureCalls
         .callWithDelay(Duration(seconds: 1), identifier: 'processPodcast')
         .processPodcastCall
@@ -117,13 +98,11 @@ class PodcastEndpoint extends Endpoint {
     return job;
   }
 
-  /// Gets the status of an ingestion job as a stream
   Stream<IngestionJob> getJobStatus(
     Session session,
     int jobId,
   ) async* {
     final userId = session.authenticated?.userIdentifier;
-    session.log('getJobStatus: invoked for job $jobId by user $userId');
 
     if (userId == null) {
       session.log(
@@ -150,7 +129,6 @@ class PodcastEndpoint extends Endpoint {
       throw Exception('Job not found or the user doesn\'t have access to it');
     }
 
-    session.log('getJobStatus: Initial status for job $jobId: ${job.status}');
     yield job;
 
     if (job.status == 'completed' || job.status == 'failed') {
@@ -162,11 +140,7 @@ class PodcastEndpoint extends Endpoint {
       'job-updates-$jobId',
     );
 
-    session.log('getJobStatus: Listening for updates on job-updates-$jobId');
     await for (final update in stream) {
-      session.log(
-        'getJobStatus: Update received for job $jobId: ${update.status} - ${update.stage}',
-      );
       yield update;
       if (update.status == 'completed' || update.status == 'failed') {
         session.log(
@@ -177,10 +151,8 @@ class PodcastEndpoint extends Endpoint {
     }
   }
 
-  /// Lists all podcasts for the authenticated user
   Future<List<Podcast>> listPodcasts(Session session) async {
     final userId = session.authenticated?.userIdentifier;
-    session.log('listPodcasts: invoked by user $userId');
 
     if (userId == null) {
       session.log(
@@ -197,9 +169,6 @@ class PodcastEndpoint extends Endpoint {
       orderDescending: true,
     );
 
-    session.log(
-      'listPodcasts: Found ${podcasts.length} podcasts for user $userId',
-    );
     return podcasts;
   }
 }

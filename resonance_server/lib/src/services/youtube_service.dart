@@ -6,10 +6,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
-/// Service for retrieving YouTube transcripts and metadata
 class YouTubeService {
-  /// Downloads audio from a YouTube video
-  Future<File> downloadYouTubeAudio(
+  Future<(File, File?)> convertVideoToTranscript(
     String videoId, {
     void Function(int)? onProgress,
   }) async {
@@ -35,6 +33,31 @@ class YouTubeService {
           }, 'https://www.youtube.com/youtubei/v1/player?prettyPrint=false'),
         ],
       );
+
+      final tempDir = Directory.systemTemp;
+      File? captionFile;
+
+      try {
+        var trackManifest = await yt.videos.closedCaptions.getManifest(
+          videoId,
+        );
+
+        var trackInfo = trackManifest.getByLanguage('en').firstOrNull;
+
+        if (trackInfo != null) {
+          var track = await yt.videos.closedCaptions.get(trackInfo);
+
+          captionFile = File('${tempDir.path}/$videoId.transcript.txt');
+          var bucket = captionFile.openWrite();
+          for (final caption in track.captions) {
+            bucket.writeln('${caption.offset}: ${caption.text}');
+          }
+          await bucket.flush();
+          await bucket.close();
+        }
+      } catch (e) {
+        log('Error fetching captions: $e');
+      }
 
       final availableManifests = <AudioStreamInfo>[];
 
@@ -65,7 +88,7 @@ class YouTubeService {
       var totalBytes = firstStream.size.totalBytes;
       var receivedBytes = 0;
 
-      var file = File('$videoId.${firstStream.container}');
+      var file = File('${tempDir.path}/$videoId.${firstStream.container}');
       var output = file.openWrite();
 
       var stream = yt.videos.streams.get(firstStream);
@@ -82,8 +105,8 @@ class YouTubeService {
       await output.flush();
       await output.close();
       yt.close();
-      log('\nDownload complete: $videoId.webm');
-      return file;
+      log('\nDownload complete: $videoId.${firstStream.container}');
+      return (file, captionFile);
     } catch (e) {
       log('\nError downloading audio: $e');
       rethrow;

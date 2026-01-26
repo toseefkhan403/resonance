@@ -25,7 +25,7 @@ abstract class IngestionJob
     DateTime? createdAt,
     DateTime? updatedAt,
     this.completedAt,
-  }) : stage = stage ?? 'pending',
+  }) : stage = stage ?? 'booting up',
        status = status ?? 'pending',
        progress = progress ?? 0,
        createdAt = createdAt ?? DateTime.now(),

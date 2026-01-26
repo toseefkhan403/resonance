@@ -261,7 +261,6 @@ class EndpointJwtRefresh extends _i4.EndpointRefreshJwtTokens {
   );
 }
 
-/// Endpoint for conversational AI ("Ask the speakers")
 /// {@category Endpoint}
 class EndpointConversation extends _i2.EndpointRef {
   EndpointConversation(_i2.EndpointCaller caller) : super(caller);
@@ -270,7 +269,6 @@ class EndpointConversation extends _i2.EndpointRef {
   String get name => 'conversation';
 
   /// Answers questions using stored knowledge graph and speaker perspective
-  /// streams the generated answer as chunks
   _i3.Stream<String> askQuestion(
     String question,
     _i5.Speaker speaker,
@@ -292,7 +290,6 @@ class EndpointConversation extends _i2.EndpointRef {
       );
 }
 
-/// Endpoint for graph visualization data
 /// {@category Endpoint}
 class EndpointGraph extends _i2.EndpointRef {
   EndpointGraph(_i2.EndpointCaller caller) : super(caller);
@@ -300,16 +297,21 @@ class EndpointGraph extends _i2.EndpointRef {
   @override
   String get name => 'graph';
 
-  /// Returns nodes and links for force-directed graph visualization
   _i3.Future<_i6.GraphData> getGraphData() =>
       caller.callServerEndpoint<_i6.GraphData>(
         'graph',
         'getGraphData',
         {},
       );
+
+  _i3.Future<_i6.GraphData> getDemoGraphData() =>
+      caller.callServerEndpoint<_i6.GraphData>(
+        'graph',
+        'getDemoGraphData',
+        {},
+      );
 }
 
-/// Endpoint for podcast ingestion and management
 /// {@category Endpoint}
 class EndpointPodcast extends _i2.EndpointRef {
   EndpointPodcast(_i2.EndpointCaller caller) : super(caller);
@@ -317,9 +319,6 @@ class EndpointPodcast extends _i2.EndpointRef {
   @override
   String get name => 'podcast';
 
-  /// Step 1: Ingestion orchestration
-  /// Accepts a YouTube URL from an authenticated user
-  /// Creates a background ingestion job and returns immediately
   _i3.Future<_i7.IngestionJob> ingestPodcast(String youtubeUrl) =>
       caller.callServerEndpoint<_i7.IngestionJob>(
         'podcast',
@@ -327,7 +326,6 @@ class EndpointPodcast extends _i2.EndpointRef {
         {'youtubeUrl': youtubeUrl},
       );
 
-  /// Gets the status of an ingestion job as a stream
   _i3.Stream<_i7.IngestionJob> getJobStatus(int jobId) =>
       caller.callStreamingServerEndpoint<
         _i3.Stream<_i7.IngestionJob>,
@@ -339,7 +337,6 @@ class EndpointPodcast extends _i2.EndpointRef {
         {},
       );
 
-  /// Lists all podcasts for the authenticated user
   _i3.Future<List<_i8.Podcast>> listPodcasts() =>
       caller.callServerEndpoint<List<_i8.Podcast>>(
         'podcast',
