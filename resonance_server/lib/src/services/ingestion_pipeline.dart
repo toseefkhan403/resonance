@@ -75,14 +75,6 @@ class IngestionPipeline {
           25,
         );
 
-        await _updateJobStatus(
-          session,
-          jobId,
-          'processing',
-          'Analyzing audio',
-          30,
-        );
-
         final ytService = YouTubeService();
 
         final audioFile = await ytService

@@ -65,12 +65,11 @@ Example output:
               'items': {
                 'type': 'object',
                 'properties': {
-                  'speaker': {'type': 'string'},
                   'quote': {'type': 'string'},
                   'start': {'type': 'integer'},
                   'end': {'type': 'integer'},
                 },
-                'required': ['speaker', 'quote', 'start', 'end'],
+                'required': ['quote', 'start', 'end'],
               },
             },
           },
