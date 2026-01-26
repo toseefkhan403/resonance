@@ -3,7 +3,7 @@ import '../generated/protocol.dart';
 import '../services/llm_service.dart';
 
 class ConversationEndpoint extends Endpoint {
-  final double distanceThreshold = 0.3;
+  final double distanceThreshold = 0.4;
 
   /// Answers questions using stored knowledge graph and speaker perspective
   Stream<String> askQuestion(

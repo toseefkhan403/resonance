@@ -3,7 +3,7 @@ import '../generated/protocol.dart';
 import 'llm_service.dart';
 
 class GraphService {
-  final linkThreshold = 0.3;
+  final linkThreshold = 0.25;
 
   Future<int> mergeOrCreateSpeaker(
     Session session,

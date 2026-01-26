@@ -18,12 +18,13 @@ Rules:
    - A detailed summary explaining the idea
    - Impact score (0-1) - How important is this idea?
    - Primary speaker - Who is the main speaker of this idea?
-   - One or more timestamped references where the idea is discussed
+   - One or more timestamped references (in seconds) where the idea is discussed
 3. Only include references spoken by the guest(s). Do NOT include the interviewer or host. Keep only one primary speaker for each idea.
 4. Speaker names must be the full, human-readable name.
-5. Do not invent ideas. Only extract ideas clearly discussed in the audio.
-6. Output must be strictly in English. Do not translate the audio.
-7. Output must be JSON.
+5. The start and end timestamps MUST be in seconds since the beginning of the audio.
+6. Do not invent ideas. Only extract ideas clearly discussed in the audio.
+7. Output must be strictly in English. Do not translate the audio.
+8. Output must be JSON.
 
 Example output:
 {
@@ -36,8 +37,8 @@ Example output:
       "references": [
         {
           "quote": "Dopamine is the currency of craving.",
-          "start": 120.5,
-          "end": 135.0
+          "start": 120,
+          "end": 135
         }
       ]
     }
@@ -66,8 +67,8 @@ Example output:
                 'properties': {
                   'speaker': {'type': 'string'},
                   'quote': {'type': 'string'},
-                  'start': {'type': 'number'},
-                  'end': {'type': 'number'},
+                  'start': {'type': 'integer'},
+                  'end': {'type': 'integer'},
                 },
                 'required': ['speaker', 'quote', 'start', 'end'],
               },
@@ -102,15 +103,18 @@ $contextText
 Answer the question using ONLY the information provided in the context. 
 Maintain the tone and perspective of $speakerName.
 Do not make up information not present in the context.
-If the context doesn't contain enough information, say so clearly.
+If the context doesn't contain enough information, say so clearly, and send no references.
+Compulsorily include the &t=start time parameter to the youtube link.
 
-Format your response exactly as follows:
+Format your response as follows:
 [$speakerName] [Summarized answer here - don't use the verbatim quote here]
-References: "verbatimQuote" - [youtubeLink]
+
+References: "verbatimQuote" <youtubeLink>
 
 Example:
 [Andrew Huberman] Dopamine is actually about craving, not just pleasure. It drives us to seek things out.
-References: "Dopamine is the currency of craving." - https://youtube.com/watch?v=videoId&t=120
+
+References: "Dopamine is the currency of craving." <https://youtube.com/watch?v=videoId&t=120>
 ''';
 
   static const String conversationalAnswerSystemMessage =

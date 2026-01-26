@@ -21,31 +21,31 @@ abstract class TranscriptReference implements _i1.SerializableModel {
 
   factory TranscriptReference({
     required String quote,
-    required double start,
-    required double end,
+    required int start,
+    required int end,
   }) = _TranscriptReferenceImpl;
 
   factory TranscriptReference.fromJson(Map<String, dynamic> jsonSerialization) {
     return TranscriptReference(
       quote: jsonSerialization['quote'] as String,
-      start: (jsonSerialization['start'] as num).toDouble(),
-      end: (jsonSerialization['end'] as num).toDouble(),
+      start: jsonSerialization['start'] as int,
+      end: jsonSerialization['end'] as int,
     );
   }
 
   String quote;
 
-  double start;
+  int start;
 
-  double end;
+  int end;
 
   /// Returns a shallow copy of this [TranscriptReference]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
   TranscriptReference copyWith({
     String? quote,
-    double? start,
-    double? end,
+    int? start,
+    int? end,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -66,8 +66,8 @@ abstract class TranscriptReference implements _i1.SerializableModel {
 class _TranscriptReferenceImpl extends TranscriptReference {
   _TranscriptReferenceImpl({
     required String quote,
-    required double start,
-    required double end,
+    required int start,
+    required int end,
   }) : super._(
          quote: quote,
          start: start,
@@ -80,8 +80,8 @@ class _TranscriptReferenceImpl extends TranscriptReference {
   @override
   TranscriptReference copyWith({
     String? quote,
-    double? start,
-    double? end,
+    int? start,
+    int? end,
   }) {
     return TranscriptReference(
       quote: quote ?? this.quote,

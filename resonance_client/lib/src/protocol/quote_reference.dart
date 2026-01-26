@@ -20,22 +20,22 @@ abstract class QuoteReference implements _i1.SerializableModel {
   });
 
   factory QuoteReference({
-    required double startTime,
-    required double endTime,
+    required int startTime,
+    required int endTime,
     required String verbatimQuote,
   }) = _QuoteReferenceImpl;
 
   factory QuoteReference.fromJson(Map<String, dynamic> jsonSerialization) {
     return QuoteReference(
-      startTime: (jsonSerialization['startTime'] as num).toDouble(),
-      endTime: (jsonSerialization['endTime'] as num).toDouble(),
+      startTime: jsonSerialization['startTime'] as int,
+      endTime: jsonSerialization['endTime'] as int,
       verbatimQuote: jsonSerialization['verbatimQuote'] as String,
     );
   }
 
-  double startTime;
+  int startTime;
 
-  double endTime;
+  int endTime;
 
   String verbatimQuote;
 
@@ -43,8 +43,8 @@ abstract class QuoteReference implements _i1.SerializableModel {
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
   QuoteReference copyWith({
-    double? startTime,
-    double? endTime,
+    int? startTime,
+    int? endTime,
     String? verbatimQuote,
   });
   @override
@@ -65,8 +65,8 @@ abstract class QuoteReference implements _i1.SerializableModel {
 
 class _QuoteReferenceImpl extends QuoteReference {
   _QuoteReferenceImpl({
-    required double startTime,
-    required double endTime,
+    required int startTime,
+    required int endTime,
     required String verbatimQuote,
   }) : super._(
          startTime: startTime,
@@ -79,8 +79,8 @@ class _QuoteReferenceImpl extends QuoteReference {
   @_i1.useResult
   @override
   QuoteReference copyWith({
-    double? startTime,
-    double? endTime,
+    int? startTime,
+    int? endTime,
     String? verbatimQuote,
   }) {
     return QuoteReference(

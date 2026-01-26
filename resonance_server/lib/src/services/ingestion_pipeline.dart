@@ -85,8 +85,9 @@ class IngestionPipeline {
 
         final ytService = YouTubeService();
 
-        final (audioFile, captionFile) = await ytService
+        final audioFile = await ytService
             .convertVideoToTranscript(
+              session,
               podcast.videoId,
               onProgress: (progress) {
                 _updateJobStatus(
@@ -112,7 +113,6 @@ class IngestionPipeline {
           podcast,
           jobId,
           audioFile,
-          captionFile: captionFile,
         );
         segmentedTranscript = fetchedTranscript.copyWith(
           videoId: podcast.videoId,

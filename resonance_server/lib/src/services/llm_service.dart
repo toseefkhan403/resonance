@@ -19,9 +19,8 @@ class LLMService {
     Session session,
     Podcast podcast,
     int jobId,
-    File audioFile, {
-    File? captionFile,
-  }) async {
+    File audioFile,
+  ) async {
     try {
       final audioBytes = await audioFile.readAsBytes();
       session.log(
@@ -35,16 +34,6 @@ class LLMService {
         ),
       ];
 
-      if (captionFile != null) {
-        final captionBytes = await captionFile.readAsBytes();
-        attachments.add(
-          DataPart(
-            captionBytes,
-            mimeType: 'text/plain',
-          ),
-        );
-      }
-
       final result = await _agent.sendFor<SegmentedTranscript>(
         LLMPrompts.segmentedTranscriptPrompt(
           podcast.title,
@@ -57,7 +46,6 @@ class LLMService {
       session.log('LLMService: Received response from Gemini');
 
       await audioFile.delete();
-      await captionFile?.delete();
 
       return result.output;
     } catch (e) {

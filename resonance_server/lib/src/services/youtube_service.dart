@@ -2,12 +2,14 @@ import 'dart:developer';
 
 import 'package:resonance_server/src/generated/protocol.dart';
 import 'package:http/http.dart' as http;
+import 'package:serverpod/serverpod.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class YouTubeService {
-  Future<(File, File?)> convertVideoToTranscript(
+  Future<File> convertVideoToTranscript(
+    Session session,
     String videoId, {
     void Function(int)? onProgress,
   }) async {
@@ -35,29 +37,6 @@ class YouTubeService {
       );
 
       final tempDir = Directory.systemTemp;
-      File? captionFile;
-
-      try {
-        var trackManifest = await yt.videos.closedCaptions.getManifest(
-          videoId,
-        );
-
-        var trackInfo = trackManifest.getByLanguage('en').firstOrNull;
-
-        if (trackInfo != null) {
-          var track = await yt.videos.closedCaptions.get(trackInfo);
-
-          captionFile = File('${tempDir.path}/$videoId.transcript.txt');
-          var bucket = captionFile.openWrite();
-          for (final caption in track.captions) {
-            bucket.writeln('${caption.offset}: ${caption.text}');
-          }
-          await bucket.flush();
-          await bucket.close();
-        }
-      } catch (e) {
-        log('Error fetching captions: $e');
-      }
 
       final availableManifests = <AudioStreamInfo>[];
 
@@ -81,7 +60,7 @@ class YouTubeService {
       );
       final firstStream = availableManifests.first;
 
-      log(
+      session.log(
         'Selected Lowest Bitrate: ${firstStream.bitrate.bitsPerSecond / 1000} kbps',
       );
 
@@ -105,10 +84,10 @@ class YouTubeService {
       await output.flush();
       await output.close();
       yt.close();
-      log('\nDownload complete: $videoId.${firstStream.container}');
-      return (file, captionFile);
+      session.log('\nDownload complete: $videoId.${firstStream.container}');
+      return file;
     } catch (e) {
-      log('\nError downloading audio: $e');
+      session.log('\nError downloading audio: $e');
       rethrow;
     }
   }
