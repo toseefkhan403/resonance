@@ -9,7 +9,15 @@ class GraphService {
   final Client _client;
 
   Future<GraphData> getGraphData({bool isDemo = false}) {
+    // Determine which endpoint to use based on isDemo
+    if (isDemo) {
+      return _client.graph.getDemoGraphData();
+    }
     return _client.graph.getGraphData();
+  }
+
+  Future<List<Speaker>> listSpeakers() {
+    return _client.conversation.listSpeakers();
   }
 }
 

@@ -63,11 +63,13 @@ class _HomePageState extends ConsumerState<HomePage> {
       // Auto scroll to bottom
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_logScrollController.hasClients) {
-          unawaited(_logScrollController.animateTo(
-            _logScrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-          ));
+          unawaited(
+            _logScrollController.animateTo(
+              _logScrollController.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+            ),
+          );
         }
       });
     }
@@ -75,9 +77,9 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Listen to changes in ingestion job to update logs
+    // listen to changes to update logs
     ref
-      ..listen(homeControllerProvider.select((s) => s.ingestionJob?.status), (
+      ..listen(homeControllerProvider.select((s) => s.ingestionJob?.stage), (
         previous,
         next,
       ) {
@@ -111,7 +113,10 @@ class _HomePageState extends ConsumerState<HomePage> {
                 padding: const EdgeInsets.all(24),
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 500),
-                  child: ingestionJob == null && !isSubmitting
+                  child:
+                      (ingestionJob == null ||
+                              ingestionJob.status == 'failed') &&
+                          !isSubmitting
                       ? _buildInputForm(homeState.errorMessage)
                       : _buildProgressView(homeState),
                 ),
@@ -351,39 +356,44 @@ class _HomePageState extends ConsumerState<HomePage> {
               color: ResonanceColors.accent.withValues(alpha: 0.1),
             ),
           ),
-          child: ListView.builder(
-            controller: _logScrollController,
-            itemCount: _logs.length + 1,
-            itemBuilder: (context, index) {
-              if (index == _logs.length) {
-                return TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0, end: 1),
-                  duration: const Duration(milliseconds: 500),
-                  builder: (context, value, child) {
-                    return Opacity(
-                      opacity: value > 0.5 ? 1.0 : 0.0,
-                      child: Text(
-                        '_',
-                        style: GoogleFonts.shareTechMono(
-                          color: ResonanceColors.accent,
+          child: ScrollConfiguration(
+            behavior: ScrollConfiguration.of(
+              context,
+            ).copyWith(scrollbars: false),
+            child: ListView.builder(
+              controller: _logScrollController,
+              itemCount: _logs.length + 1,
+              itemBuilder: (context, index) {
+                if (index == _logs.length) {
+                  return TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0, end: 1),
+                    duration: const Duration(milliseconds: 500),
+                    builder: (context, value, child) {
+                      return Opacity(
+                        opacity: value > 0.5 ? 1.0 : 0.0,
+                        child: Text(
+                          '_', // todo_should be blinking
+                          style: GoogleFonts.shareTechMono(
+                            color: ResonanceColors.accent,
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                  onEnd: () {},
-                );
-              }
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Text(
-                  _logs[index],
-                  style: GoogleFonts.shareTechMono(
-                    color: ResonanceColors.accent,
-                    fontSize: 14,
+                      );
+                    },
+                    onEnd: () {},
+                  );
+                }
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(
+                    _logs[index],
+                    style: GoogleFonts.shareTechMono(
+                      color: ResonanceColors.accent,
+                      fontSize: 14,
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
       ],
@@ -429,14 +439,12 @@ class _HoverCyberButtonState extends State<HoverCyberButton> {
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
               decoration: BoxDecoration(
-                color: _isHovering
-                    ? ResonanceColors.accent
-                    : Colors.transparent,
+                color: Colors.transparent,
                 borderRadius: BorderRadius.circular(30),
                 boxShadow: [
                   BoxShadow(
                     color: ResonanceColors.accent.withValues(
-                      alpha: _isHovering ? 0.6 : 0.3,
+                      alpha: _isHovering ? 0.6 : 0.01,
                     ),
                     blurRadius: _isHovering ? 20 : 10,
                     spreadRadius: 1,

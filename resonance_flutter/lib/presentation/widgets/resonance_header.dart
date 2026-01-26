@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:resonance_flutter/presentation/utils/resonance_colors.dart';
 import 'package:resonance_flutter/presentation/widgets/hover_link_text.dart';
+import 'package:resonance_flutter/presentation/widgets/resonance_dialog.dart';
 
 class ResonanceHeader extends StatelessWidget {
   const ResonanceHeader({super.key});
@@ -34,14 +35,15 @@ class ResonanceHeader extends StatelessWidget {
           _buildLinkText(
             'WHAT IS RESONANCE',
             onTap: () {
-              // open dialog box
+              // todo_add yt link
               unawaited(
                 showDialog<void>(
                   context: context,
-                  builder: (context) => const AlertDialog(
-                    title: Text('What is Resonance?'),
-                    content: Text(
-                      '''Resonance is a platform that allows you to connect with your brain and extract information from it. It uses advanced AI technology to extract information from your brain and convert it into text that can be used to create a graph of your thoughts.'''
+                  builder: (context) => const ResonanceDialog(
+                    title: 'What is Resonance?',
+                    child: Text(
+                      '''Resonance extracts structured knowledge from podcasts and organizes it into an interactive graph. Each idea is connected, source-grounded, and queryable, turning passive listening into a durable, explorable knowledge system.''',
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
                     ),
                   ),
                 ),

@@ -85,7 +85,15 @@ class HomeController extends _$HomeController {
         .watchJob(jobId)
         .listen(
           (job) {
-            state = state.copyWith(ingestionJob: job);
+            if (job.status == 'failed') {
+              state = HomeState(
+                ingestionJob: job,
+                isSubmitting: false,
+                errorMessage: job.errorMessage,
+              );
+            } else {
+              state = state.copyWith(ingestionJob: job);
+            }
           },
           onError: (Object e) {
             state = HomeState(

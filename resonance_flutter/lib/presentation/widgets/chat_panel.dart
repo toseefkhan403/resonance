@@ -1,12 +1,19 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:resonance_client/resonance_client.dart';
 import 'package:resonance_flutter/presentation/controllers/conversation_controller.dart';
+import 'package:resonance_flutter/presentation/utils/resonance_colors.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ChatPanel extends ConsumerStatefulWidget {
-  const ChatPanel({super.key});
+  const ChatPanel({required this.speakers, super.key});
+
+  final List<Speaker> speakers;
 
   @override
   ConsumerState<ChatPanel> createState() => _ChatPanelState();
@@ -41,25 +48,116 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
     final text = _chatController.text.trim();
     if (text.isNotEmpty) {
       unawaited(
-        ref.read(conversationControllerProvider.notifier).sendMessage(text),
+        ref
+            .read(conversationControllerProvider(widget.speakers).notifier)
+            .sendMessage(text),
       );
       _chatController.clear();
     }
   }
 
+  TextSpan _buildRichTextSpan(String text) {
+    final spans = <InlineSpan>[];
+    // Matches content inside double quotes or angle brackets
+    final regex = RegExp('(".*?"|<.*?>)');
+    var lastMatchEnd = 0;
+
+    for (final match in regex.allMatches(text)) {
+      // Add text before the match
+      if (match.start > lastMatchEnd) {
+        spans.add(
+          TextSpan(
+            text: text.substring(lastMatchEnd, match.start),
+            style: GoogleFonts.rajdhani(
+              color: const Color(0xFFE0E0E0),
+              fontSize: 13,
+            ),
+          ),
+        );
+      }
+
+      final matchText = match.group(0)!;
+
+      if (matchText.startsWith('"')) {
+        // Italics for quotes
+        spans.add(
+          TextSpan(
+            text: matchText,
+            style: GoogleFonts.rajdhani(
+              color: const Color(0xFFE0E0E0),
+              fontSize: 13,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        );
+      } else if (matchText.startsWith('<')) {
+        // Tappable link for brackets
+        final url = matchText.substring(1, matchText.length - 1);
+        spans.add(
+          TextSpan(
+            text: matchText,
+            style: GoogleFonts.rajdhani(
+              color: ResonanceColors.accent,
+              fontSize: 13,
+              decoration: TextDecoration.underline,
+              fontWeight: FontWeight.bold,
+            ),
+            recognizer: TapGestureRecognizer()
+              ..onTap = () async {
+                final uri = Uri.tryParse(url);
+                if (uri != null) {
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri);
+                  } else {
+                    // Try adding https if missing scheme
+                    final uri2 = Uri.tryParse('https://$url');
+                    if (uri2 != null && await canLaunchUrl(uri2)) {
+                      await launchUrl(uri2);
+                    }
+                  }
+                }
+              },
+          ),
+        );
+      }
+
+      lastMatchEnd = match.end;
+    }
+
+    // Add remaining text
+    if (lastMatchEnd < text.length) {
+      spans.add(
+        TextSpan(
+          text: text.substring(lastMatchEnd),
+          style: const TextStyle(
+            color: Color(0xFFE0E0E0),
+            fontSize: 13,
+          ),
+        ),
+      );
+    }
+
+    return TextSpan(children: spans);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final conversationState = ref.watch(conversationControllerProvider);
+    final conversationState = ref.watch(
+      conversationControllerProvider(widget.speakers),
+    );
 
     ref
       ..listen(
-        conversationControllerProvider.select((s) => s.messages.length),
+        conversationControllerProvider(
+          widget.speakers,
+        ).select((s) => s.messages.length),
         (_, _) => _scrollToBottom(),
       )
       ..listen(
-        conversationControllerProvider.select((s) => s.messages.lastOrNull),
+        conversationControllerProvider(
+          widget.speakers,
+        ).select((s) => s.messages.lastOrNull),
         (prev, next) {
-          // scroll on new chunk if streaming
           if (conversationState.isStreaming) {
             _scrollToBottom();
           }
@@ -74,132 +172,391 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
 
     return Column(
       children: [
-        _buildSpeakerList(conversationState),
-        const Divider(height: 1),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          child: Row(
+            children: [
+              const Text(
+                'ASK THE SPEAKERS',
+                style: TextStyle(
+                  color: ResonanceColors.accent,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 2,
+                  fontSize: 16,
+                ),
+              ),
+              const Spacer(),
+              const SizedBox(width: 8),
+              Container(
+                width: 8,
+                height: 8,
+                color: ResonanceColors.accentDark,
+              ),
+              const SizedBox(width: 4),
+              const Text(
+                'ACTIVE',
+                style: TextStyle(
+                  color: ResonanceColors.accentDark,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 10,
+                  letterSpacing: 1,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const Padding(
+          padding: EdgeInsets.only(left: 10, bottom: 10),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              """ANSWERS ARE GROUNDED EXCLUSIVELY IN THE SELECTED SPEAKER'S IDEAS.""",
+              style: TextStyle(
+                color: ResonanceColors.accentDarker,
+                fontWeight: FontWeight.bold,
+                fontSize: 10,
+                letterSpacing: 1,
+              ),
+            ),
+          ),
+        ),
         _buildChatArea(conversationState),
+        _buildSpeakerList(conversationState),
       ],
     );
   }
 
   Widget _buildSpeakerList(ConversationState state) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              'Select Speaker',
-              style: Theme.of(context).textTheme.titleLarge,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(left: 10),
+          child: Text(
+            'RESPOND AS',
+            style: TextStyle(
+              color: ResonanceColors.accent,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 2,
+              fontSize: 12,
             ),
           ),
-          Expanded(
-            child: state.isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : state.speakers == null || state.speakers!.isEmpty
-                ? const Center(child: Text('No speakers found'))
-                : ListView.builder(
-                    itemCount: state.speakers!.length,
-                    itemBuilder: (context, index) {
-                      final speaker = state.speakers![index];
-                      return RadioListTile<Speaker>(
-                        title: Text(speaker.name),
-                        value: speaker,
-                        // ignore: deprecated_member_use
-                        groupValue: state.selectedSpeaker,
-                        // ignore: deprecated_member_use
-                        onChanged: (Speaker? value) {
-                          ref
-                              .read(conversationControllerProvider.notifier)
-                              .selectSpeaker(value);
-                        },
-                      );
-                    },
+        ),
+        SizedBox(
+          height: 35,
+          child: state.speakers.isEmpty
+              ? const Center(
+                  child: Text(
+                    'No speakers found',
+                    style: TextStyle(color: Colors.grey),
                   ),
-          ),
-        ],
-      ),
+                )
+              : ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: state.speakers.length,
+                  itemBuilder: (context, index) {
+                    final speaker = state.speakers[index];
+                    final isSelected = state.selectedSpeaker == speaker;
+
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: InkWell(
+                        onTap: () {
+                          ref
+                              .read(
+                                conversationControllerProvider(
+                                  widget.speakers,
+                                ).notifier,
+                              )
+                              .selectSpeaker(speaker);
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 14,
+                              height: 14,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isSelected
+                                      ? ResonanceColors.accent
+                                      : Colors.grey[500]!,
+                                ),
+                              ),
+                              child: isSelected
+                                  ? Center(
+                                      child: Container(
+                                        width: 8,
+                                        height: 8,
+                                        decoration: const BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: ResonanceColors.accent,
+                                        ),
+                                      ),
+                                    )
+                                  : null,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              speaker.name,
+                              style: TextStyle(
+                                color: isSelected
+                                    ? ResonanceColors.accent
+                                    : Colors.grey[400],
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
+        const SizedBox(height: 8),
+      ],
     );
   }
 
   Widget _buildChatArea(ConversationState state) {
     return Expanded(
-      flex: 2,
       child: Column(
         children: [
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
               padding: const EdgeInsets.all(16),
-              itemCount: state.messages.length,
+              itemCount: state.messages.length + (state.isStreaming ? 1 : 0),
               itemBuilder: (context, index) {
+                if (index == state.messages.length && state.isStreaming) {
+                  // This part is redundant if "..." message is already in state.messages\
+                  return const SizedBox.shrink();
+                }
+
+                // Safety check
+                if (index >= state.messages.length) {
+                  return const SizedBox.shrink();
+                }
+
                 final msg = state.messages[index];
-                return Align(
-                  alignment: msg.isUser
-                      ? Alignment.centerRight
-                      : Alignment.centerLeft,
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    margin: const EdgeInsets.only(bottom: 8),
-                    constraints: const BoxConstraints(maxWidth: 240),
-                    decoration: BoxDecoration(
-                      color: msg.isUser
-                          ? Theme.of(
-                              context,
-                            ).primaryColor.withValues(alpha: 0.1)
-                          : Colors.grey[200],
-                      borderRadius: BorderRadius.circular(12),
+                final isBot = !msg.isUser;
+
+                if (isBot) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: ResonanceColors.accent),
+                            color: ResonanceColors.accent.withValues(
+                              alpha: 0.1,
+                            ),
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              Icons.api,
+                              color: ResonanceColors.accent,
+                              size: 14,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Flexible(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'ORACLE_CORE',
+                                style: TextStyle(
+                                  color: ResonanceColors.accent,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Container(
+                                decoration: const BoxDecoration(
+                                  border: Border(
+                                    left: BorderSide(
+                                      color: ResonanceColors.accent,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  color: Color(
+                                    0xFF1E1E1E,
+                                  ),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                                child: RichText(
+                                  text: _buildRichTextSpan(msg.text),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    child: Text(msg.text),
-                  ),
-                );
+                  );
+                } else {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.only(
+                            right: 36,
+                          ),
+                          child: Text(
+                            'OPERATOR_01',
+                            style: TextStyle(
+                              color: ResonanceColors.textGrey,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Flexible(
+                              child: Container(
+                                color: const Color(0xFF252525),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 10,
+                                ),
+                                child: Text(
+                                  msg.text,
+                                  style: GoogleFonts.rajdhani(
+                                    color: ResonanceColors.textGrey,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Container(
+                              width: 24,
+                              height: 24,
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: ResonanceColors.textGrey,
+                                ),
+                                color: Colors.transparent,
+                              ),
+                              child: const Center(
+                                child: Icon(
+                                  Icons.fingerprint,
+                                  color: ResonanceColors.textGrey,
+                                  size: 14,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                }
               },
             ),
           ),
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  offset: const Offset(0, -2),
-                  blurRadius: 4,
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _chatController,
-                    enabled:
-                        !state.isStreaming && state.selectedSpeaker != null,
-                    decoration: const InputDecoration(
-                      hintText: 'Ask a question...',
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                    ),
-                    onSubmitted: (_) => _sendMessage(),
+          if (state.isStreaming)
+            const Padding(
+              padding: EdgeInsets.only(left: 16, bottom: 8),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '••• SYNTHESIZING_VECTORS...',
+                  style: TextStyle(
+                    color: ResonanceColors.accentDark,
+                    fontSize: 10,
+                    letterSpacing: 1,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: state.isStreaming
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.send),
-                  onPressed: state.isStreaming || state.selectedSpeaker == null
-                      ? null
-                      : _sendMessage,
-                ),
-              ],
+              ),
+            ),
+          Container(
+            padding: const EdgeInsets.all(16),
+            color: ResonanceColors.primaryDark,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: ResonanceColors.accent),
+                color: Colors.transparent,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _chatController,
+                      enabled:
+                          !state.isStreaming && state.selectedSpeaker != null,
+                      style: const TextStyle(
+                        color: ResonanceColors.accent,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      cursorColor: ResonanceColors.accent,
+                      decoration: const InputDecoration(
+                        hintText: 'ENTER_QUERY...',
+                        hintStyle: TextStyle(
+                          color: ResonanceColors.accentDark,
+                          fontSize: 12,
+                          letterSpacing: 1,
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                      ),
+                      onSubmitted: (_) => _sendMessage(),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: state.isStreaming || state.selectedSpeaker == null
+                        ? null
+                        : _sendMessage,
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      color: state.isStreaming || state.selectedSpeaker == null
+                          ? ResonanceColors.accentDarker
+                          : ResonanceColors.accent,
+                      child: Center(
+                        child: state.isStreaming
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CupertinoActivityIndicator(
+                                  color: Colors.black,
+                                ),
+                              )
+                            : const Icon(Icons.bolt, color: Colors.black),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

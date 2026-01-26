@@ -1,0 +1,160 @@
+import 'package:flutter/material.dart';
+import 'package:pointer_interceptor/pointer_interceptor.dart';
+import 'package:resonance_flutter/presentation/utils/resonance_colors.dart';
+
+class ResonanceDialog extends StatelessWidget {
+  const ResonanceDialog({
+    required this.title,
+    required this.child,
+    super.key,
+  });
+
+  final String title;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return PointerInterceptor(
+      child: Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        insetPadding: const EdgeInsets.all(24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: Container(
+            decoration: BoxDecoration(
+              color: ResonanceColors.primary,
+              border: Border.all(color: ResonanceColors.secondary),
+            ),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                // Content
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Header
+                      Row(
+                        children: [
+                          Text(
+                            title.toUpperCase(),
+                            style: const TextStyle(
+                              color: ResonanceColors.accent,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                          const Spacer(),
+                          // Close Button
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () => Navigator.of(context).pop(),
+                              hoverColor: ResonanceColors.accent.withValues(
+                                alpha: 0.2,
+                              ),
+                              child: const BorderedIcon(
+                                icon: Icons.close,
+                                size: 20,
+                                color: ResonanceColors.accent,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      const Divider(
+                        color: ResonanceColors.accentDark,
+                        height: 1,
+                        thickness: 0.5,
+                      ),
+                      const SizedBox(height: 16),
+                      // Body
+                      Flexible(child: child),
+                    ],
+                  ),
+                ),
+
+                // Corners
+                const Positioned(
+                  top: -1,
+                  left: -1,
+                  child: _CornerAccent(isTop: true, isLeft: true),
+                ),
+                const Positioned(
+                  bottom: -1,
+                  right: -1,
+                  child: _CornerAccent(isTop: false, isLeft: false),
+                ),
+
+                // Decorative scan lines or dots could go here
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CornerAccent extends StatelessWidget {
+  const _CornerAccent({
+    required this.isTop,
+    required this.isLeft,
+  });
+
+  final bool isTop;
+  final bool isLeft;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(
+        border: Border(
+          top: isTop
+              ? const BorderSide(color: ResonanceColors.accent, width: 2)
+              : BorderSide.none,
+          bottom: !isTop
+              ? const BorderSide(color: ResonanceColors.accent, width: 2)
+              : BorderSide.none,
+          left: isLeft
+              ? const BorderSide(color: ResonanceColors.accent, width: 2)
+              : BorderSide.none,
+          right: !isLeft
+              ? const BorderSide(color: ResonanceColors.accent, width: 2)
+              : BorderSide.none,
+        ),
+      ),
+    );
+  }
+}
+
+class BorderedIcon extends StatelessWidget {
+  const BorderedIcon({
+    required this.icon,
+    this.color = Colors.white,
+    this.size = 24,
+    super.key,
+  });
+
+  final IconData icon;
+  final Color color;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        border: Border.all(color: color.withValues(alpha: 0.5)),
+      ),
+      child: Icon(icon, color: color, size: size),
+    );
+  }
+}

@@ -183,13 +183,22 @@ class SignInPage extends ConsumerWidget {
                         required child,
                         required onPressed,
                         required style,
-                      }) => CyberpunkButton(
-                        onPressed: onPressed,
-                        text: 'LOGIN WITH GOOGLE',
-                        icon: Icons.g_mobiledata,
+                      }) => Stack(
+                        children: [
+                          Opacity(
+                            opacity: 0.01,
+                            child: child,
+                          ),
+                          CyberpunkButton(
+                            onPressed: onPressed,
+                            text: 'LOGIN WITH GOOGLE',
+                            icon: Icons.g_mobiledata,
+                          ),
+                        ],
                       ),
                   onError: (error) {
-                    // Handle error visually
+                    // todo_Handle error visually
+                    debugPrint(error.toString());
                   },
                 ),
                 const SizedBox(height: 30),
@@ -275,7 +284,7 @@ class SignInPage extends ConsumerWidget {
               Text(
                 'BUILT WITH',
                 style: GoogleFonts.rajdhani(
-                  color: ResonanceColors.accentDark,
+                  color: ResonanceColors.accent,
                   fontSize: 10,
                   letterSpacing: 1,
                   fontWeight: FontWeight.bold,

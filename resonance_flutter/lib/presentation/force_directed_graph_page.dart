@@ -1,12 +1,18 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:graphify/graphify.dart';
+import 'package:resonance_client/resonance_client.dart';
 import 'package:resonance_flutter/presentation/controllers/graph_controller.dart';
 import 'package:resonance_flutter/presentation/utils/resonance_colors.dart';
 import 'package:resonance_flutter/presentation/widgets/chat_panel.dart';
 import 'package:resonance_flutter/presentation/widgets/cyberpunk_button.dart';
+import 'package:resonance_flutter/presentation/widgets/node_info_dialog.dart';
+import 'package:resonance_flutter/presentation/widgets/resonance_dialog.dart';
+import 'package:resonance_flutter/presentation/widgets/speaker_checklist.dart';
 
 class ForceDirectedGraphPage extends ConsumerStatefulWidget {
   const ForceDirectedGraphPage({super.key, this.isDemo = false});
@@ -25,81 +31,14 @@ class _ForceDirectedGraphPageState
     super.dispose();
   }
 
-  Map<String, dynamic> _buildChartOptions(GraphState state) {
-    final graphData = state.graphData;
-    if (graphData == null || graphData.graphWithGranularity.isEmpty) {
-      return {};
-    }
-
-    // Use the current granular level
-    final index = state.currentGranularityIndex.clamp(
-      0,
-      graphData.graphWithGranularity.length - 1,
-    );
-    final graph = graphData.graphWithGranularity[index].graph;
-
-    final categories = graph.categories.map((c) => {'name': c.name}).toList();
-
-    final nodes = graph.nodes.asMap().entries.map((entry) {
-      final index = entry.key;
-      final n = entry.value;
-      return {
-        // 'id': n.nodeId,
-        'id': index,
-        'name': n.name,
-        'value': n.value,
-        'category': n.category,
-        'symbolSize': n.symbolSize,
-        // Optional: pass other metadata if needed for tooltips
-        'videoId': n.videoId,
-        'summary': n.summary,
-        'references': n.references,
-      };
-    }).toList();
-
-    final links = graph.links.map((l) {
-      return {
-        'source': l.source,
-        'target': l.target,
-      };
-    }).toList();
-
-    return {
-      'legend': {
-        'data': categories.map((c) => c['name']).toList(),
-        'orient': 'vertical',
-        'left': 'left',
-      },
-      'tooltip': <String, dynamic>{},
-      'series': [
-        {
-          'type': 'graph',
-          'layout': 'force',
-          'animation': true,
-          'label': {'position': 'right', 'formatter': '{b}'},
-          'draggable': true,
-          'data': nodes,
-          'categories': categories,
-          'force': {
-            'edgeLength': 50,
-            'repulsion': 100,
-            'gravity': 0.1,
-          },
-          'edges': links,
-          'roam': true,
-          'lineStyle': {
-            'color': 'source',
-            'curveness': 0.3,
-          },
-        },
-      ],
-    };
-  }
-
   @override
   Widget build(BuildContext context) {
     final graphState = ref.watch(
       graphControllerProvider(isDemo: widget.isDemo),
+    );
+
+    final graphController = ref.read(
+      graphControllerProvider(isDemo: widget.isDemo).notifier,
     );
 
     if (graphState.isLoading) {
@@ -129,13 +68,10 @@ class _ForceDirectedGraphPageState
                   child: CyberpunkButton(
                     text: 'RETRY',
                     icon: Icons.refresh,
-                    onPressed: () => ref
-                        .read(
-                          graphControllerProvider(
-                            isDemo: widget.isDemo,
-                          ).notifier,
-                        )
-                        .loadData(isDemo: widget.isDemo),
+                    onPressed: () {
+                      // should refresh the webpage
+                      context.go('/');
+                    },
                   ),
                 ),
               ],
@@ -160,10 +96,10 @@ class _ForceDirectedGraphPageState
                 ),
                 const SizedBox(height: 20),
                 SizedBox(
-                  width: 200,
+                  width: 250,
                   child: CyberpunkButton(
                     text: 'ADD A PODCAST',
-                    icon: Icons.add_outlined,
+                    icon: Icons.podcasts,
                     onPressed: () {
                       context.go('/home');
                     },
@@ -183,45 +119,96 @@ class _ForceDirectedGraphPageState
           Expanded(
             flex: 3,
             child: ColoredBox(
-              color: const Color(0xff100c2a),
+              color: ResonanceColors.primary,
               child: graphState.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : GraphifyView(
-                      // Force rebuild/update when granularity changes
+                      // Force rebuild/update when granularity/speaker changes
                       key: ValueKey(
-                        'graph_${graphState.currentGranularityIndex}',
+                        '''graph_${graphState.currentGranularityIndex}_${graphState.selectedSpeakerIds}''',
                       ),
                       controller: GraphifyController(),
-                      initialOptions: _buildChartOptions(graphState),
+                      initialOptions: graphController.buildChartOptions(
+                        graphState,
+                      ),
                       onChartClick: (chartId, data) {
                         if (data['dataType'] == 'node') {
-                          // todo_open dialog with node info
+                          unawaited(
+                            showDialog<void>(
+                              context: context,
+                              builder: (context) {
+                                try {
+                                  final node = GraphNodeDisplay.fromJson(
+                                    data['data'] as Map<String, dynamic>,
+                                  );
+
+                                  return NodeInfoDialog(
+                                    node: node,
+                                    speakerName: graphState.speakers
+                                        .where(
+                                          (speaker) =>
+                                              speaker.id ==
+                                              node.primarySpeakerId,
+                                        )
+                                        .firstOrNull
+                                        ?.name,
+                                  );
+                                } catch (e) {
+                                  debugPrint(e.toString());
+                                  return const ResonanceDialog(
+                                    title: 'Node Info',
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          'Error loading node info',
+                                          style: TextStyle(
+                                            color: ResonanceColors.accent,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                          );
                         }
                       },
                     ),
             ),
           ),
           // Divider
-          Container(width: 1, color: Colors.grey[300]),
-          // Right Panel: Chat & Speakers
+          Container(width: 0.5, color: ResonanceColors.accent),
+          // Right Panel: Graph config & Chat
           Expanded(
-            child: Column(
-              children: [
-                if ((graphState.graphData?.graphWithGranularity.length ?? 0) >
-                    1)
-                  FloatingActionButton.extended(
-                    label: const Text('Cycle Granularity'),
-                    icon: const Icon(Icons.grain),
-                    onPressed: () => ref
-                        .read(
-                          graphControllerProvider(
-                            isDemo: widget.isDemo,
-                          ).notifier,
-                        )
-                        .cycleGranularity(),
+            child: ColoredBox(
+              color: ResonanceColors.primaryDark,
+              child: Column(
+                children: [
+                  SpeakerChecklist(
+                    speakers: graphState.speakers,
+                    selectedSpeakerIds: graphState.selectedSpeakerIds,
+                    onToggle: graphController.toggleSpeaker,
                   ),
-                const Expanded(child: ChatPanel()),
-              ],
+                  if ((graphState.graphData?.graphWithGranularity.length ?? 0) >
+                      1)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: CyberpunkButton(
+                        text: 'Cycle Granularity',
+                        icon: Icons.rotate_90_degrees_ccw_outlined,
+                        onPressed: graphController.cycleGranularity,
+                      ),
+                    ),
+                  const SizedBox(height: 10),
+                  const Divider(
+                    color: ResonanceColors.accentDark,
+                    thickness: 0.5,
+                  ),
+                  Expanded(child: ChatPanel(speakers: graphState.speakers)),
+                ],
+              ),
             ),
           ),
         ],

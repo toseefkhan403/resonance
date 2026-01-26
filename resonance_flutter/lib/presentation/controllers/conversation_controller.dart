@@ -22,19 +22,17 @@ class ChatMessage {
 
 class ConversationState {
   const ConversationState({
-    this.speakers,
+    this.speakers = const [],
     this.selectedSpeaker,
     this.messages = const [],
     this.isStreaming = false,
-    this.isLoading = true,
     this.error,
   });
 
-  final List<Speaker>? speakers;
+  final List<Speaker> speakers;
   final Speaker? selectedSpeaker;
   final List<ChatMessage> messages;
   final bool isStreaming;
-  final bool isLoading;
   final String? error;
 
   ConversationState copyWith({
@@ -42,7 +40,6 @@ class ConversationState {
     Speaker? selectedSpeaker,
     List<ChatMessage>? messages,
     bool? isStreaming,
-    bool? isLoading,
     String? error,
   }) {
     return ConversationState(
@@ -50,7 +47,6 @@ class ConversationState {
       selectedSpeaker: selectedSpeaker ?? this.selectedSpeaker,
       messages: messages ?? this.messages,
       isStreaming: isStreaming ?? this.isStreaming,
-      isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
     );
   }
@@ -59,26 +55,11 @@ class ConversationState {
 @riverpod
 class ConversationController extends _$ConversationController {
   @override
-  ConversationState build() {
-    unawaited(_loadSpeakers());
-    return const ConversationState();
-  }
-
-  Future<void> _loadSpeakers() async {
-    try {
-      final service = ref.read(conversationServiceProvider);
-      final speakers = await service.listSpeakers();
-
-      state = state.copyWith(
-        speakers: speakers,
-        isLoading: false,
-      );
-    } catch (e) {
-      state = state.copyWith(
-        error: e.toString(),
-        isLoading: false,
-      );
-    }
+  ConversationState build(List<Speaker> speakers) {
+    return ConversationState(
+      speakers: speakers,
+      selectedSpeaker: speakers.isEmpty ? null : speakers.first,
+    );
   }
 
   void selectSpeaker(Speaker? speaker) {
@@ -107,7 +88,9 @@ class ConversationController extends _$ConversationController {
         final messages = List<ChatMessage>.from(state.messages);
         if (messages.isNotEmpty && !messages.last.isUser) {
           final lastMsg = messages.last;
-          messages.last = lastMsg.copyWith(text: lastMsg.text + chunk);
+          messages.last = lastMsg.copyWith(
+            text: lastMsg.text == '...' ? chunk : lastMsg.text + chunk,
+          );
           state = state.copyWith(messages: messages);
         }
       }

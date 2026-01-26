@@ -7,5 +7,6 @@ class ResonanceColors {
   static const Color accentDark = Color(0xFF990022);
   static const Color accentDarker = Color(0xFF540202);
   static const Color textGrey = Color(0xFF999999);
+  static const Color primaryDark = Color(0xFF070707);
   static const Color white = Color(0xFFFFFFFF);
 }

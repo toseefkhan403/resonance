@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:resonance_flutter/presentation/utils/resonance_colors.dart';
+import 'package:resonance_flutter/presentation/widgets/podcasts_dialog.dart';
 
 class ResonanceSidebar extends StatelessWidget {
   const ResonanceSidebar({super.key});
@@ -40,12 +41,7 @@ class ResonanceSidebar extends StatelessWidget {
               unawaited(
                 showDialog<void>(
                   context: context,
-                  builder: (context) => const AlertDialog(
-                    title: Text('List Podcasts'),
-                    content: Text(
-                      'List of podcasts',
-                    ),
-                  ),
+                  builder: (context) => const PodcastsDialog(),
                 ),
               );
             },
