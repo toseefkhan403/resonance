@@ -1,17 +1,28 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:resonance_flutter/application/audio_service.dart';
+import 'package:resonance_flutter/application/auth_service.dart';
 import 'package:resonance_flutter/presentation/utils/resonance_colors.dart';
 import 'package:resonance_flutter/presentation/widgets/hover_link_text.dart';
 import 'package:resonance_flutter/presentation/widgets/resonance_dialog.dart';
+import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
-class ResonanceHeader extends StatelessWidget {
+class ResonanceHeader extends ConsumerWidget {
   const ResonanceHeader({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authInfoListenable = ref
+        .watch(authServiceProvider)
+        .authInfoListenable;
+    final authService = ref.read(authServiceProvider);
+    final isMusicPlaying = ref.watch(audioServiceProvider);
+    final audioNotifier = ref.read(audioServiceProvider.notifier);
+
     var location = '';
     try {
       location = GoRouterState.of(context).uri.toString();
@@ -35,6 +46,7 @@ class ResonanceHeader extends StatelessWidget {
           _buildLinkText(
             'WHAT IS RESONANCE',
             onTap: () {
+              audioNotifier.playClickSound();
               // todo_add yt link
               unawaited(
                 showDialog<void>(
@@ -54,10 +66,117 @@ class ResonanceHeader extends StatelessWidget {
             'DEMO GRAPH',
             isActive: location == '/demo-graph',
             onTap: () {
+              audioNotifier.playClickSound();
               context.go('/demo-graph');
             },
           ),
+          IconButton(
+            onPressed: audioNotifier.toggleMusic,
+            icon: Icon(
+              isMusicPlaying ? Icons.volume_up : Icons.volume_off,
+              color: isMusicPlaying
+                  ? ResonanceColors.accent
+                  : ResonanceColors.textGrey,
+            ),
+            tooltip: isMusicPlaying ? 'Stop Music' : 'Play Music',
+          ),
+          ValueListenableBuilder(
+            valueListenable: authInfoListenable,
+            builder: (context, authInfo, child) {
+              if (authInfo == null) return const SizedBox.shrink();
+              final userProfileValue = ref.watch(getCurrentUserProfileProvider);
+
+              return userProfileValue.when(
+                data: (userProfile) {
+                  if (userProfile == null) return const SizedBox.shrink();
+                  return Row(
+                    children: [
+                      const SizedBox(width: 16),
+                      _buildProfileSection(
+                        context,
+                        userProfile,
+                        onSignOutTap: () {
+                          audioNotifier.playClickSound();
+                          authService.signOut();
+                        },
+                      ),
+                    ],
+                  );
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (error, stackTrace) => const SizedBox.shrink(),
+              );
+            },
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildProfileSection(
+    BuildContext context,
+    UserProfileModel userInfo, {
+    required VoidCallback onSignOutTap,
+  }) {
+    return PopupMenuButton(
+      offset: const Offset(0, 50),
+      color: ResonanceColors.secondary,
+      shape: RoundedRectangleBorder(
+        side: const BorderSide(color: ResonanceColors.accent),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      itemBuilder: (context) => [
+        PopupMenuItem<void>(
+          onTap: onSignOutTap,
+          child: const Text(
+            'LOGOUT',
+            style: TextStyle(
+              color: ResonanceColors.white,
+              fontSize: 11,
+              letterSpacing: 1.5,
+            ),
+          ),
+        ),
+      ],
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: Colors.black,
+          border: Border.all(color: ResonanceColors.accent),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: Colors.grey[800],
+                borderRadius: BorderRadius.circular(4),
+                image: userInfo.imageUrl != null
+                    ? DecorationImage(
+                        image: NetworkImage(userInfo.imageUrl.toString()),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+              ),
+              child: userInfo.imageUrl == null
+                  ? const Icon(Icons.person, color: Colors.white, size: 20)
+                  : null,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              userInfo.fullName?.toUpperCase() ?? 'USER',
+              style: const TextStyle(
+                color: ResonanceColors.accent,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                letterSpacing: 1.5,
+              ),
+            ),
+            const SizedBox(width: 12),
+          ],
+        ),
       ),
     );
   }

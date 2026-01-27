@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:jumping_dot/jumping_dot.dart';
 import 'package:resonance_client/resonance_client.dart';
 import 'package:resonance_flutter/presentation/controllers/conversation_controller.dart';
 import 'package:resonance_flutter/presentation/utils/resonance_colors.dart';
@@ -336,7 +337,6 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
               itemCount: state.messages.length + (state.isStreaming ? 1 : 0),
               itemBuilder: (context, index) {
                 if (index == state.messages.length && state.isStreaming) {
-                  // This part is redundant if "..." message is already in state.messages\
                   return const SizedBox.shrink();
                 }
 
@@ -402,8 +402,26 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
                                   horizontal: 12,
                                   vertical: 8,
                                 ),
-                                child: RichText(
-                                  text: _buildRichTextSpan(msg.text),
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                    minWidth: 30,
+                                  ),
+                                  child: msg.text == '...'
+                                      ? SizedBox(
+                                          width: 30,
+                                          height: 16,
+                                          child: JumpingDots(
+                                            color: ResonanceColors.accent,
+                                            radius: 4,
+                                            verticalOffset: -5,
+                                            animationDuration: const Duration(
+                                              milliseconds: 500,
+                                            ),
+                                          ),
+                                        )
+                                      : RichText(
+                                          text: _buildRichTextSpan(msg.text),
+                                        ),
                                 ),
                               ),
                             ],

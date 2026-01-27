@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:resonance_flutter/application/audio_service.dart';
 import 'package:resonance_flutter/presentation/utils/resonance_colors.dart';
 
-class CyberpunkButton extends StatefulWidget {
+class CyberpunkButton extends ConsumerStatefulWidget {
   const CyberpunkButton({
     required this.onPressed,
     required this.text,
@@ -17,10 +19,10 @@ class CyberpunkButton extends StatefulWidget {
   final bool isPrimary;
 
   @override
-  State<CyberpunkButton> createState() => _CyberpunkButtonState();
+  ConsumerState<CyberpunkButton> createState() => _CyberpunkButtonState();
 }
 
-class _CyberpunkButtonState extends State<CyberpunkButton> {
+class _CyberpunkButtonState extends ConsumerState<CyberpunkButton> {
   bool _isHovering = false;
 
   @override
@@ -87,7 +89,10 @@ class _CyberpunkButtonState extends State<CyberpunkButton> {
       onExit: (_) => setState(() => _isHovering = false),
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
-        onTap: widget.onPressed,
+        onTap: () {
+          widget.onPressed?.call();
+          ref.read(audioServiceProvider.notifier).playClickSound();
+        },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           height: 40,

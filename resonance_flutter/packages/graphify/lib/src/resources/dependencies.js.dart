@@ -50,26 +50,4 @@ const String chartScripts = """
       }
     }
     
-    function ${JsMethods.onChartHover}(chart_id, eventData) {
-      // For mobile: use JavaScript channel
-      if (window.${JsMethods.onChartHover}) {
-        window.${JsMethods.onChartHover}.postMessage(chart_id + '|' + eventData);
-      }
-      // For web: call function on parent window
-      else if (window.parent && typeof window.parent.${JsMethods.onChartHover} === 'function') {
-        window.parent.${JsMethods.onChartHover}(chart_id, eventData);
-      }
-    }
-    
-    function ${JsMethods.onChartHoverOut}(chart_id, eventData) {
-      // For mobile: use JavaScript channel
-      if (window.${JsMethods.onChartHoverOut}) {
-        window.${JsMethods.onChartHoverOut}.postMessage(chart_id + '|' + eventData);
-      }
-      // For web: call function on parent window
-      else if (window.parent && typeof window.parent.${JsMethods.onChartHoverOut} === 'function') {
-        window.parent.${JsMethods.onChartHoverOut}(chart_id, eventData);
-      }
-    }
-    
 """;

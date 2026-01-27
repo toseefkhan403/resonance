@@ -21,8 +21,6 @@ class GraphifyView extends g_view.GraphifyView {
     super.onConsoleMessage,
     super.onCreated,
     super.onChartClick,
-    super.onChartHover,
-    super.onChartHoverOut,
   });
 
   @override
@@ -53,28 +51,6 @@ class _GraphifyViewState extends g_view.GraphifyViewState<GraphifyView> {
           final chartIdStr = chartId.toDart;
           final data = jsonDecode(eventDataJson.toDart) as Map<String, dynamic>;
           widget.onChartClick!(chartIdStr, data);
-        }).toJS,
-      );
-    }
-
-    if (widget.onChartHover != null) {
-      (window as JSObject).setProperty(
-        JsMethods.onChartHover.toJS,
-        ((JSString chartId, JSString eventDataJson) {
-          final chartIdStr = chartId.toDart;
-          final data = jsonDecode(eventDataJson.toDart) as Map<String, dynamic>;
-          widget.onChartHover!(chartIdStr, data);
-        }).toJS,
-      );
-    }
-
-    if (widget.onChartHoverOut != null) {
-      (window as JSObject).setProperty(
-        JsMethods.onChartHoverOut.toJS,
-        ((JSString chartId, JSString eventDataJson) {
-          final chartIdStr = chartId.toDart;
-          final data = jsonDecode(eventDataJson.toDart) as Map<String, dynamic>;
-          widget.onChartHoverOut!(chartIdStr, data);
         }).toJS,
       );
     }

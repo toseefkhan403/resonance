@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:resonance_flutter/application/audio_service.dart';
 import 'package:resonance_flutter/presentation/controllers/home_controller.dart';
 import 'package:resonance_flutter/presentation/utils/resonance_colors.dart';
 import 'package:resonance_flutter/presentation/widgets/animated_background.dart';
@@ -90,7 +92,11 @@ class _HomePageState extends ConsumerState<HomePage> {
         next,
       ) {
         if (next == 100) {
-          context.go('/graph');
+          Future.delayed(const Duration(seconds: 1), () {
+            if (context.mounted) {
+              context.go('/graph');
+            }
+          });
         }
       });
 
@@ -369,14 +375,17 @@ class _HomePageState extends ConsumerState<HomePage> {
                     tween: Tween(begin: 0, end: 1),
                     duration: const Duration(milliseconds: 500),
                     builder: (context, value, child) {
-                      return Opacity(
-                        opacity: value > 0.5 ? 1.0 : 0.0,
-                        child: Text(
-                          '_', // todo_should be blinking
-                          style: GoogleFonts.shareTechMono(
-                            color: ResonanceColors.accent,
+                      return AnimatedTextKit(
+                        repeatForever: true,
+                        animatedTexts: [
+                          TyperAnimatedText(
+                            '_',
+                            textStyle: GoogleFonts.shareTechMono(
+                              color: ResonanceColors.accent,
+                            ),
+                            speed: const Duration(milliseconds: 500),
                           ),
-                        ),
+                        ],
                       );
                     },
                     onEnd: () {},
@@ -401,7 +410,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 }
 
-class HoverCyberButton extends StatefulWidget {
+class HoverCyberButton extends ConsumerStatefulWidget {
   const HoverCyberButton({
     required this.onPressed,
     required this.text,
@@ -412,10 +421,10 @@ class HoverCyberButton extends StatefulWidget {
   final String text;
 
   @override
-  State<HoverCyberButton> createState() => _HoverCyberButtonState();
+  ConsumerState<HoverCyberButton> createState() => _HoverCyberButtonState();
 }
 
-class _HoverCyberButtonState extends State<HoverCyberButton> {
+class _HoverCyberButtonState extends ConsumerState<HoverCyberButton> {
   bool _isHovering = false;
 
   @override
@@ -425,7 +434,10 @@ class _HoverCyberButtonState extends State<HoverCyberButton> {
       onExit: (_) => setState(() => _isHovering = false),
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
-        onTap: widget.onPressed,
+        onTap: () {
+          widget.onPressed();
+          ref.read(audioServiceProvider.notifier).playClickSound();
+        },
         child: ClipRRect(
           borderRadius: BorderRadius.circular(30),
           child: AnimatedBackground(

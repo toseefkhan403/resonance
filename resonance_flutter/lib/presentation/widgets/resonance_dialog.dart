@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
+import 'package:resonance_flutter/application/audio_service.dart';
 import 'package:resonance_flutter/presentation/utils/resonance_colors.dart';
 
-class ResonanceDialog extends StatelessWidget {
+class ResonanceDialog extends ConsumerWidget {
   const ResonanceDialog({
     required this.title,
     required this.child,
@@ -13,7 +15,7 @@ class ResonanceDialog extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return PointerInterceptor(
       child: Dialog(
         backgroundColor: Colors.transparent,
@@ -53,7 +55,12 @@ class ResonanceDialog extends StatelessWidget {
                           Material(
                             color: Colors.transparent,
                             child: InkWell(
-                              onTap: () => Navigator.of(context).pop(),
+                              onTap: () {
+                                ref
+                                    .read(audioServiceProvider.notifier)
+                                    .playClickSound();
+                                Navigator.of(context).pop();
+                              },
                               hoverColor: ResonanceColors.accent.withValues(
                                 alpha: 0.2,
                               ),

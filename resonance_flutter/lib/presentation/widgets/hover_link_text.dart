@@ -1,9 +1,10 @@
-// create a clickable text that changes color on hover
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:resonance_flutter/application/audio_service.dart';
 import 'package:resonance_flutter/presentation/utils/resonance_colors.dart';
 
-class HoverLinkText extends StatefulWidget {
+class HoverLinkText extends ConsumerStatefulWidget {
   const HoverLinkText({
     required this.text,
     required this.onTap,
@@ -16,10 +17,10 @@ class HoverLinkText extends StatefulWidget {
   final bool isActive;
 
   @override
-  State<HoverLinkText> createState() => _HoverLinkTextState();
+  ConsumerState<HoverLinkText> createState() => _HoverLinkTextState();
 }
 
-class _HoverLinkTextState extends State<HoverLinkText> {
+class _HoverLinkTextState extends ConsumerState<HoverLinkText> {
   bool _isHovered = false;
 
   @override
@@ -28,7 +29,10 @@ class _HoverLinkTextState extends State<HoverLinkText> {
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: GestureDetector(
-        onTap: widget.onTap,
+        onTap: () {
+          widget.onTap();
+          ref.read(audioServiceProvider.notifier).playClickSound();
+        },
         child: AnimatedDefaultTextStyle(
           duration: const Duration(milliseconds: 300),
           style: GoogleFonts.rajdhani(

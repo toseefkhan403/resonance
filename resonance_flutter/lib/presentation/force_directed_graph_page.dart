@@ -1,11 +1,10 @@
-import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:graphify/graphify.dart';
 import 'package:resonance_client/resonance_client.dart';
+import 'package:resonance_flutter/application/audio_service.dart';
 import 'package:resonance_flutter/presentation/controllers/graph_controller.dart';
 import 'package:resonance_flutter/presentation/utils/resonance_colors.dart';
 import 'package:resonance_flutter/presentation/widgets/chat_panel.dart';
@@ -69,8 +68,9 @@ class _ForceDirectedGraphPageState
                     text: 'RETRY',
                     icon: Icons.refresh,
                     onPressed: () {
-                      // should refresh the webpage
-                      context.go('/');
+                      ref.invalidate(
+                        graphControllerProvider(isDemo: widget.isDemo),
+                      );
                     },
                   ),
                 ),
@@ -133,45 +133,45 @@ class _ForceDirectedGraphPageState
                       ),
                       onChartClick: (chartId, data) {
                         if (data['dataType'] == 'node') {
-                          unawaited(
-                            showDialog<void>(
-                              context: context,
-                              builder: (context) {
-                                try {
-                                  final node = GraphNodeDisplay.fromJson(
-                                    data['data'] as Map<String, dynamic>,
-                                  );
+                          ref
+                              .read(audioServiceProvider.notifier)
+                              .playClickSound();
+                          showDialog<void>(
+                            context: context,
+                            builder: (context) {
+                              try {
+                                final node = GraphNodeDisplay.fromJson(
+                                  data['data'] as Map<String, dynamic>,
+                                );
 
-                                  return NodeInfoDialog(
-                                    node: node,
-                                    speakerName: graphState.speakers
-                                        .where(
-                                          (speaker) =>
-                                              speaker.id ==
-                                              node.primarySpeakerId,
-                                        )
-                                        .firstOrNull
-                                        ?.name,
-                                  );
-                                } catch (e) {
-                                  debugPrint(e.toString());
-                                  return const ResonanceDialog(
-                                    title: 'Node Info',
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          'Error loading node info',
-                                          style: TextStyle(
-                                            color: ResonanceColors.accent,
-                                          ),
+                                return NodeInfoDialog(
+                                  node: node,
+                                  speakerName: graphState.speakers
+                                      .where(
+                                        (speaker) =>
+                                            speaker.id == node.primarySpeakerId,
+                                      )
+                                      .firstOrNull
+                                      ?.name,
+                                );
+                              } catch (e) {
+                                debugPrint(e.toString());
+                                return const ResonanceDialog(
+                                  title: 'Node Info',
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        'Error loading node info',
+                                        style: TextStyle(
+                                          color: ResonanceColors.accent,
                                         ),
-                                      ],
-                                    ),
-                                  );
-                                }
-                              },
-                            ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }
+                            },
                           );
                         }
                       },

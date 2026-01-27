@@ -44,34 +44,6 @@ String indexHtml({required String id, String? dependencies}) {
             }
           });
 
-          chart.on('mouseover', function (params) {
-            console.log('mouseover:', {params: params});
-
-            const eventData = {};
-            if (params.dataType === 'node' || params.dataType === 'edge') {
-              eventData.dataType = params.dataType;
-              eventData.data = params.data;
-            }
-            
-            if (context.${JsMethods.onChartHover}) {
-              context.${JsMethods.onChartHover}('$id', JSON.stringify(eventData));
-            }
-          });
-
-          chart.on('mouseout', function (params) {
-            console.log('mouseout:', {params: params});
-
-            const eventData = {};
-            if (params.dataType === 'node' || params.dataType === 'edge') {
-              eventData.dataType = params.dataType;
-              eventData.data = params.data;
-            }
-            
-            if (context.${JsMethods.onChartHoverOut}) {
-              context.${JsMethods.onChartHoverOut}('$id', JSON.stringify(eventData));
-            }
-          });
-
           window.addEventListener('resize', chart.resize);
       </script>
     </body>

@@ -197,8 +197,10 @@ class SignInPage extends ConsumerWidget {
                         ],
                       ),
                   onError: (error) {
-                    // todo_Handle error visually
                     debugPrint(error.toString());
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error: $error')),
+                    );
                   },
                 ),
                 const SizedBox(height: 30),

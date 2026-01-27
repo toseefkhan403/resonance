@@ -16,8 +16,6 @@ abstract class GraphifyView extends StatefulWidget {
     this.onConsoleMessage,
     this.onCreated,
     this.onChartClick,
-    this.onChartHover,
-    this.onChartHoverOut,
   });
 
   final GraphifyController? controller;
@@ -30,12 +28,6 @@ abstract class GraphifyView extends StatefulWidget {
 
   /// Called when a chart element (node or edge) is clicked
   final OnChartEvent? onChartClick;
-
-  /// Called when the mouse hovers over a chart element
-  final OnChartEvent? onChartHover;
-
-  /// Called when the mouse leaves a chart element
-  final OnChartEvent? onChartHoverOut;
 
   @override
   State<StatefulWidget> createState();

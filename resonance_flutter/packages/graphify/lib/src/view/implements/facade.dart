@@ -9,8 +9,6 @@ class GraphifyView extends g_view.GraphifyView {
     super.onConsoleMessage,
     super.onCreated,
     super.onChartClick,
-    super.onChartHover,
-    super.onChartHoverOut,
   });
 
   @override

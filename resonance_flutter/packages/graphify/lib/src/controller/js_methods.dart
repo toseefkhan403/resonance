@@ -8,8 +8,4 @@ final class JsMethods {
   static const normalizeJson = 'normalizeJson';
 
   static const onChartClick = 'onChartClick';
-
-  static const onChartHover = 'onChartHover';
-
-  static const onChartHoverOut = 'onChartHoverOut';
 }

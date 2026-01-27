@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:resonance_flutter/application/audio_service.dart';
 import 'package:resonance_flutter/presentation/utils/resonance_colors.dart';
 import 'package:resonance_flutter/presentation/widgets/podcasts_dialog.dart';
 
@@ -62,7 +64,7 @@ class ResonanceSidebar extends StatelessWidget {
   }
 }
 
-class _SidebarButton extends StatefulWidget {
+class _SidebarButton extends ConsumerStatefulWidget {
   const _SidebarButton({
     required this.icon,
     required this.tooltip,
@@ -76,10 +78,10 @@ class _SidebarButton extends StatefulWidget {
   final bool isActive;
 
   @override
-  State<_SidebarButton> createState() => _SidebarButtonState();
+  ConsumerState<_SidebarButton> createState() => _SidebarButtonState();
 }
 
-class _SidebarButtonState extends State<_SidebarButton> {
+class _SidebarButtonState extends ConsumerState<_SidebarButton> {
   bool _isHovering = false;
 
   @override
@@ -93,7 +95,10 @@ class _SidebarButtonState extends State<_SidebarButton> {
         onExit: (_) => setState(() => _isHovering = false),
         cursor: SystemMouseCursors.click,
         child: GestureDetector(
-          onTap: widget.onTap,
+          onTap: () {
+            widget.onTap();
+            ref.read(audioServiceProvider.notifier).playClickSound();
+          },
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             width: 40,
