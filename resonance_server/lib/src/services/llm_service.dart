@@ -118,7 +118,7 @@ class LLMService {
   Agent _createAgent() {
     Agent.environment['GEMINI_API_KEY'] = _geminiAPIKey;
     return Agent(
-      'google?chat=gemini-2.5-flash-lite&embeddings=text-embedding-004',
+      'google?chat=gemini-3-flash-preview&embeddings=text-embedding-004',
       embeddingsModelOptions: const GoogleEmbeddingsModelOptions(
         dimensions: 768,
       ),
