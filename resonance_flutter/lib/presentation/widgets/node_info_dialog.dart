@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:resonance_client/resonance_client.dart';
+import 'package:resonance_flutter/application/graph_service.dart';
 import 'package:resonance_flutter/presentation/utils/resonance_colors.dart';
 import 'package:resonance_flutter/presentation/widgets/resonance_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class NodeInfoDialog extends StatelessWidget {
+class NodeInfoDialog extends ConsumerStatefulWidget {
   const NodeInfoDialog({
     required this.node,
     this.speakerName,
@@ -15,19 +17,79 @@ class NodeInfoDialog extends StatelessWidget {
   final String? speakerName;
 
   @override
+  ConsumerState<NodeInfoDialog> createState() => _NodeInfoDialogState();
+}
+
+class _NodeInfoDialogState extends ConsumerState<NodeInfoDialog> {
+  bool isBookmarked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        isBookmarked = widget.node.isBookmarked;
+      });
+    });
+  }
+
+  Future<void> _toggleBookmark() async {
+    final newValue = !isBookmarked;
+    setState(() {
+      isBookmarked = newValue;
+    });
+
+    try {
+      await ref
+          .read(graphServiceProvider)
+          .bookmarkNode(
+            widget.node.nodeId,
+            isBookmarked: newValue,
+          );
+      ref.invalidate(bookmarkedNodesProvider);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          isBookmarked = !newValue;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ResonanceDialog(
       title: 'Node Info',
+      actions: [
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: _toggleBookmark,
+            borderRadius: BorderRadius.circular(20),
+            hoverColor: ResonanceColors.accent.withValues(alpha: 0.2),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              child: Icon(
+                isBookmarked ? Icons.bookmark : Icons.bookmark_outline,
+                color: ResonanceColors.accent,
+                size: 20,
+              ),
+            ),
+          ),
+        ),
+      ],
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildInfoRow('Name', node.name),
-          const SizedBox(height: 12),
-          _buildInfoRow(
-            'Primary Speaker',
-            speakerName ?? 'ID: ${node.primarySpeakerId}',
-          ),
+          _buildInfoRow('Name', widget.node.name),
+          if (widget.speakerName != null) ...[
+            const SizedBox(height: 12),
+            _buildInfoRow(
+              'Primary Speaker',
+              widget.speakerName!,
+            ),
+          ],
           const SizedBox(height: 12),
           const Text(
             'Summary',
@@ -39,13 +101,13 @@ class NodeInfoDialog extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            node.summary,
+            widget.node.summary,
             style: const TextStyle(
               color: ResonanceColors.textGrey,
               height: 1.4,
             ),
           ),
-          if (node.references.isNotEmpty) ...[
+          if (widget.node.references.isNotEmpty) ...[
             const SizedBox(height: 20),
             const Text(
               'References',
@@ -60,14 +122,14 @@ class NodeInfoDialog extends StatelessWidget {
               constraints: const BoxConstraints(maxHeight: 200),
               child: ListView.separated(
                 shrinkWrap: true,
-                itemCount: node.references.length,
+                itemCount: widget.node.references.length,
                 separatorBuilder: (context, index) =>
                     const SizedBox(height: 12),
                 itemBuilder: (context, index) {
-                  final ref = node.references[index];
+                  final ref = widget.node.references[index];
                   final startTimeInt = ref.startTime;
                   final youtubeUrl =
-                      'https://www.youtube.com/watch?v=${node.videoId}&t=$startTimeInt';
+                      'https://www.youtube.com/watch?v=${widget.node.videoId}&t=$startTimeInt';
 
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

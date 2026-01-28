@@ -25,9 +25,11 @@ abstract class GraphNode implements _i1.SerializableModel {
     required this.primarySpeakerId,
     required this.references,
     required this.embedding,
+    bool? isBookmarked,
     DateTime? createdAt,
     DateTime? updatedAt,
-  }) : createdAt = createdAt ?? DateTime.now(),
+  }) : isBookmarked = isBookmarked ?? false,
+       createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
 
   factory GraphNode({
@@ -40,6 +42,7 @@ abstract class GraphNode implements _i1.SerializableModel {
     required int primarySpeakerId,
     required List<_i2.QuoteReference> references,
     required _i1.Vector embedding,
+    bool? isBookmarked,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _GraphNodeImpl;
@@ -59,6 +62,7 @@ abstract class GraphNode implements _i1.SerializableModel {
       embedding: _i1.VectorJsonExtension.fromJson(
         jsonSerialization['embedding'],
       ),
+      isBookmarked: jsonSerialization['isBookmarked'] as bool?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -89,6 +93,8 @@ abstract class GraphNode implements _i1.SerializableModel {
 
   _i1.Vector embedding;
 
+  bool isBookmarked;
+
   DateTime createdAt;
 
   DateTime updatedAt;
@@ -106,6 +112,7 @@ abstract class GraphNode implements _i1.SerializableModel {
     int? primarySpeakerId,
     List<_i2.QuoteReference>? references,
     _i1.Vector? embedding,
+    bool? isBookmarked,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -122,6 +129,7 @@ abstract class GraphNode implements _i1.SerializableModel {
       'primarySpeakerId': primarySpeakerId,
       'references': references.toJson(valueToJson: (v) => v.toJson()),
       'embedding': embedding.toJson(),
+      'isBookmarked': isBookmarked,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -146,6 +154,7 @@ class _GraphNodeImpl extends GraphNode {
     required int primarySpeakerId,
     required List<_i2.QuoteReference> references,
     required _i1.Vector embedding,
+    bool? isBookmarked,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : super._(
@@ -158,6 +167,7 @@ class _GraphNodeImpl extends GraphNode {
          primarySpeakerId: primarySpeakerId,
          references: references,
          embedding: embedding,
+         isBookmarked: isBookmarked,
          createdAt: createdAt,
          updatedAt: updatedAt,
        );
@@ -176,6 +186,7 @@ class _GraphNodeImpl extends GraphNode {
     int? primarySpeakerId,
     List<_i2.QuoteReference>? references,
     _i1.Vector? embedding,
+    bool? isBookmarked,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -190,6 +201,7 @@ class _GraphNodeImpl extends GraphNode {
       references:
           references ?? this.references.map((e0) => e0.copyWith()).toList(),
       embedding: embedding ?? this.embedding.clone(),
+      isBookmarked: isBookmarked ?? this.isBookmarked,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

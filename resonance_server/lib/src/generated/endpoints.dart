@@ -297,13 +297,22 @@ class Endpoints extends _i1.EndpointDispatch {
       methodConnectors: {
         'listSpeakers': _i1.MethodConnector(
           name: 'listSpeakers',
-          params: {},
+          params: {
+            'isDemo': _i1.ParameterDescription(
+              name: 'isDemo',
+              type: _i1.getType<bool>(),
+              nullable: false,
+            ),
+          },
           call:
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async => (endpoints['conversation'] as _i5.ConversationEndpoint)
-                  .listSpeakers(session),
+                  .listSpeakers(
+                    session,
+                    isDemo: params['isDemo'],
+                  ),
         ),
         'askQuestion': _i1.MethodStreamConnector(
           name: 'askQuestion',
@@ -316,6 +325,11 @@ class Endpoints extends _i1.EndpointDispatch {
             'speaker': _i1.ParameterDescription(
               name: 'speaker',
               type: _i1.getType<_i8.Speaker>(),
+              nullable: false,
+            ),
+            'isDemo': _i1.ParameterDescription(
+              name: 'isDemo',
+              type: _i1.getType<bool>(),
               nullable: false,
             ),
           },
@@ -331,6 +345,7 @@ class Endpoints extends _i1.EndpointDispatch {
                     session,
                     params['question'],
                     params['speaker'],
+                    isDemo: params['isDemo'],
                   ),
         ),
       },
@@ -341,24 +356,55 @@ class Endpoints extends _i1.EndpointDispatch {
       methodConnectors: {
         'getGraphData': _i1.MethodConnector(
           name: 'getGraphData',
-          params: {},
+          params: {
+            'isDemo': _i1.ParameterDescription(
+              name: 'isDemo',
+              type: _i1.getType<bool>(),
+              nullable: false,
+            ),
+          },
           call:
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async => (endpoints['graph'] as _i6.GraphEndpoint).getGraphData(
                 session,
+                isDemo: params['isDemo'],
               ),
         ),
-        'getDemoGraphData': _i1.MethodConnector(
-          name: 'getDemoGraphData',
+        'bookmarkNode': _i1.MethodConnector(
+          name: 'bookmarkNode',
+          params: {
+            'nodeId': _i1.ParameterDescription(
+              name: 'nodeId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'isBookmarked': _i1.ParameterDescription(
+              name: 'isBookmarked',
+              type: _i1.getType<bool>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['graph'] as _i6.GraphEndpoint).bookmarkNode(
+                session,
+                params['nodeId'],
+                params['isBookmarked'],
+              ),
+        ),
+        'getBookmarkedNodes': _i1.MethodConnector(
+          name: 'getBookmarkedNodes',
           params: {},
           call:
               (
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async => (endpoints['graph'] as _i6.GraphEndpoint)
-                  .getDemoGraphData(session),
+                  .getBookmarkedNodes(session),
         ),
       },
     );

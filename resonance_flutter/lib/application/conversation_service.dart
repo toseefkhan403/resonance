@@ -8,12 +8,16 @@ class ConversationService {
   ConversationService(this._client);
   final Client _client;
 
-  Future<List<Speaker>> listSpeakers() {
-    return _client.conversation.listSpeakers();
+  Future<List<Speaker>> listSpeakers({bool isDemo = false}) {
+    return _client.conversation.listSpeakers(isDemo: isDemo);
   }
 
-  Stream<String> askQuestion(String text, Speaker speaker) {
-    return _client.conversation.askQuestion(text, speaker);
+  Stream<String> askQuestion(
+    String text,
+    Speaker speaker, {
+    bool isDemo = false,
+  }) {
+    return _client.conversation.askQuestion(text, speaker, isDemo: isDemo);
   }
 }
 

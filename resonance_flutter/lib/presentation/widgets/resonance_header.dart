@@ -35,13 +35,23 @@ class ResonanceHeader extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
         children: [
-          SvgPicture.asset(
-            'assets/svg/logo.svg',
-            width: 28,
-            height: 28,
+          GestureDetector(
+            onTap: () {
+              audioNotifier.playClickSound();
+              context.go('/');
+            },
+            child: Row(
+              children: [
+                SvgPicture.asset(
+                  'assets/svg/logo.svg',
+                  width: 28,
+                  height: 28,
+                ),
+                const SizedBox(width: 12),
+                _title(),
+              ],
+            ),
           ),
-          const SizedBox(width: 12),
-          _title(),
           const Spacer(),
           _buildLinkText(
             'WHAT IS RESONANCE',

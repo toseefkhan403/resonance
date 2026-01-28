@@ -8,11 +8,13 @@ class ResonanceDialog extends ConsumerWidget {
   const ResonanceDialog({
     required this.title,
     required this.child,
+    this.actions,
     super.key,
   });
 
   final String title;
   final Widget child;
+  final List<Widget>? actions;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -51,6 +53,10 @@ class ResonanceDialog extends ConsumerWidget {
                             ),
                           ),
                           const Spacer(),
+                          if (actions != null) ...[
+                            ...actions!,
+                            const SizedBox(width: 16),
+                          ],
                           // Close Button
                           Material(
                             color: Colors.transparent,

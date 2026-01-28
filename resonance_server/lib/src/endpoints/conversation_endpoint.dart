@@ -9,11 +9,20 @@ class ConversationEndpoint extends Endpoint {
   Stream<String> askQuestion(
     Session session,
     String question,
-    Speaker speaker,
-  ) async* {
-    final userId = session.authenticated?.userIdentifier;
-    if (userId == null) {
-      throw Exception('User not authenticated');
+    Speaker speaker, {
+    bool isDemo = false,
+  }) async* {
+    String? userId;
+    if (isDemo) {
+      userId = session.passwords['demoUserId'];
+      if (userId == null) {
+        throw Exception('Demo user not configured');
+      }
+    } else {
+      userId = session.authenticated?.userIdentifier;
+      if (userId == null) {
+        throw Exception('User not authenticated');
+      }
     }
 
     final llmService = LLMService();
@@ -39,15 +48,25 @@ class ConversationEndpoint extends Endpoint {
     }
   }
 
-  Future<List<Speaker>> listSpeakers(Session session) async {
-    final userId = session.authenticated?.userIdentifier;
-
-    if (userId == null) {
-      session.log(
-        'listSpeakers: User not authenticated',
-        level: LogLevel.warning,
-      );
-      throw Exception('User not authenticated');
+  Future<List<Speaker>> listSpeakers(
+    Session session, {
+    bool isDemo = false,
+  }) async {
+    String? userId;
+    if (isDemo) {
+      userId = session.passwords['demoUserId'];
+      if (userId == null) {
+        throw Exception('Demo user not configured');
+      }
+    } else {
+      userId = session.authenticated?.userIdentifier;
+      if (userId == null) {
+        session.log(
+          'listSpeakers: User not authenticated',
+          level: LogLevel.warning,
+        );
+        throw Exception('User not authenticated');
+      }
     }
 
     final speakers = await Speaker.db.find(

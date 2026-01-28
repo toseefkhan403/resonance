@@ -18,9 +18,10 @@ import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i4;
 import 'package:resonance_client/src/protocol/speaker.dart' as _i5;
 import 'package:resonance_client/src/protocol/graph_data.dart' as _i6;
-import 'package:resonance_client/src/protocol/ingestion_job.dart' as _i7;
-import 'package:resonance_client/src/protocol/podcast.dart' as _i8;
-import 'protocol.dart' as _i9;
+import 'package:resonance_client/src/protocol/graph_node.dart' as _i7;
+import 'package:resonance_client/src/protocol/ingestion_job.dart' as _i8;
+import 'package:resonance_client/src/protocol/podcast.dart' as _i9;
+import 'protocol.dart' as _i10;
 
 /// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
 /// are made available on the server and enable the corresponding sign-in widget
@@ -271,22 +272,24 @@ class EndpointConversation extends _i2.EndpointRef {
   /// Answers questions using stored knowledge graph and speaker perspective
   _i3.Stream<String> askQuestion(
     String question,
-    _i5.Speaker speaker,
-  ) => caller.callStreamingServerEndpoint<_i3.Stream<String>, String>(
+    _i5.Speaker speaker, {
+    required bool isDemo,
+  }) => caller.callStreamingServerEndpoint<_i3.Stream<String>, String>(
     'conversation',
     'askQuestion',
     {
       'question': question,
       'speaker': speaker,
+      'isDemo': isDemo,
     },
     {},
   );
 
-  _i3.Future<List<_i5.Speaker>> listSpeakers() =>
+  _i3.Future<List<_i5.Speaker>> listSpeakers({required bool isDemo}) =>
       caller.callServerEndpoint<List<_i5.Speaker>>(
         'conversation',
         'listSpeakers',
-        {},
+        {'isDemo': isDemo},
       );
 }
 
@@ -297,17 +300,29 @@ class EndpointGraph extends _i2.EndpointRef {
   @override
   String get name => 'graph';
 
-  _i3.Future<_i6.GraphData> getGraphData() =>
+  _i3.Future<_i6.GraphData> getGraphData({required bool isDemo}) =>
       caller.callServerEndpoint<_i6.GraphData>(
         'graph',
         'getGraphData',
-        {},
+        {'isDemo': isDemo},
       );
 
-  _i3.Future<_i6.GraphData> getDemoGraphData() =>
-      caller.callServerEndpoint<_i6.GraphData>(
+  _i3.Future<void> bookmarkNode(
+    int nodeId,
+    bool isBookmarked,
+  ) => caller.callServerEndpoint<void>(
+    'graph',
+    'bookmarkNode',
+    {
+      'nodeId': nodeId,
+      'isBookmarked': isBookmarked,
+    },
+  );
+
+  _i3.Future<List<_i7.GraphNode>> getBookmarkedNodes() =>
+      caller.callServerEndpoint<List<_i7.GraphNode>>(
         'graph',
-        'getDemoGraphData',
+        'getBookmarkedNodes',
         {},
       );
 }
@@ -319,17 +334,17 @@ class EndpointPodcast extends _i2.EndpointRef {
   @override
   String get name => 'podcast';
 
-  _i3.Future<_i7.IngestionJob> ingestPodcast(String youtubeUrl) =>
-      caller.callServerEndpoint<_i7.IngestionJob>(
+  _i3.Future<_i8.IngestionJob> ingestPodcast(String youtubeUrl) =>
+      caller.callServerEndpoint<_i8.IngestionJob>(
         'podcast',
         'ingestPodcast',
         {'youtubeUrl': youtubeUrl},
       );
 
-  _i3.Stream<_i7.IngestionJob> getJobStatus(int jobId) =>
+  _i3.Stream<_i8.IngestionJob> getJobStatus(int jobId) =>
       caller.callStreamingServerEndpoint<
-        _i3.Stream<_i7.IngestionJob>,
-        _i7.IngestionJob
+        _i3.Stream<_i8.IngestionJob>,
+        _i8.IngestionJob
       >(
         'podcast',
         'getJobStatus',
@@ -337,8 +352,8 @@ class EndpointPodcast extends _i2.EndpointRef {
         {},
       );
 
-  _i3.Future<List<_i8.Podcast>> listPodcasts() =>
-      caller.callServerEndpoint<List<_i8.Podcast>>(
+  _i3.Future<List<_i9.Podcast>> listPodcasts() =>
+      caller.callServerEndpoint<List<_i9.Podcast>>(
         'podcast',
         'listPodcasts',
         {},
@@ -376,7 +391,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i9.Protocol(),
+         _i10.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,

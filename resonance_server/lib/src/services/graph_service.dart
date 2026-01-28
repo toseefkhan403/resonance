@@ -3,7 +3,7 @@ import '../generated/protocol.dart';
 import 'llm_service.dart';
 
 class GraphService {
-  final linkThreshold = 0.28;
+  final linkThreshold = 0.4;
 
   Future<int> mergeOrCreateSpeaker(
     Session session,
@@ -115,6 +115,9 @@ class GraphService {
             (n.embedding.distanceCosine(ideaEmbedding) < linkThreshold),
         orderBy: (n) => n.embedding.distanceCosine(ideaEmbedding),
       );
+      session.log(
+        'GraphService: processTranscriptIdeas found ${similarNodes.length} similar nodes for idea ${idea.label}',
+      );
 
       var rank = 0;
       for (final similarNode in similarNodes) {
@@ -139,5 +142,29 @@ class GraphService {
       'GraphService: processTranscriptIdeas completed. Nodes created: $nodesCreated',
     );
     return nodesCreated;
+  }
+
+  Future<void> bookmarkNode(
+    Session session,
+    int nodeId,
+    bool isBookmarked,
+  ) async {
+    final node = await GraphNode.db.findById(session, nodeId);
+    if (node != null) {
+      await GraphNode.db.updateRow(
+        session,
+        node.copyWith(isBookmarked: isBookmarked),
+      );
+    }
+  }
+
+  Future<List<GraphNode>> getBookmarkedNodes(
+    Session session,
+    String userId,
+  ) async {
+    return await GraphNode.db.find(
+      session,
+      where: (n) => n.userId.equals(userId) & n.isBookmarked.equals(true),
+    );
   }
 }

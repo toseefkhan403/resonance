@@ -206,7 +206,12 @@ class _ForceDirectedGraphPageState
                     color: ResonanceColors.accentDark,
                     thickness: 0.5,
                   ),
-                  Expanded(child: ChatPanel(speakers: graphState.speakers)),
+                  Expanded(
+                    child: ChatPanel(
+                      speakers: graphState.speakers,
+                      isDemo: widget.isDemo,
+                    ),
+                  ),
                 ],
               ),
             ),

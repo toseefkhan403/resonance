@@ -12,9 +12,10 @@ import 'package:resonance_flutter/presentation/utils/resonance_colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ChatPanel extends ConsumerStatefulWidget {
-  const ChatPanel({required this.speakers, super.key});
+  const ChatPanel({required this.speakers, this.isDemo = false, super.key});
 
   final List<Speaker> speakers;
+  final bool isDemo;
 
   @override
   ConsumerState<ChatPanel> createState() => _ChatPanelState();
@@ -48,11 +49,9 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
   void _sendMessage() {
     final text = _chatController.text.trim();
     if (text.isNotEmpty) {
-      unawaited(
-        ref
-            .read(conversationControllerProvider(widget.speakers).notifier)
-            .sendMessage(text),
-      );
+      ref
+          .read(conversationControllerProvider(widget.speakers).notifier)
+          .sendMessage(text, isDemo: widget.isDemo);
       _chatController.clear();
     }
   }

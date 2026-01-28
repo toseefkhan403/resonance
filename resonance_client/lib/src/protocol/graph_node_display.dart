@@ -25,6 +25,7 @@ abstract class GraphNodeDisplay implements _i1.SerializableModel {
     required this.summary,
     required this.primarySpeakerId,
     required this.references,
+    required this.isBookmarked,
   });
 
   factory GraphNodeDisplay({
@@ -37,6 +38,7 @@ abstract class GraphNodeDisplay implements _i1.SerializableModel {
     required String summary,
     required int primarySpeakerId,
     required List<_i2.QuoteReference> references,
+    required bool isBookmarked,
   }) = _GraphNodeDisplayImpl;
 
   factory GraphNodeDisplay.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -52,6 +54,7 @@ abstract class GraphNodeDisplay implements _i1.SerializableModel {
       references: _i3.Protocol().deserialize<List<_i2.QuoteReference>>(
         jsonSerialization['references'],
       ),
+      isBookmarked: jsonSerialization['isBookmarked'] as bool,
     );
   }
 
@@ -73,6 +76,8 @@ abstract class GraphNodeDisplay implements _i1.SerializableModel {
 
   List<_i2.QuoteReference> references;
 
+  bool isBookmarked;
+
   /// Returns a shallow copy of this [GraphNodeDisplay]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -86,6 +91,7 @@ abstract class GraphNodeDisplay implements _i1.SerializableModel {
     String? summary,
     int? primarySpeakerId,
     List<_i2.QuoteReference>? references,
+    bool? isBookmarked,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -100,6 +106,7 @@ abstract class GraphNodeDisplay implements _i1.SerializableModel {
       'summary': summary,
       'primarySpeakerId': primarySpeakerId,
       'references': references.toJson(valueToJson: (v) => v.toJson()),
+      'isBookmarked': isBookmarked,
     };
   }
 
@@ -120,6 +127,7 @@ class _GraphNodeDisplayImpl extends GraphNodeDisplay {
     required String summary,
     required int primarySpeakerId,
     required List<_i2.QuoteReference> references,
+    required bool isBookmarked,
   }) : super._(
          name: name,
          value: value,
@@ -130,6 +138,7 @@ class _GraphNodeDisplayImpl extends GraphNodeDisplay {
          summary: summary,
          primarySpeakerId: primarySpeakerId,
          references: references,
+         isBookmarked: isBookmarked,
        );
 
   /// Returns a shallow copy of this [GraphNodeDisplay]
@@ -146,6 +155,7 @@ class _GraphNodeDisplayImpl extends GraphNodeDisplay {
     String? summary,
     int? primarySpeakerId,
     List<_i2.QuoteReference>? references,
+    bool? isBookmarked,
   }) {
     return GraphNodeDisplay(
       name: name ?? this.name,
@@ -158,6 +168,7 @@ class _GraphNodeDisplayImpl extends GraphNodeDisplay {
       primarySpeakerId: primarySpeakerId ?? this.primarySpeakerId,
       references:
           references ?? this.references.map((e0) => e0.copyWith()).toList(),
+      isBookmarked: isBookmarked ?? this.isBookmarked,
     );
   }
 }

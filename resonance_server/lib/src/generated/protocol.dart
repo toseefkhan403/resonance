@@ -34,7 +34,8 @@ import 'transcript_reference.dart' as _i19;
 import 'transcript_topic.dart' as _i20;
 import 'video_metadata.dart' as _i21;
 import 'package:resonance_server/src/generated/speaker.dart' as _i22;
-import 'package:resonance_server/src/generated/podcast.dart' as _i23;
+import 'package:resonance_server/src/generated/graph_node.dart' as _i23;
+import 'package:resonance_server/src/generated/podcast.dart' as _i24;
 export 'graph_category.dart';
 export 'graph_data.dart';
 export 'graph_edge.dart';
@@ -178,6 +179,13 @@ class Protocol extends _i1.SerializationManagerServer {
           isNullable: false,
           dartType: 'Vector(768)',
           vectorDimension: 768,
+        ),
+        _i2.ColumnDefinition(
+          name: 'isBookmarked',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
         ),
         _i2.ColumnDefinition(
           name: 'createdAt',
@@ -720,8 +728,12 @@ class Protocol extends _i1.SerializationManagerServer {
       return (data as List).map((e) => deserialize<_i22.Speaker>(e)).toList()
           as T;
     }
-    if (t == List<_i23.Podcast>) {
-      return (data as List).map((e) => deserialize<_i23.Podcast>(e)).toList()
+    if (t == List<_i23.GraphNode>) {
+      return (data as List).map((e) => deserialize<_i23.GraphNode>(e)).toList()
+          as T;
+    }
+    if (t == List<_i24.Podcast>) {
+      return (data as List).map((e) => deserialize<_i24.Podcast>(e)).toList()
           as T;
     }
     try {

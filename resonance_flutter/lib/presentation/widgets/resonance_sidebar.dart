@@ -4,62 +4,75 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:resonance_flutter/application/audio_service.dart';
+import 'package:resonance_flutter/application/auth_service.dart';
 import 'package:resonance_flutter/presentation/utils/resonance_colors.dart';
 import 'package:resonance_flutter/presentation/widgets/podcasts_dialog.dart';
 
-class ResonanceSidebar extends StatelessWidget {
+class ResonanceSidebar extends ConsumerWidget {
   const ResonanceSidebar({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final location = GoRouterState.of(context).uri.toString();
+    final authInfoListenable = ref
+        .watch(authServiceProvider)
+        .authInfoListenable;
 
-    return Container(
-      width: 70,
-      decoration: const BoxDecoration(
-        border: Border(right: BorderSide(color: Color(0xFF333333))),
-      ),
-      child: Column(
-        children: [
-          const SizedBox(height: 20),
-          _SidebarButton(
-            icon: Icons.podcasts,
-            tooltip: 'Add Podcast',
-            isActive: location == '/home',
-            onTap: () => context.go('/home'),
+    return ValueListenableBuilder(
+      valueListenable: authInfoListenable,
+      builder: (context, authInfo, child) {
+        final isLoggedIn = authInfo != null;
+
+        return Container(
+          width: 70,
+          decoration: const BoxDecoration(
+            border: Border(right: BorderSide(color: Color(0xFF333333))),
           ),
-          const SizedBox(height: 20),
-          _SidebarButton(
-            icon: Icons.hub,
-            tooltip: 'View Graph',
-            isActive: location == '/graph',
-            onTap: () => context.go('/graph'),
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
+              _SidebarButton(
+                icon: Icons.podcasts,
+                tooltip: 'Add Podcast',
+                isActive: location == '/home',
+                onTap: () => context.go('/home'),
+              ),
+              const SizedBox(height: 20),
+              _SidebarButton(
+                icon: Icons.hub,
+                tooltip: 'View Graph',
+                isActive: location == '/graph',
+                isDisabled: !isLoggedIn,
+                onTap: () => context.go('/graph'),
+              ),
+              const SizedBox(height: 20),
+              _SidebarButton(
+                icon: Icons.list_outlined,
+                tooltip: 'List Podcasts',
+                isDisabled: !isLoggedIn,
+                onTap: () {
+                  unawaited(
+                    showDialog<void>(
+                      context: context,
+                      builder: (context) => const PodcastsDialog(),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 20),
+              _SidebarButton(
+                icon: Icons.bookmark_outline,
+                tooltip: 'Bookmarks',
+                isActive: location == '/bookmarks',
+                isDisabled: !isLoggedIn,
+                onTap: () {
+                  context.go('/bookmarks');
+                },
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
-          _SidebarButton(
-            icon: Icons.list_outlined,
-            tooltip: 'List Podcasts',
-            onTap: () {
-              unawaited(
-                showDialog<void>(
-                  context: context,
-                  builder: (context) => const PodcastsDialog(),
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 20),
-          _SidebarButton(
-            icon: Icons.save_alt,
-            tooltip: 'Saves',
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Save feature coming soon')),
-              );
-            },
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -70,12 +83,14 @@ class _SidebarButton extends ConsumerStatefulWidget {
     required this.tooltip,
     required this.onTap,
     this.isActive = false,
+    this.isDisabled = false,
   });
 
   final IconData icon;
   final String tooltip;
   final VoidCallback onTap;
   final bool isActive;
+  final bool isDisabled;
 
   @override
   ConsumerState<_SidebarButton> createState() => _SidebarButtonState();
@@ -86,6 +101,22 @@ class _SidebarButtonState extends ConsumerState<_SidebarButton> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.isDisabled) {
+      return Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(2),
+        ),
+        child: Icon(
+          widget.icon,
+          size: 20,
+          color: ResonanceColors.textGrey.withValues(alpha: 0.3),
+        ),
+      );
+    }
+
     final isSelected = widget.isActive || _isHovering;
 
     return Tooltip(

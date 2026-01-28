@@ -9,15 +9,15 @@ class GraphService {
   final Client _client;
 
   Future<GraphData> getGraphData({bool isDemo = false}) {
-    // Determine which endpoint to use based on isDemo
-    if (isDemo) {
-      return _client.graph.getDemoGraphData();
-    }
-    return _client.graph.getGraphData();
+    return _client.graph.getGraphData(isDemo: isDemo);
   }
 
-  Future<List<Speaker>> listSpeakers() {
-    return _client.conversation.listSpeakers();
+  Future<void> bookmarkNode(int nodeId, {required bool isBookmarked}) {
+    return _client.graph.bookmarkNode(nodeId, isBookmarked);
+  }
+
+  Future<List<GraphNode>> getBookmarkedNodes() {
+    return _client.graph.getBookmarkedNodes();
   }
 }
 
@@ -25,4 +25,10 @@ class GraphService {
 GraphService graphService(Ref ref) {
   final client = ref.watch(serverpodClientProvider);
   return GraphService(client);
+}
+
+@riverpod
+Future<List<GraphNode>> bookmarkedNodes(Ref ref) async {
+  final graphService = ref.watch(graphServiceProvider);
+  return graphService.getBookmarkedNodes();
 }

@@ -9,3 +9,4 @@ fields:
   summary: String
   primarySpeakerId: int
   references: List<QuoteReference>
+  isBookmarked: bool

@@ -15,7 +15,8 @@ conversation:
   - listSpeakers:
 graph:
   - getGraphData:
-  - getDemoGraphData:
+  - bookmarkNode:
+  - getBookmarkedNodes:
 podcast:
   - ingestPodcast:
   - getJobStatus:

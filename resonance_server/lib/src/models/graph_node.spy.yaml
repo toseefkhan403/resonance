@@ -9,6 +9,7 @@ fields:
   primarySpeakerId: int
   references: List<QuoteReference>
   embedding: Vector(768)
+  isBookmarked: bool, default=false
   createdAt: DateTime, default=now
   updatedAt: DateTime, default=now
 indexes:

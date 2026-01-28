@@ -1,17 +1,23 @@
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
+import '../services/graph_service.dart';
 
 class GraphEndpoint extends Endpoint {
-  Future<GraphData> getGraphData(Session session) async {
-    final userId = session.authenticated?.userIdentifier;
-    if (userId == null) {
-      throw Exception('User not authenticated');
+  Future<GraphData> getGraphData(Session session, {bool isDemo = false}) async {
+    String? userId;
+    if (isDemo) {
+      userId = session.passwords['demoUserId'];
+      if (userId == null) {
+        throw Exception('Demo user not configured');
+      }
+    } else {
+      userId = session.authenticated?.userIdentifier;
+      if (userId == null) {
+        throw Exception('User not authenticated');
+      }
     }
-    return _getGraphDataForUser(session, userId);
-  }
 
-  Future<GraphData> getDemoGraphData(Session session) async {
-    return _getGraphDataForUser(session, session.passwords['demoUserId']!);
+    return _getGraphDataForUser(session, userId);
   }
 
   Future<GraphData> _getGraphDataForUser(
@@ -171,6 +177,7 @@ class GraphEndpoint extends Endpoint {
           value: node.impactScore,
           category: categoryIndex,
           symbolSize: symbolSize,
+          isBookmarked: node.isBookmarked,
         ),
       );
     }
@@ -202,5 +209,53 @@ class GraphEndpoint extends Endpoint {
       ),
       otherNodeCount,
     );
+  }
+
+  // ignore: unused_element
+  Future<void> _deleteGraphForUser(Session session) async {
+    final userId = session.authenticated?.userIdentifier;
+    if (userId == null) {
+      throw Exception('User not authenticated');
+    }
+
+    await GraphNode.db.deleteWhere(
+      session,
+      where: (c) => c.userId.equals(userId),
+    );
+    await GraphEdge.db.deleteWhere(
+      session,
+      where: (c) => c.userId.equals(userId),
+    );
+
+    final podcasts = await Podcast.db.find(
+      session,
+      where: (c) => c.userId.equals(userId),
+    );
+    for (final podcast in podcasts) {
+      await Podcast.db.updateRow(
+        session,
+        podcast.copyWith(graphExists: false),
+      );
+    }
+  }
+
+  Future<void> bookmarkNode(
+    Session session,
+    int nodeId,
+    bool isBookmarked,
+  ) async {
+    final userId = session.authenticated?.userIdentifier;
+    if (userId == null) {
+      throw Exception('User not authenticated');
+    }
+    await GraphService().bookmarkNode(session, nodeId, isBookmarked);
+  }
+
+  Future<List<GraphNode>> getBookmarkedNodes(Session session) async {
+    final userId = session.authenticated?.userIdentifier;
+    if (userId == null) {
+      throw Exception('User not authenticated');
+    }
+    return await GraphService().getBookmarkedNodes(session, userId);
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:resonance_flutter/application/auth_service.dart';
 import 'package:resonance_flutter/application/graph_service.dart';
+import 'package:resonance_flutter/presentation/bookmarks_page.dart';
 import 'package:resonance_flutter/presentation/force_directed_graph_page.dart';
 import 'package:resonance_flutter/presentation/home_page.dart';
 import 'package:resonance_flutter/presentation/sign_in_page.dart';
@@ -25,7 +26,8 @@ GoRouter goRouter(Ref ref) {
         final isOnSignIn = state.matchedLocation == '/';
         final isProtectedRoute =
             state.matchedLocation == '/home' ||
-            state.matchedLocation == '/graph';
+            state.matchedLocation == '/graph' ||
+            state.matchedLocation == '/bookmarks';
 
         debugPrint(
           'redirect → isLoggedIn=$isLoggedIn, route=${state.matchedLocation}',
@@ -37,7 +39,6 @@ GoRouter goRouter(Ref ref) {
 
         if (isLoggedIn && isOnSignIn) {
           final graphService = ref.read(graphServiceProvider);
-          // todo_move this to a lighter method
           final graphData = await graphService.getGraphData();
           if (graphData.graphWithGranularity.isNotEmpty) {
             return '/graph';
@@ -92,6 +93,14 @@ GoRouter goRouter(Ref ref) {
             ),
           ),
           GoRoute(
+            path: '/bookmarks',
+            name: AppRoute.bookmarks.name,
+            pageBuilder: (context, state) => _buildPageWithAnimation(
+              child: const BookmarksPage(),
+              state: state,
+            ),
+          ),
+          GoRoute(
             path: '/unknown',
             name: AppRoute.unknown.name,
             pageBuilder: (context, state) => _buildPageWithAnimation(
@@ -127,6 +136,7 @@ Page<dynamic> _buildPageWithAnimation({
 
 enum AppRoute {
   home,
+  bookmarks,
   demoGraph,
   graph,
   signIn,

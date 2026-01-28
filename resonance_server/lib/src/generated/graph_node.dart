@@ -26,9 +26,11 @@ abstract class GraphNode
     required this.primarySpeakerId,
     required this.references,
     required this.embedding,
+    bool? isBookmarked,
     DateTime? createdAt,
     DateTime? updatedAt,
-  }) : createdAt = createdAt ?? DateTime.now(),
+  }) : isBookmarked = isBookmarked ?? false,
+       createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
 
   factory GraphNode({
@@ -41,6 +43,7 @@ abstract class GraphNode
     required int primarySpeakerId,
     required List<_i2.QuoteReference> references,
     required _i1.Vector embedding,
+    bool? isBookmarked,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _GraphNodeImpl;
@@ -60,6 +63,7 @@ abstract class GraphNode
       embedding: _i1.VectorJsonExtension.fromJson(
         jsonSerialization['embedding'],
       ),
+      isBookmarked: jsonSerialization['isBookmarked'] as bool?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -92,6 +96,8 @@ abstract class GraphNode
 
   _i1.Vector embedding;
 
+  bool isBookmarked;
+
   DateTime createdAt;
 
   DateTime updatedAt;
@@ -112,6 +118,7 @@ abstract class GraphNode
     int? primarySpeakerId,
     List<_i2.QuoteReference>? references,
     _i1.Vector? embedding,
+    bool? isBookmarked,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -128,6 +135,7 @@ abstract class GraphNode
       'primarySpeakerId': primarySpeakerId,
       'references': references.toJson(valueToJson: (v) => v.toJson()),
       'embedding': embedding.toJson(),
+      'isBookmarked': isBookmarked,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -148,6 +156,7 @@ abstract class GraphNode
         valueToJson: (v) => v.toJsonForProtocol(),
       ),
       'embedding': embedding.toJson(),
+      'isBookmarked': isBookmarked,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -196,6 +205,7 @@ class _GraphNodeImpl extends GraphNode {
     required int primarySpeakerId,
     required List<_i2.QuoteReference> references,
     required _i1.Vector embedding,
+    bool? isBookmarked,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : super._(
@@ -208,6 +218,7 @@ class _GraphNodeImpl extends GraphNode {
          primarySpeakerId: primarySpeakerId,
          references: references,
          embedding: embedding,
+         isBookmarked: isBookmarked,
          createdAt: createdAt,
          updatedAt: updatedAt,
        );
@@ -226,6 +237,7 @@ class _GraphNodeImpl extends GraphNode {
     int? primarySpeakerId,
     List<_i2.QuoteReference>? references,
     _i1.Vector? embedding,
+    bool? isBookmarked,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -240,6 +252,7 @@ class _GraphNodeImpl extends GraphNode {
       references:
           references ?? this.references.map((e0) => e0.copyWith()).toList(),
       embedding: embedding ?? this.embedding.clone(),
+      isBookmarked: isBookmarked ?? this.isBookmarked,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -291,6 +304,11 @@ class GraphNodeUpdateTable extends _i1.UpdateTable<GraphNodeTable> {
         value,
       );
 
+  _i1.ColumnValue<bool, bool> isBookmarked(bool value) => _i1.ColumnValue(
+    table.isBookmarked,
+    value,
+  );
+
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
       _i1.ColumnValue(
         table.createdAt,
@@ -340,6 +358,11 @@ class GraphNodeTable extends _i1.Table<int?> {
       this,
       dimension: 768,
     );
+    isBookmarked = _i1.ColumnBool(
+      'isBookmarked',
+      this,
+      hasDefault: true,
+    );
     createdAt = _i1.ColumnDateTime(
       'createdAt',
       this,
@@ -370,6 +393,8 @@ class GraphNodeTable extends _i1.Table<int?> {
 
   late final _i1.ColumnVector embedding;
 
+  late final _i1.ColumnBool isBookmarked;
+
   late final _i1.ColumnDateTime createdAt;
 
   late final _i1.ColumnDateTime updatedAt;
@@ -385,6 +410,7 @@ class GraphNodeTable extends _i1.Table<int?> {
     primarySpeakerId,
     references,
     embedding,
+    isBookmarked,
     createdAt,
     updatedAt,
   ];

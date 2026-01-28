@@ -66,7 +66,7 @@ class ConversationController extends _$ConversationController {
     state = state.copyWith(selectedSpeaker: speaker);
   }
 
-  Future<void> sendMessage(String text) async {
+  Future<void> sendMessage(String text, {bool isDemo = false}) async {
     if (text.isEmpty || state.selectedSpeaker == null || state.isStreaming) {
       return;
     }
@@ -82,7 +82,11 @@ class ConversationController extends _$ConversationController {
 
     try {
       final service = ref.read(conversationServiceProvider);
-      final stream = service.askQuestion(text, state.selectedSpeaker!);
+      final stream = service.askQuestion(
+        text,
+        state.selectedSpeaker!,
+        isDemo: isDemo,
+      );
 
       await for (final chunk in stream) {
         final messages = List<ChatMessage>.from(state.messages);

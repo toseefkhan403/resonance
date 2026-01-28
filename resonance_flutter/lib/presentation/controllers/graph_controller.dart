@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:resonance_client/resonance_client.dart';
+import 'package:resonance_flutter/application/conversation_service.dart';
 import 'package:resonance_flutter/application/graph_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -55,9 +56,10 @@ class GraphController extends _$GraphController {
   Future<void> loadData({bool isDemo = false}) async {
     try {
       final service = ref.read(graphServiceProvider);
+      final conversationService = ref.read(conversationServiceProvider);
       final futures = await Future.wait([
         service.getGraphData(isDemo: isDemo),
-        service.listSpeakers(),
+        conversationService.listSpeakers(isDemo: isDemo),
       ]);
 
       final data = futures[0] as GraphData;
@@ -137,6 +139,7 @@ class GraphController extends _$GraphController {
           'summary': node.summary,
           'primarySpeakerId': node.primarySpeakerId,
           'references': node.references,
+          'isBookmarked': node.isBookmarked,
         });
         newIndex++;
       }
