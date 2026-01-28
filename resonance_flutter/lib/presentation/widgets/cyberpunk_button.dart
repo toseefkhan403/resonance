@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -112,13 +113,16 @@ class _CyberpunkButtonState extends ConsumerState<CyberpunkButton> {
                 size: 20,
               ),
               const SizedBox(width: 12),
-              Text(
-                widget.text,
-                style: GoogleFonts.orbitron(
-                  color: getTextColor(),
-                  fontSize: 14,
-                  letterSpacing: 2,
-                  fontWeight: FontWeight.bold,
+              Flexible(
+                child: AutoSizeText(
+                  widget.text,
+                  maxLines: 1,
+                  style: GoogleFonts.orbitron(
+                    color: getTextColor(),
+                    fontSize: 14,
+                    letterSpacing: 2,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],

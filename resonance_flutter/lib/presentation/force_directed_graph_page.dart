@@ -1,8 +1,10 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:graphify/graphify.dart';
+import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:resonance_client/resonance_client.dart';
 import 'package:resonance_flutter/application/audio_service.dart';
 import 'package:resonance_flutter/presentation/controllers/graph_controller.dart';
@@ -56,7 +58,7 @@ class _ForceDirectedGraphPageState
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
+                AutoSizeText(
                   'Graph Error: ${graphState.error}',
                   style: const TextStyle(color: ResonanceColors.accent),
                   textAlign: TextAlign.center,
@@ -89,7 +91,7 @@ class _ForceDirectedGraphPageState
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
+                const AutoSizeText(
                   'No graph data available. Have you added a podcast yet?',
                   style: TextStyle(color: ResonanceColors.accent),
                   textAlign: TextAlign.center,
@@ -112,112 +114,187 @@ class _ForceDirectedGraphPageState
       );
     }
 
-    return Scaffold(
-      body: Row(
-        children: [
-          // Left Panel: Graph
-          Expanded(
-            flex: 3,
-            child: ColoredBox(
-              color: ResonanceColors.primary,
-              child: graphState.isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : GraphifyView(
-                      // Force rebuild/update when granularity/speaker changes
-                      key: ValueKey(
-                        '''graph_${graphState.currentGranularityIndex}_${graphState.selectedSpeakerIds}''',
-                      ),
-                      controller: GraphifyController(),
-                      initialOptions: graphController.buildChartOptions(
-                        graphState,
-                      ),
-                      onChartClick: (chartId, data) {
-                        if (data['dataType'] == 'node') {
-                          ref
-                              .read(audioServiceProvider.notifier)
-                              .playClickSound();
-                          showDialog<void>(
-                            context: context,
-                            builder: (context) {
-                              try {
-                                final node = GraphNodeDisplay.fromJson(
-                                  data['data'] as Map<String, dynamic>,
-                                );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 900;
 
-                                return NodeInfoDialog(
-                                  node: node,
-                                  speakerName: graphState.speakers
-                                      .where(
-                                        (speaker) =>
-                                            speaker.id == node.primarySpeakerId,
-                                      )
-                                      .firstOrNull
-                                      ?.name,
-                                );
-                              } catch (e) {
-                                debugPrint(e.toString());
-                                return const ResonanceDialog(
-                                  title: 'Node Info',
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        'Error loading node info',
-                                        style: TextStyle(
-                                          color: ResonanceColors.accent,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }
-                            },
-                          );
-                        }
-                      },
-                    ),
-            ),
-          ),
-          // Divider
-          Container(width: 0.5, color: ResonanceColors.accent),
-          // Right Panel: Graph config & Chat
-          Expanded(
-            child: ColoredBox(
-              color: ResonanceColors.primaryDark,
-              child: Column(
-                children: [
-                  SpeakerChecklist(
-                    speakers: graphState.speakers,
-                    selectedSpeakerIds: graphState.selectedSpeakerIds,
-                    onToggle: graphController.toggleSpeaker,
-                  ),
-                  if ((graphState.graphData?.graphWithGranularity.length ?? 0) >
-                      1)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: CyberpunkButton(
-                        text: 'Cycle Granularity',
-                        icon: Icons.rotate_90_degrees_ccw_outlined,
-                        onPressed: graphController.cycleGranularity,
+        if (isMobile) {
+          return Scaffold(
+            endDrawer: PointerInterceptor(
+              child: Drawer(
+                width: constraints.maxWidth * 0.85,
+                backgroundColor: ResonanceColors.primaryDark,
+                child: SafeArea(
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        top: 0,
+                        right: 5,
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.close,
+                            color: ResonanceColors.accent,
+                          ),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ),
                       ),
-                    ),
-                  const SizedBox(height: 10),
-                  const Divider(
-                    color: ResonanceColors.accentDark,
-                    thickness: 0.5,
+                      Positioned.fill(
+                        child: _buildControlPanel(graphState, graphController),
+                      ),
+                    ],
                   ),
-                  Expanded(
-                    child: ChatPanel(
-                      speakers: graphState.speakers,
-                      isDemo: widget.isDemo,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
+            body: Stack(
+              children: [
+                Positioned.fill(
+                  child: _buildGraph(graphState, graphController),
+                ),
+                Positioned(
+                  top: 16,
+                  right: 16,
+                  child: Builder(
+                    builder: (context) {
+                      return PointerInterceptor(
+                        child: FloatingActionButton(
+                          mini: true,
+                          backgroundColor: ResonanceColors.accent,
+                          onPressed: () {
+                            Scaffold.of(context).openEndDrawer();
+                          },
+                          child: const Icon(
+                            Icons.menu_open,
+                            color: Colors.black,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return Scaffold(
+          body: Row(
+            children: [
+              // Left Panel: Graph
+              Expanded(
+                flex: 3,
+                child: _buildGraph(graphState, graphController),
+              ),
+              // Divider
+              Container(width: 0.5, color: ResonanceColors.accent),
+              // Right Panel: Graph config & Chat
+              Expanded(
+                child: ColoredBox(
+                  color: ResonanceColors.primaryDark,
+                  child: _buildControlPanel(graphState, graphController),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
+    );
+  }
+
+  Widget _buildGraph(GraphState graphState, GraphController graphController) {
+    return ColoredBox(
+      color: ResonanceColors.primary,
+      child: graphState.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : GraphifyView(
+              // Force rebuild/update when granularity/speaker changes
+              key: ValueKey(
+                '''graph_${graphState.currentGranularityIndex}_${graphState.selectedSpeakerIds}''',
+              ),
+              controller: GraphifyController(),
+              initialOptions: graphController.buildChartOptions(
+                graphState,
+              ),
+              onChartClick: (chartId, data) {
+                if (data['dataType'] == 'node') {
+                  ref.read(audioServiceProvider.notifier).playClickSound();
+                  showDialog<void>(
+                    context: context,
+                    builder: (context) {
+                      try {
+                        final node = GraphNodeDisplay.fromJson(
+                          data['data'] as Map<String, dynamic>,
+                        );
+
+                        return NodeInfoDialog(
+                          node: node,
+                          speakerName: graphState.speakers
+                              .where(
+                                (speaker) =>
+                                    speaker.id == node.primarySpeakerId,
+                              )
+                              .firstOrNull
+                              ?.name,
+                        );
+                      } catch (e) {
+                        debugPrint(e.toString());
+                        return const ResonanceDialog(
+                          title: 'Node Info',
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Error loading node info',
+                                style: TextStyle(
+                                  color: ResonanceColors.accent,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                    },
+                  );
+                }
+              },
+            ),
+    );
+  }
+
+  Widget _buildControlPanel(
+    GraphState graphState,
+    GraphController graphController,
+  ) {
+    return Column(
+      children: [
+        SpeakerChecklist(
+          speakers: graphState.speakers,
+          selectedSpeakerIds: graphState.selectedSpeakerIds,
+          onToggle: graphController.toggleSpeaker,
+        ),
+        if ((graphState.graphData?.graphWithGranularity.length ?? 0) > 1)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: CyberpunkButton(
+              text: 'Cycle Granularity',
+              icon: Icons.rotate_90_degrees_ccw_outlined,
+              onPressed: graphController.cycleGranularity,
+            ),
+          ),
+        const SizedBox(height: 10),
+        const Divider(
+          color: ResonanceColors.accentDark,
+          thickness: 0.5,
+        ),
+        Expanded(
+          child: ChatPanel(
+            speakers: graphState.speakers,
+            isDemo: widget.isDemo,
+          ),
+        ),
+      ],
     );
   }
 }

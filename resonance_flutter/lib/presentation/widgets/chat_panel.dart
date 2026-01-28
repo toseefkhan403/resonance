@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:auto_size_text/auto_size_text.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
@@ -176,8 +177,9 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           child: Row(
             children: [
-              const Text(
+              const AutoSizeText(
                 'ASK THE SPEAKERS',
+                maxLines: 1,
                 style: TextStyle(
                   color: ResonanceColors.accent,
                   fontWeight: FontWeight.bold,
@@ -193,8 +195,9 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
                 color: ResonanceColors.accentDark,
               ),
               const SizedBox(width: 4),
-              const Text(
+              const AutoSizeText(
                 'ACTIVE',
+                maxLines: 1,
                 style: TextStyle(
                   color: ResonanceColors.accentDark,
                   fontWeight: FontWeight.bold,
@@ -205,13 +208,14 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
             ],
           ),
         ),
-        const Padding(
-          padding: EdgeInsets.only(left: 10, bottom: 10),
+        Padding(
+          padding: const EdgeInsets.only(left: 10, bottom: 10),
           child: Align(
             alignment: Alignment.centerLeft,
-            child: Text(
+            child: AutoSizeText(
               """ANSWERS ARE GROUNDED EXCLUSIVELY IN THE SELECTED SPEAKER'S IDEAS.""",
-              style: TextStyle(
+              maxLines: 2,
+              style: GoogleFonts.rajdhani(
                 color: ResonanceColors.accentDarker,
                 fontWeight: FontWeight.bold,
                 fontSize: 10,
@@ -233,8 +237,9 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
       children: [
         const Padding(
           padding: EdgeInsets.only(left: 10),
-          child: Text(
+          child: AutoSizeText(
             'RESPOND AS',
+            maxLines: 1,
             style: TextStyle(
               color: ResonanceColors.accent,
               fontWeight: FontWeight.bold,
@@ -375,8 +380,9 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              const AutoSizeText(
                                 'ORACLE_CORE',
+                                maxLines: 1,
                                 style: TextStyle(
                                   color: ResonanceColors.accent,
                                   fontSize: 10,
@@ -439,8 +445,9 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
                           padding: EdgeInsets.only(
                             right: 36,
                           ),
-                          child: Text(
+                          child: AutoSizeText(
                             'OPERATOR_01',
+                            maxLines: 1,
                             style: TextStyle(
                               color: ResonanceColors.textGrey,
                               fontSize: 10,
@@ -502,8 +509,9 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
               padding: EdgeInsets.only(left: 16, bottom: 8),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text(
+                child: AutoSizeText(
                   '••• SYNTHESIZING_VECTORS...',
+                  maxLines: 1,
                   style: TextStyle(
                     color: ResonanceColors.accentDark,
                     fontSize: 10,

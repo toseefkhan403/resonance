@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:auto_size_text/auto_size_text.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,98 +29,108 @@ class ResonanceHeader extends ConsumerWidget {
       location = GoRouterState.of(context).uri.toString();
     } catch (_) {}
 
-    return Container(
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFF333333))),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () {
-              audioNotifier.playClickSound();
-              context.go('/');
-            },
-            child: Row(
-              children: [
-                SvgPicture.asset(
-                  'assets/svg/logo.svg',
-                  width: 28,
-                  height: 28,
-                ),
-                const SizedBox(width: 12),
-                _title(),
-              ],
-            ),
-          ),
-          const Spacer(),
-          _buildLinkText(
-            'WHAT IS RESONANCE',
-            onTap: () {
-              audioNotifier.playClickSound();
-              // todo_add yt link
-              unawaited(
-                showDialog<void>(
-                  context: context,
-                  builder: (context) => const ResonanceDialog(
-                    title: 'What is Resonance?',
-                    child: Text(
-                      '''Resonance extracts structured knowledge from podcasts and organizes it into an interactive graph. Each idea is connected, source-grounded, and queryable, turning passive listening into a durable, explorable knowledge system.''',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-          _buildLinkText(
-            'DEMO GRAPH',
-            isActive: location == '/demo-graph',
-            onTap: () {
-              audioNotifier.playClickSound();
-              context.go('/demo-graph');
-            },
-          ),
-          IconButton(
-            onPressed: audioNotifier.toggleMusic,
-            icon: Icon(
-              isMusicPlaying ? Icons.volume_up : Icons.volume_off,
-              color: isMusicPlaying
-                  ? ResonanceColors.accent
-                  : ResonanceColors.textGrey,
-            ),
-            tooltip: isMusicPlaying ? 'Stop Music' : 'Play Music',
-          ),
-          ValueListenableBuilder(
-            valueListenable: authInfoListenable,
-            builder: (context, authInfo, child) {
-              if (authInfo == null) return const SizedBox.shrink();
-              final userProfileValue = ref.watch(getCurrentUserProfileProvider);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isSmallScreen = constraints.maxWidth < 800;
 
-              return userProfileValue.when(
-                data: (userProfile) {
-                  if (userProfile == null) return const SizedBox.shrink();
-                  return Row(
-                    children: [
-                      const SizedBox(width: 16),
-                      _buildProfileSection(
-                        context,
-                        userProfile,
-                        onSignOutTap: () {
-                          audioNotifier.playClickSound();
-                          authService.signOut();
-                        },
+        return Container(
+          decoration: const BoxDecoration(
+            border: Border(bottom: BorderSide(color: Color(0xFF333333))),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Row(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  audioNotifier.playClickSound();
+                  context.go('/');
+                },
+                child: Row(
+                  children: [
+                    SvgPicture.asset(
+                      'assets/svg/logo.svg',
+                      width: 28,
+                      height: 28,
+                    ),
+                    const SizedBox(width: 12),
+                    _title(),
+                  ],
+                ),
+              ),
+              const Spacer(),
+              if (!isSmallScreen) ...[
+                _buildLinkText(
+                  'WHAT IS RESONANCE',
+                  onTap: () {
+                    audioNotifier.playClickSound();
+                    // todo_add yt link
+                    unawaited(
+                      showDialog<void>(
+                        context: context,
+                        builder: (context) => const ResonanceDialog(
+                          title: 'What is Resonance?',
+                          child: Text(
+                            '''Resonance extracts structured knowledge from podcasts and organizes it into an interactive graph. Each idea is connected, source-grounded, and queryable, turning passive listening into a durable, explorable knowledge system.''',
+                            style: TextStyle(fontSize: 14, color: Colors.grey),
+                          ),
+                        ),
                       ),
-                    ],
+                    );
+                  },
+                ),
+                _buildLinkText(
+                  'DEMO GRAPH',
+                  isActive: location == '/demo-graph',
+                  onTap: () {
+                    audioNotifier.playClickSound();
+                    context.go('/demo-graph');
+                  },
+                ),
+              ],
+              IconButton(
+                onPressed: audioNotifier.toggleMusic,
+                icon: Icon(
+                  isMusicPlaying ? Icons.volume_up : Icons.volume_off,
+                  color: isMusicPlaying
+                      ? ResonanceColors.accent
+                      : ResonanceColors.textGrey,
+                ),
+                tooltip: isMusicPlaying ? 'Stop Music' : 'Play Music',
+              ),
+              ValueListenableBuilder(
+                valueListenable: authInfoListenable,
+                builder: (context, authInfo, child) {
+                  if (authInfo == null) return const SizedBox.shrink();
+                  final userProfileValue = ref.watch(
+                    getCurrentUserProfileProvider,
+                  );
+
+                  return userProfileValue.when(
+                    data: (userProfile) {
+                      if (userProfile == null) return const SizedBox.shrink();
+                      return Row(
+                        children: [
+                          const SizedBox(width: 16),
+                          _buildProfileSection(
+                            context,
+                            userProfile,
+                            onSignOutTap: () {
+                              audioNotifier.playClickSound();
+                              authService.signOut();
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                    loading: () => const SizedBox.shrink(),
+                    error: (error, stackTrace) => const SizedBox.shrink(),
                   );
                 },
-                loading: () => const SizedBox.shrink(),
-                error: (error, stackTrace) => const SizedBox.shrink(),
-              );
-            },
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -171,12 +182,12 @@ class ResonanceHeader extends ConsumerWidget {
                     : null,
               ),
               child: userInfo.imageUrl == null
-                  ? const Icon(Icons.person, color: Colors.white, size: 20)
+                  ? const Icon(Icons.person, color: Colors.grey, size: 20)
                   : null,
             ),
             const SizedBox(width: 12),
             Text(
-              userInfo.fullName?.toUpperCase() ?? 'USER',
+              userInfo.userName?.toUpperCase() ?? 'USER',
               style: const TextStyle(
                 color: ResonanceColors.accent,
                 fontWeight: FontWeight.bold,
@@ -191,8 +202,9 @@ class ResonanceHeader extends ConsumerWidget {
     );
   }
 
-  Widget _title({double fontSize = 24}) => Text(
+  Widget _title({double fontSize = 24}) => AutoSizeText(
     'RESONANCE',
+    maxLines: 1,
     style: TextStyle(
       color: ResonanceColors.white,
       fontSize: fontSize,

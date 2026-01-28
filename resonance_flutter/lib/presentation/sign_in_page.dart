@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -30,23 +31,28 @@ class SignInPage extends ConsumerWidget {
             children: [
               const ResonanceHeader(),
               Expanded(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const SizedBox(height: 40),
-                        _buildStatusBar(),
-                        const SizedBox(height: 20),
-                        _title(fontSize: 64),
-                        const SizedBox(height: 10),
-                        _buildSubtitle(),
-                        const SizedBox(height: 60),
-                        _buildLoginCard(context, client),
-                        const SizedBox(height: 60),
-                        _buildFooterStatus(),
-                      ],
+                child: ScrollConfiguration(
+                  behavior: ScrollConfiguration.of(context).copyWith(
+                    scrollbars: false,
+                  ),
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 40),
+                          _buildStatusBar(),
+                          const SizedBox(height: 20),
+                          _title(fontSize: 64),
+                          const SizedBox(height: 10),
+                          _buildSubtitle(),
+                          const SizedBox(height: 60),
+                          _buildLoginCard(context, client),
+                          const SizedBox(height: 60),
+                          _buildFooterStatus(),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -58,8 +64,9 @@ class SignInPage extends ConsumerWidget {
     );
   }
 
-  Widget _title({double fontSize = 24}) => Text(
+  Widget _title({double fontSize = 24}) => AutoSizeText(
     'RESONANCE',
+    maxLines: 1,
     style: TextStyle(
       color: ResonanceColors.white,
       fontSize: fontSize,
@@ -101,12 +108,15 @@ class SignInPage extends ConsumerWidget {
             waitDuration: Durations.long1,
           ),
           const SizedBox(width: 10),
-          Text(
-            'KNOWLEDGE GRAPH BUILDER',
-            style: GoogleFonts.robotoMono(
-              color: ResonanceColors.accent,
-              fontSize: 12,
-              letterSpacing: 2,
+          Flexible(
+            child: AutoSizeText(
+              'KNOWLEDGE GRAPH BUILDER',
+              maxLines: 1,
+              style: GoogleFonts.robotoMono(
+                color: ResonanceColors.accent,
+                fontSize: 12,
+                letterSpacing: 2,
+              ),
             ),
           ),
         ],
@@ -115,10 +125,11 @@ class SignInPage extends ConsumerWidget {
   }
 
   Widget _buildSubtitle() {
-    return Text(
+    return AutoSizeText(
       '''Turn podcasts into structured knowledge graphs you can search, explore, and recall.'''
           .toUpperCase(),
       textAlign: TextAlign.center,
+      maxLines: 2,
       style: GoogleFonts.rajdhani(
         color: ResonanceColors.accent,
         fontSize: 14,
@@ -130,7 +141,7 @@ class SignInPage extends ConsumerWidget {
 
   Widget _buildLoginCard(BuildContext context, Client client) {
     return Container(
-      width: 400,
+      constraints: const BoxConstraints(maxWidth: 400),
       decoration: BoxDecoration(
         color: ResonanceColors.primary.withValues(alpha: 0.6),
         border: Border.all(
@@ -155,8 +166,9 @@ class SignInPage extends ConsumerWidget {
             padding: const EdgeInsets.all(40),
             child: Column(
               children: [
-                const Text(
+                const AutoSizeText(
                   'ACCESS THE GRAPH',
+                  maxLines: 1,
                   style: TextStyle(
                     color: ResonanceColors.white,
                     fontSize: 22,
@@ -166,9 +178,10 @@ class SignInPage extends ConsumerWidget {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 12),
-                Text(
+                AutoSizeText(
                   'AUTHORIZE CREDENTIALS TO INITIATE KNOWLEDGE MAPPING',
                   textAlign: TextAlign.center,
+                  maxLines: 2,
                   style: GoogleFonts.rajdhani(
                     color: ResonanceColors.textGrey,
                     fontSize: 12,
@@ -275,54 +288,64 @@ class SignInPage extends ConsumerWidget {
   }
 
   Widget _buildFooterStatus() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: Color(0xFF111111))),
-      ),
-      child: Row(
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isSmallScreen = constraints.maxWidth < 600;
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          decoration: const BoxDecoration(
+            border: Border(top: BorderSide(color: Color(0xFF111111))),
+          ),
+          child: Row(
+            mainAxisAlignment: isSmallScreen
+                ? MainAxisAlignment.center
+                : MainAxisAlignment.start,
             children: [
-              Text(
-                'BUILT WITH',
-                style: GoogleFonts.rajdhani(
-                  color: ResonanceColors.accent,
-                  fontSize: 10,
-                  letterSpacing: 1,
-                  fontWeight: FontWeight.bold,
+              if (!isSmallScreen) ...[
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'BUILT WITH',
+                      style: GoogleFonts.rajdhani(
+                        color: ResonanceColors.accent,
+                        fontSize: 10,
+                        letterSpacing: 1,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'SERVERPOD & FLUTTER',
+                      style: GoogleFonts.shareTechMono(
+                        color: Colors.grey,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ],
                 ),
+                const Spacer(),
+              ],
+              _buildLinkText(
+                'VIEW ON GITHUB',
+                onTap: () {
+                  unawaited(
+                    UrlLauncher.launchURLNewTab(ResonanceConstants.githubUrl),
+                  );
+                },
               ),
-              const SizedBox(height: 4),
-              Text(
-                'SERVERPOD & FLUTTER',
-                style: GoogleFonts.shareTechMono(
-                  color: Colors.grey,
-                  fontSize: 10,
-                ),
+              _buildLinkText(
+                'VIEW ON DEVPOST',
+                onTap: () {
+                  unawaited(
+                    UrlLauncher.launchURLNewTab(ResonanceConstants.devpostUrl),
+                  );
+                },
               ),
             ],
           ),
-          const Spacer(),
-          _buildLinkText(
-            'VIEW ON GITHUB',
-            onTap: () {
-              unawaited(
-                UrlLauncher.launchURLNewTab(ResonanceConstants.githubUrl),
-              );
-            },
-          ),
-          _buildLinkText(
-            'VIEW ON DEVPOST',
-            onTap: () {
-              unawaited(
-                UrlLauncher.launchURLNewTab(ResonanceConstants.devpostUrl),
-              );
-            },
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

@@ -9,6 +9,7 @@ description: A new Flutter project with Serverpod.
 dependencies:
   animated_text_kit: ^4.3.0
   audioplayers: ^6.5.1
+  auto_size_text: ^3.0.0
   cupertino_icons: ^1.0.5
   flutter:
     sdk: flutter

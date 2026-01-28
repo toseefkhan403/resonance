@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -140,9 +141,10 @@ class _HomePageState extends ConsumerState<HomePage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       key: const ValueKey('input_form'),
       children: [
-        Text(
+        AutoSizeText(
           'PODCAST',
           textAlign: TextAlign.center,
+          maxLines: 1,
           style: GoogleFonts.orbitron(
             fontSize: 56,
             fontWeight: FontWeight.bold,
@@ -151,9 +153,10 @@ class _HomePageState extends ConsumerState<HomePage> {
             letterSpacing: 4,
           ),
         ),
-        Text(
+        AutoSizeText(
           'INGESTION',
           textAlign: TextAlign.center,
+          maxLines: 1,
           style: GoogleFonts.orbitron(
             fontSize: 56,
             fontWeight: FontWeight.bold,
@@ -173,10 +176,11 @@ class _HomePageState extends ConsumerState<HomePage> {
         const SizedBox(height: 30),
 
         // Subtitle
-        Text(
+        AutoSizeText(
           '''Convert long-form podcast into structured, explorable knowledge graphs in real time.'''
               .toUpperCase(),
           textAlign: TextAlign.center,
+          maxLines: 2,
           style: GoogleFonts.rajdhani(
             color: ResonanceColors.accentDark,
             fontSize: 16,
@@ -290,27 +294,31 @@ class _HomePageState extends ConsumerState<HomePage> {
           children: [
             const Icon(Icons.hub, color: ResonanceColors.accent, size: 24),
             const SizedBox(width: 12),
-            Text(
-              'CONSTRUCTING NODES...',
-              style: GoogleFonts.orbitron(
-                color: ResonanceColors.accent,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 2,
-                shadows: [
-                  BoxShadow(
-                    color: ResonanceColors.accent.withValues(alpha: 0.6),
-                    blurRadius: 10,
-                  ),
-                ],
+            Expanded(
+              child: AutoSizeText(
+                'CONSTRUCTING NODES...',
+                maxLines: 1,
+                style: GoogleFonts.orbitron(
+                  color: ResonanceColors.accent,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 2,
+                  shadows: [
+                    BoxShadow(
+                      color: ResonanceColors.accent.withValues(alpha: 0.6),
+                      blurRadius: 10,
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
         ),
         const SizedBox(height: 8),
-        Text(
+        AutoSizeText(
           'EXTRACTING KNOWLEDGE ENTITIES',
           textAlign: TextAlign.center,
+          maxLines: 1,
           style: GoogleFonts.rajdhani(
             color: ResonanceColors.accentDark,
             fontSize: 14,
@@ -466,13 +474,17 @@ class _HoverCyberButtonState extends ConsumerState<HoverCyberButton> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    widget.text,
-                    style: GoogleFonts.orbitron(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 2,
+                  Flexible(
+                    child: AutoSizeText(
+                      widget.text,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.orbitron(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),

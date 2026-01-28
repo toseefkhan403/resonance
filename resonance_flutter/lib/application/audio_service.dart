@@ -14,14 +14,7 @@ class AudioService extends _$AudioService {
   bool build() {
     _bgPlayer = AudioPlayer();
     _sfxPlayer = AudioPlayer();
-    _init();
     return false;
-  }
-
-  Future<void> _init() async {
-    await _bgPlayer.setReleaseMode(ReleaseMode.loop);
-    await _bgPlayer.setSource(AssetSource('audio/bg_music.mp3'));
-    await _bgPlayer.setVolume(0.2);
   }
 
   Future<void> toggleMusic() async {
@@ -29,7 +22,11 @@ class AudioService extends _$AudioService {
       await _bgPlayer.pause();
       state = false;
     } else {
-      await _bgPlayer.resume();
+      await _bgPlayer.play(
+        AssetSource('audio/bg_music.mp3'),
+        mode: PlayerMode.lowLatency,
+        volume: 0.2,
+      );
       state = true;
     }
   }

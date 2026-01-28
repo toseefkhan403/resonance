@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
@@ -43,16 +44,18 @@ class ResonanceDialog extends ConsumerWidget {
                       // Header
                       Row(
                         children: [
-                          Text(
-                            title.toUpperCase(),
-                            style: const TextStyle(
-                              color: ResonanceColors.accent,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 2,
+                          Expanded(
+                            child: AutoSizeText(
+                              title.toUpperCase(),
+                              maxLines: 1,
+                              style: const TextStyle(
+                                color: ResonanceColors.accent,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 2,
+                              ),
                             ),
                           ),
-                          const Spacer(),
                           if (actions != null) ...[
                             ...actions!,
                             const SizedBox(width: 16),

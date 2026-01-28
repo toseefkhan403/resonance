@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:resonance_client/resonance_client.dart';
@@ -91,8 +92,9 @@ class _NodeInfoDialogState extends ConsumerState<NodeInfoDialog> {
             ),
           ],
           const SizedBox(height: 12),
-          const Text(
+          const AutoSizeText(
             'Summary',
+            maxLines: 1,
             style: TextStyle(
               color: ResonanceColors.accent,
               fontWeight: FontWeight.bold,
@@ -109,8 +111,9 @@ class _NodeInfoDialogState extends ConsumerState<NodeInfoDialog> {
           ),
           if (widget.node.references.isNotEmpty) ...[
             const SizedBox(height: 20),
-            const Text(
+            const AutoSizeText(
               'References',
+              maxLines: 1,
               style: TextStyle(
                 color: ResonanceColors.accent,
                 fontWeight: FontWeight.bold,
@@ -158,12 +161,15 @@ class _NodeInfoDialogState extends ConsumerState<NodeInfoDialog> {
                               color: ResonanceColors.accent,
                             ),
                             const SizedBox(width: 4),
-                            Text(
-                              '''Watch at ${formatDuration(Duration(seconds: startTimeInt))}''',
-                              style: const TextStyle(
-                                color: ResonanceColors.accent,
-                                decoration: TextDecoration.underline,
-                                fontSize: 13,
+                            Expanded(
+                              child: AutoSizeText(
+                                '''Watch at ${formatDuration(Duration(seconds: startTimeInt))}''',
+                                maxLines: 1,
+                                style: const TextStyle(
+                                  color: ResonanceColors.accent,
+                                  decoration: TextDecoration.underline,
+                                  fontSize: 13,
+                                ),
                               ),
                             ),
                           ],
@@ -184,8 +190,9 @@ class _NodeInfoDialogState extends ConsumerState<NodeInfoDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        AutoSizeText(
           label,
+          maxLines: 1,
           style: const TextStyle(
             color: ResonanceColors.accent,
             fontWeight: FontWeight.bold,
@@ -193,7 +200,7 @@ class _NodeInfoDialogState extends ConsumerState<NodeInfoDialog> {
           ),
         ),
         const SizedBox(height: 2),
-        Text(
+        SelectableText(
           value,
           style: const TextStyle(
             color: Colors.white,
