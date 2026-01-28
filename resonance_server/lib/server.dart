@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:resonance_server/src/web/routes/flutter_route_allow_popups.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_idp_server/core.dart';
 import 'package:serverpod_auth_idp_server/providers/email.dart';
@@ -46,7 +47,7 @@ void run(List<String> args) async {
   if (appDir.existsSync()) {
     // Serve the flutter web app under the /app path.
     pod.webServer.addRoute(
-      FlutterRoute(
+      FlutterRouteAllowPopups(
         Directory(
           Uri(path: 'web/app').toFilePath(),
         ),

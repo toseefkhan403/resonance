@@ -227,6 +227,11 @@ class GraphEndpoint extends Endpoint {
       where: (c) => c.userId.equals(userId),
     );
 
+    // await SegmentedTranscript.db.deleteWhere(
+    //   session,
+    //   where: (c) => c.videoId.notEquals(''),
+    // );
+
     final podcasts = await Podcast.db.find(
       session,
       where: (c) => c.userId.equals(userId),

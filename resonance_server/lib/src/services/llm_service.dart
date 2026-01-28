@@ -19,33 +19,37 @@ class LLMService {
     Session session,
     Podcast podcast,
     int jobId,
-    File audioFile,
+    File? captionsFile,
   ) async {
     try {
-      final audioBytes = await audioFile.readAsBytes();
-      session.log(
-        'LLMService: Audio file read, size: ${audioBytes.length} bytes',
-      );
+      final attachments = <DataPart>[];
+      if (captionsFile != null) {
+        final captionsBytes = await captionsFile.readAsBytes();
+        session.log(
+          'LLMService: Captions file read, size: ${captionsBytes.length} bytes',
+        );
 
-      final attachments = <DataPart>[
-        DataPart(
-          audioBytes,
-          mimeType: 'audio/${audioFile.path.split('.').last}',
-        ),
-      ];
+        attachments.add(
+          DataPart(
+            captionsBytes,
+            mimeType: 'application/json',
+          ),
+        );
+      }
 
       final result = await _agent.sendFor<SegmentedTranscript>(
         LLMPrompts.segmentedTranscriptPrompt(
           podcast.title,
           podcast.channelName,
+          podcast.youtubeUrl,
         ),
-        attachments: attachments,
         outputSchema: LLMPrompts.segmentedTranscriptSchema,
         outputFromJson: SegmentedTranscript.fromJson,
+        attachments: attachments,
       );
       session.log('LLMService: Received response from Gemini');
 
-      await audioFile.delete();
+      await captionsFile?.delete();
 
       return result.output;
     } catch (e) {
@@ -118,7 +122,7 @@ class LLMService {
   Agent _createAgent() {
     Agent.environment['GEMINI_API_KEY'] = _geminiAPIKey;
     return Agent(
-      'google?chat=gemini-3-flash-preview&embeddings=text-embedding-004',
+      'google?chat=gemini-3-pro-preview&embeddings=gemini-embedding-001',
       embeddingsModelOptions: const GoogleEmbeddingsModelOptions(
         dimensions: 768,
       ),

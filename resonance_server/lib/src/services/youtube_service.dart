@@ -6,8 +6,41 @@ import 'package:serverpod/serverpod.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
+import 'package:youtube_transcript_api/youtube_transcript_api.dart';
 
 class YouTubeService {
+  Future<File?> getCaptions(Session session, String videoId) async {
+    try {
+      final tempDir = Directory.systemTemp;
+      final file = File('${tempDir.path}/$videoId.json');
+
+      final api = YouTubeTranscriptApi();
+      final transcript = await api.fetch(
+        videoId,
+        languages: ['en', 'en-US', 'en-GB'],
+      );
+
+      final jsonFormatter = JsonFormatter();
+      final jsonContent = jsonFormatter.format(transcript);
+      session.log(
+        'YouTubeService: Captions fetched for video: $videoId ($jsonContent)',
+      );
+
+      await file.writeAsString(jsonContent);
+
+      return file;
+    } catch (e, stackTrace) {
+      session.log(
+        'Error fetching captions: $e',
+        level: LogLevel.error,
+        exception: e,
+        stackTrace: stackTrace,
+      );
+      return null;
+    }
+  }
+
+  // processing yt links directly in Gemini, no need to download audio
   Future<File> convertVideoToTranscript(
     Session session,
     String videoId, {

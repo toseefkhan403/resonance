@@ -1,24 +1,29 @@
 import 'package:json_schema/json_schema.dart';
 
 class LLMPrompts {
-  static String segmentedTranscriptPrompt(String? title, String? channelName) =>
+  static String segmentedTranscriptPrompt(
+    String? title,
+    String? channelName,
+    String? youtubeUrl,
+  ) =>
       '''
 You are an expert Knowledge Extraction system.
 
-Listen to this podcast audio and read the attached closed captions to extract atomic semantic ideas.
+Listen to this youtube video and read the attached captions file to extract atomic semantic ideas.
 A semantic idea represents a single, self-contained concept.
 
-${title != null ? 'Podcast Title: $title' : ''}
+${youtubeUrl != null ? 'Youtube URL: $youtubeUrl' : ''}
+${title != null ? 'Video Title: $title' : ''}
 ${channelName != null ? 'Channel Name: $channelName' : ''}
 
 Rules:
-1. Extract at least 10 distinct semantic ideas from the podcast.
+1. Extract at least 10 distinct semantic ideas from the video.
 2. Each idea must include:
    - A concise label (2–6 words)
    - A detailed summary explaining the idea
    - Impact score (0-1) - How important is this idea?
    - Primary speaker - Who is the main speaker of this idea?
-   - One or more timestamped references (in seconds) where the idea is discussed
+   - One or more timestamped references (in seconds) where the idea is discussed. Use the timestamps from the captions file to generate the references.
 3. Only include references spoken by the guest(s). Do NOT include the interviewer or host. Keep only one primary speaker for each idea.
 4. Speaker names must be the full, human-readable name.
 5. The start and end timestamps MUST be in seconds since the beginning of the audio.
