@@ -174,7 +174,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
         // Subtitle
         Text(
-          '''Convert long-form audio into structured, explorable knowledge graphs in real time.'''
+          '''Convert long-form podcast into structured, explorable knowledge graphs in real time.'''
               .toUpperCase(),
           textAlign: TextAlign.center,
           style: GoogleFonts.rajdhani(

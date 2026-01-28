@@ -178,6 +178,8 @@ class SignInPage extends ConsumerWidget {
                 const SizedBox(height: 40),
                 GoogleSignInWidget(
                   client: client,
+                  // need to pass empty scopes to avoid double popup issue
+                  scopes: const [],
                   buttonWrapper:
                       ({
                         required child,

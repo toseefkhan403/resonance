@@ -25,8 +25,8 @@ void main() async {
         ..authSessionManager = FlutterAuthSessionManager();
       configureApp();
 
-      unawaited(client.auth.initialize());
-      unawaited(client.auth.initializeGoogleSignIn());
+      client.auth.initialize();
+      client.auth.initializeGoogleSignIn();
 
       runApp(
         ProviderScope(
