@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:resonance_server/src/services/youtube_service.dart';
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
@@ -90,15 +91,32 @@ class IngestionPipeline {
           45,
         );
 
-        final fetchedTranscript = await llmService.getSegmentedTranscript(
-          session,
-          podcast,
-          jobId,
-          captionsFile,
-        );
-        segmentedTranscript = fetchedTranscript.copyWith(
-          videoId: podcast.videoId,
-        );
+        // Start keep-alive timer to prevent stream timeout
+        Timer? keepAliveTimer;
+        try {
+          keepAliveTimer = Timer.periodic(const Duration(seconds: 20), (timer) {
+            _updateJobStatus(
+              session,
+              jobId,
+              'processing',
+              'AI Agent processing',
+              45 + (timer.tick),
+            );
+          });
+
+          final fetchedTranscript = await llmService.getSegmentedTranscript(
+            session,
+            podcast,
+            jobId,
+            captionsFile,
+          );
+          segmentedTranscript = fetchedTranscript.copyWith(
+            videoId: podcast.videoId,
+          );
+        } finally {
+          keepAliveTimer?.cancel();
+        }
+
         await _updateJobStatus(
           session,
           jobId,

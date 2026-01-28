@@ -22,9 +22,7 @@ class YouTubeService {
 
       final jsonFormatter = JsonFormatter();
       final jsonContent = jsonFormatter.format(transcript);
-      session.log(
-        'YouTubeService: Captions fetched for video: $videoId ($jsonContent)',
-      );
+      session.log('YouTubeService: Captions fetched for video: $videoId');
 
       await file.writeAsString(jsonContent);
 

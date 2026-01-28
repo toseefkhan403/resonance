@@ -180,7 +180,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           '''Convert long-form podcast into structured, explorable knowledge graphs in real time.'''
               .toUpperCase(),
           textAlign: TextAlign.center,
-          maxLines: 2,
+          maxLines: 3,
           style: GoogleFonts.rajdhani(
             color: ResonanceColors.accentDark,
             fontSize: 16,
@@ -294,10 +294,10 @@ class _HomePageState extends ConsumerState<HomePage> {
           children: [
             const Icon(Icons.hub, color: ResonanceColors.accent, size: 24),
             const SizedBox(width: 12),
-            Expanded(
+            Flexible(
               child: AutoSizeText(
                 'CONSTRUCTING NODES...',
-                maxLines: 1,
+                maxLines: 2,
                 style: GoogleFonts.orbitron(
                   color: ResonanceColors.accent,
                   fontSize: 24,
@@ -318,7 +318,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         AutoSizeText(
           'EXTRACTING KNOWLEDGE ENTITIES',
           textAlign: TextAlign.center,
-          maxLines: 1,
+          maxLines: 2,
           style: GoogleFonts.rajdhani(
             color: ResonanceColors.accentDark,
             fontSize: 14,

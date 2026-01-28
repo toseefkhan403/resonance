@@ -1,13 +1,14 @@
-import 'dart:async';
 import 'package:auto_size_text/auto_size_text.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:resonance_flutter/application/audio_service.dart';
 import 'package:resonance_flutter/application/auth_service.dart';
+import 'package:resonance_flutter/constants.dart';
 import 'package:resonance_flutter/presentation/utils/resonance_colors.dart';
+import 'package:resonance_flutter/presentation/utils/url_launcher.dart';
 import 'package:resonance_flutter/presentation/widgets/hover_link_text.dart';
 import 'package:resonance_flutter/presentation/widgets/resonance_dialog.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
@@ -63,16 +64,51 @@ class ResonanceHeader extends ConsumerWidget {
                   'WHAT IS RESONANCE',
                   onTap: () {
                     audioNotifier.playClickSound();
-                    // todo_add yt link
-                    unawaited(
-                      showDialog<void>(
-                        context: context,
-                        builder: (context) => const ResonanceDialog(
-                          title: 'What is Resonance?',
-                          child: Text(
-                            '''Resonance extracts structured knowledge from podcasts and organizes it into an interactive graph. Each idea is connected, source-grounded, and queryable, turning passive listening into a durable, explorable knowledge system.''',
-                            style: TextStyle(fontSize: 14, color: Colors.grey),
-                          ),
+                    showDialog<void>(
+                      context: context,
+                      builder: (context) => ResonanceDialog(
+                        title: 'What is Resonance?',
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '''Resonance extracts structured knowledge from podcasts and organizes it into an interactive graph. Each idea is connected, source-grounded, and queryable, turning passive listening into a durable, explorable knowledge system.''',
+                              style: GoogleFonts.rajdhani(
+                                fontSize: 14,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            InkWell(
+                              onTap: () async {
+                                UrlLauncher.launchURLNewTab(
+                                  ResonanceConstants.resonanceYtLink,
+                                );
+                              },
+                              child: const Row(
+                                children: [
+                                  Icon(
+                                    Icons.play_circle_outline,
+                                    size: 16,
+                                    color: ResonanceColors.accent,
+                                  ),
+                                  SizedBox(width: 4),
+                                  Expanded(
+                                    child: AutoSizeText(
+                                      '''Watch on YouTube''',
+                                      maxLines: 1,
+                                      style: TextStyle(
+                                        color: ResonanceColors.accent,
+                                        decoration: TextDecoration.underline,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     );

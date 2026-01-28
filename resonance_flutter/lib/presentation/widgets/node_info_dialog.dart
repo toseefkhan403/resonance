@@ -2,6 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:resonance_client/resonance_client.dart';
+import 'package:resonance_flutter/application/auth_service.dart';
 import 'package:resonance_flutter/application/graph_service.dart';
 import 'package:resonance_flutter/presentation/utils/resonance_colors.dart';
 import 'package:resonance_flutter/presentation/widgets/resonance_dialog.dart';
@@ -41,6 +42,13 @@ class _NodeInfoDialogState extends ConsumerState<NodeInfoDialog> {
     });
 
     try {
+      if (!ref.read(authServiceProvider).isAuthenticated) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please log in to bookmark nodes')),
+        );
+        throw Exception('Not logged in');
+      }
+
       await ref
           .read(graphServiceProvider)
           .bookmarkNode(

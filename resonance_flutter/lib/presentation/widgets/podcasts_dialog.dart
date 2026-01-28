@@ -20,11 +20,16 @@ class PodcastsDialog extends ConsumerWidget {
       child: podcasts.when(
         data: (podcasts) {
           if (podcasts.isEmpty) {
-            return const Center(
-              child: Text(
-                'No podcasts found',
-                style: TextStyle(color: ResonanceColors.accent),
-              ),
+            return const Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Text(
+                    'No podcasts found',
+                    style: TextStyle(color: ResonanceColors.accent),
+                  ),
+                ),
+              ],
             );
           }
 
