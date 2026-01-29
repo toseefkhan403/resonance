@@ -31,6 +31,9 @@ Too many nodes? Filter by speaker or category to focus on what matters to you.
 ### 💾 Save Nodes
 Save your favorite topics to your personal knowledge base.
 <img width="1917" height="868" alt="Screenshot 2026-01-29 025016" src="https://github.com/user-attachments/assets/3af5267e-fa95-42b2-9e25-bc4dfbeabdf8" />
+<img width="1916" height="864" alt="Screenshot 2026-01-29 025928" src="https://github.com/user-attachments/assets/23eb4f8e-fe09-43db-ae87-6d74b275221f" />
+<img width="1712" height="773" alt="Screenshot 2026-01-30 041010" src="https://github.com/user-attachments/assets/fe0d222e-9774-4e90-a85d-684c22508a68" />
+<img width="1906" height="831" alt="Screenshot 2026-01-30 052204" src="https://github.com/user-attachments/assets/007948bf-ca7c-4133-8188-56c70b7f0ebd" />
 
 ## 📂 Project Structure
 
