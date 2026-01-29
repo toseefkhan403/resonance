@@ -25,7 +25,6 @@ class IngestionPipeline {
         10,
       );
 
-      // Agentic Segmentation and Transcript acquisition (video specific)
       final podcast = await Podcast.db.findById(session, podcastId);
       if (podcast == null) {
         session.log(

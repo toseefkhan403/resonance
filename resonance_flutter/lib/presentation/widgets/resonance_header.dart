@@ -46,16 +46,19 @@ class ResonanceHeader extends ConsumerWidget {
                   audioNotifier.playClickSound();
                   context.go('/');
                 },
-                child: Row(
-                  children: [
-                    SvgPicture.asset(
-                      'assets/svg/logo.svg',
-                      width: 28,
-                      height: 28,
-                    ),
-                    const SizedBox(width: 12),
-                    _title(),
-                  ],
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: Row(
+                    children: [
+                      SvgPicture.asset(
+                        'assets/svg/logo.svg',
+                        width: 28,
+                        height: 28,
+                      ),
+                      const SizedBox(width: 12),
+                      _title(),
+                    ],
+                  ),
                 ),
               ),
               const Spacer(),

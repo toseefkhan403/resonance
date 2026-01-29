@@ -87,6 +87,11 @@ class LLMService {
     List<GraphNode> nodes,
   ) async* {
     try {
+      if (nodes.isEmpty) {
+        yield LLMPrompts.genericAnswerSystemMessage(speakerName);
+        return;
+      }
+
       final prompt = LLMPrompts.conversationalAnswerPrompt(
         question,
         speakerName,

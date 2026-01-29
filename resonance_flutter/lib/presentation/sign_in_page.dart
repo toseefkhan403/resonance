@@ -17,11 +17,18 @@ import 'package:resonance_flutter/presentation/widgets/hover_link_text.dart';
 import 'package:resonance_flutter/presentation/widgets/resonance_header.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
-class SignInPage extends ConsumerWidget {
+class SignInPage extends ConsumerStatefulWidget {
   const SignInPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SignInPage> createState() => _SignInPageState();
+}
+
+class _SignInPageState extends ConsumerState<SignInPage> {
+  bool _isLoggingIn = false;
+
+  @override
+  Widget build(BuildContext context) {
     final client = ref.watch(serverpodClientProvider);
 
     return Scaffold(
@@ -50,13 +57,13 @@ class SignInPage extends ConsumerWidget {
                           const SizedBox(height: 60),
                           _buildLoginCard(context, client),
                           const SizedBox(height: 60),
-                          _buildFooterStatus(),
                         ],
                       ),
                     ),
                   ),
                 ),
               ),
+              _buildFooterStatus(),
             ],
           ),
         ),
@@ -200,18 +207,31 @@ class SignInPage extends ConsumerWidget {
                         required style,
                       }) => Stack(
                         children: [
-                          Opacity(
-                            opacity: 0.01,
-                            child: child,
-                          ),
+                          if (!_isLoggingIn)
+                            Opacity(
+                              opacity: 0.01,
+                              child: child,
+                            ),
                           CyberpunkButton(
-                            onPressed: onPressed,
-                            text: 'LOGIN WITH GOOGLE',
+                            onPressed: _isLoggingIn
+                                ? null
+                                : () {
+                                    setState(() {
+                                      _isLoggingIn = true;
+                                    });
+                                    onPressed?.call();
+                                  },
+                            text: _isLoggingIn
+                                ? 'CONNECTING...'
+                                : 'LOGIN WITH GOOGLE',
                             icon: Icons.g_mobiledata,
                           ),
                         ],
                       ),
                   onError: (error) {
+                    setState(() {
+                      _isLoggingIn = false;
+                    });
                     debugPrint(error.toString());
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Error: $error')),

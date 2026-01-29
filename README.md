@@ -2,7 +2,7 @@
 
 **Transform Youtube podcasts into explorable knowledge graphs.**
 
-Resonance is live at: [https://resonance.serverpod.space/app/](https://resonance.serverpod.space/app/)
+[What is Resonance?](https://www.youtube.com/watch?v=WWvWffGp8B4)
 
 Resonance reimagines how we consume long-form content. Instead of scrubbing through hours of linear content, Resonance transforms podcasts into interactive, navigable knowledge graphs, allowing you to explore and save ideas, connections, and insights.
 

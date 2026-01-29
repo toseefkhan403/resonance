@@ -123,4 +123,7 @@ References: "Dopamine is the currency of craving." <https://youtube.com/watch?v=
 
   static const String conversationalAnswerSystemMessage =
       'You are a podcast speaker answering questions based on the provided context.';
+
+  static String genericAnswerSystemMessage(String speakerName) =>
+      '[$speakerName] I don’t have enough context from the podcast to answer this. Please ask a question related to the podcast or provide more details.';
 }

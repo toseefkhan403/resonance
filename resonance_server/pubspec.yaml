@@ -10,7 +10,6 @@ dependencies:
   serverpod: 3.2.1
   serverpod_auth_idp_server: 3.2.1
   http: ^1.6.0
-  youtube_explode_dart: ^3.0.5
   dartantic_ai: ^2.2.2
   dartantic_interface: ^2.0.0
   json_schema: ^5.2.2

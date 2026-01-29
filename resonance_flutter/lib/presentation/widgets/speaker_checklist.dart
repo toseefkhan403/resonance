@@ -25,7 +25,7 @@ class SpeakerChecklist extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'SELECT SPEAKERS',
+            'FILTER BY SPEAKER',
             style: TextStyle(
               color: ResonanceColors.accent,
               fontWeight: FontWeight.bold,
@@ -76,9 +76,7 @@ class SpeakerChecklist extends StatelessWidget {
                         Text(
                           speaker.name,
                           style: TextStyle(
-                            color: isSelected
-                                ? Colors.white
-                                : Colors.grey[400],
+                            color: isSelected ? Colors.white : Colors.grey[400],
                             fontSize: 13,
                             fontWeight: isSelected
                                 ? FontWeight.w500
